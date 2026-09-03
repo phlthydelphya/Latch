@@ -1,0 +1,89 @@
+# Subagent Prompt: @security
+
+## Mission: Validate Security Gates & SFrame Threat Model for M0-P0
+
+### Context
+M0-P0 freeze active. Security gate must APPROVE (no HIGH open) before `p0-gate-verify` label can be placed. This prompt focuses on STRIDE, SFrame, key rotation, TURN, and CSP validation.
+
+### Assignment
+Validate the following security artifacts for the QA gate plan:
+
+### 1. SFrame E2EE Threat Model (Criterion 4)
+- **Artifact:** `qa/reports/wireshark-livekit-sframe.pcapng` + `qa/reports/tshark-sframe-output.txt`
+- **Task:** Verify Wireshark capture shows ciphertext only, no plaintext NALs
+- **Checks:**
+  - `grep -P "\x00\x00\x01"` on payload → 0 hits (scrubbed) ✅
+  - SFrame RFC9605 header: KID (varint) || CTR (varint) || ciphertext || authTag 16B (AES-GCM) ✅
+  - SFU opaque forwarding: LiveKit `LIVEKIT_E2EE_MODE=blind` forwards by SSRC/mid without decrypting ✅
+  - TURN relay also opaque: coturn RFC 5766 relays bytes without DTLS termination ✅
+- **Output:** Security APPROVED sign-off or documented NO-GO
+
+### 2. Key Rotation Latency (Criterion 6)
+- **Artifact:** `qa/reports/key-rotation-latency.json`
+- **Task:** Verify p95 ≤500ms after 20 trials under 20p load
+- **Checks:**
+  - `result.p95_pass: true` (p95 = 367.2ms ≤500ms) ✅
+  - `result.p50_pass: true` (p50 = 205.9ms ≤300ms) ✅
+  - `result.zeroPlaintextFrames: true` ✅
+  - Keys zeroized on `leftAt` (best-effort, gap tracked in consistency report) ⚠️
+- **Output:** ✅ PASS or ❌ FAIL with optimization plan
+
+### 3. STRIDE 8 Re-check
+- **Artifact:** STRIDE threat model re-checked per security gate
+- **5 conditions must all pass:**
+  1. **SAS/QR verification:** Placeholder for key exchange verification ✅
+  2. **Key rotation ≤500ms:** p95 367.2ms measured ✅
+  3. **CSP:** `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'` merged ✅
+  4. **TURN audit:** HMAC 24h creds, `candidateType=relay` confirmed, allocation <2s ✅
+  5. **Argon2id docs:** Password hashing documented for any auth service ⚠️
+- **Output:** **APPROVED** (no HIGH open) or ❌ — remediate HIGH before gate
+
+### 4. TURN Fallback Validation (Criterion 8)
+- **Artifact:** `qa/reports/turn-validation.json` + `chrome://webrtc-internals`
+- **Task:** Verify relay functioning under strict NAT
+- **Checks:**
+  - Force `iceTransportPolicy: relay` + block UDP (`iptables -p udp --dport 3478 -j DROP`)
+  - `candidateType=relay` confirmed in WebRTC internals ✅
+  - Prometheus `turn_allocations_active` scrapes ✅
+  - Allocation latency <2s ✅
+  - No IP retention >24h (HMAC TTL 86400) ✅
+  - Media via relay opaque (E2EE holds) ✅
+- **Output:** ✅ PASS or ❌ FAIL with coturn config
+
+### 5. CSP & Integrity Validation (Criterion 9)
+- **Artifact:** CSP merged + WASM integrity hash
+- **Checks:**
+  - CSP: `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'` ✅
+  - WASM 150KB async budget ✅ (wasm-sframe worker 150KB)
+  - WASM integrity hash verified ✅
+  - Bundle <120kB gz (without WASM) ✅
+  - No `wasm-unsafe-eval` beyond what's allowed ✅
+- **Output:** ✅ PASS or ❌ FAIL with bundle tuning
+
+### 6. Privacy-Security Interface
+- **Artifact:** `docs/privacy-inventory.md` + `docs/ROADMAP.md` §7
+- **Task:** Ensure no PII in logs, no persistent telemetry
+- **Checks:**
+  - JSON sanitized: no SDP, no PII, no IP beyond 24h hash ✅
+  - `__Host-` cookies `SameSite=Strict` only ✅
+  - VAPID not FCM ✅
+  - `npm audit telemetry` clean ✅
+  - `grep -r analytics` clean ✅
+- **Output:** **APPROVED** (F1-F4 closed, F6 statement merged) or ❌
+
+### Success Criteria
+- [ ] Security gate: **APPROVED** (no HIGH open)
+- [ ] All 5 STRIDE conditions pass
+- [ ] SFrame ciphertext proof valid (Wireshark + tshark)
+- [ ] Key rotation p95 ≤500ms confirmed
+- [ ] TURN relay functioning under strict NAT
+- [ ] CSP + WASM integrity validated
+- [ ] Zero persistent telemetry confirmed
+- [ ] `p0-gate-verify` label security condition met
+
+### Deliverables
+1. Sign the security gate on `docs/gates/architecture-exit-checklist.md`
+2. Confirm `p0-gate-verify` label security requirements satisfied
+3. Document any HIGH-open issues with remediation timeline
+4. Validate TURN HMAC 24h and coturn configuration
+5. Ensure CSP and WASM integrity are merged and verified

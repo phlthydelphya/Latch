@@ -1,0 +1,19 @@
+# Grafana provisioning — Prometheus + Loki datasources (P0)
+# Ref: docs/architecture-brief.md §3, docs/c4/p0-context.md observability
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: 15s
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      maxLines: 1000
+# Dashboards: Grafana livekit_rooms_active, sfu_load, turn_allocations_active
+# Alert: sfu_cpu_usage_percent >70% or packet_loss >1% per ADR-004 benchmark

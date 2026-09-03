@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.qa/
+qa/reports/lighthouse/
+qa/reports/playwright/
+poc/meet-webrtc-core/node_modules/
+poc/meet-webrtc-core/dist/
+infra/pgdata/
+.vite/
+*.log
+.env

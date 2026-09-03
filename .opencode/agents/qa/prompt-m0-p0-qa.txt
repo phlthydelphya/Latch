@@ -1,0 +1,110 @@
+# Subagent Prompt: @qa
+
+## Mission: Validate QA Artifacts & 4-Browser Matrix for M0-P0
+
+### Context
+M0-P0 freeze active. QA gate must APPROVE (all 10 criteria reproducible + `p0-gate-verify` label) before merge. This prompt focuses on Playwright matrix, load histograms, Lighthouse, and coverage reports.
+
+### Assignment
+Validate the following QA artifacts for the QA gate plan:
+
+### 1. Playwright 4-Browser Matrix (Criterion 1)
+- **Artifact:** `qa/reports/browser-matrix.html` + video captures
+- **Task:** Validate all core flows on 4 browsers (Chrome 127, Edge 127, Firefox 128, Safari 17.4 macOS + Safari iOS PWA)
+- **Core flows:** join, publish, subscribe, mute, leave, ICE restart
+- **SFrame check:** explicit ⚠️ DTLS-only warning if unavailable, NOT silent fallback
+- **Output:** 100% pass on all 4 browsers, or documented RED with Safari gap
+
+### 2. 20 Participants Load (Criterion 2)
+- **Artifact:** SFU logs + Prometheus `livekit_*` + `docker stats`
+- **Task:** Verify 20p (19 fake + 1 real) 10min stable load
+- **Thresholds:** p50 ≤150ms, p95 ≤300ms, CPU <70% on 1 vCPU/2GB, loss <1%
+- **Check:** 20 distinct `participantId`s in SFU logs; no drop >5s
+- **Output:** ✅ STABLE or ❌ — scale remediation
+
+### 3. Key Rotation Histogram (Criterion 6)
+- **Artifact:** `qa/reports/key-rotation-latency.json`
+- **Task:** Verify p95 ≤500ms from 20 trials under 20p load
+- **Checks (from earlier file):**
+  - `histogram.p95: 367.2ms` ≤500ms ✅
+  - `histogram.p50: 205.9ms` ≤300ms ✅
+  - `histogram.zeroPlaintextFrames: true` ✅
+  - `result.passed: true` ✅
+- **Output:** ✅ PASS or ❌ — optimization required
+
+### 4. Reconnect Histogram (Criterion 7)
+- **Artifact:** `qa/reports/reconnect-latency.json`
+- **Task:** Verify p95 ≤5s from 10 trials/browser (50 total)
+- **Checks (from earlier file):**
+  - `aggregate.overall_p95_ms: 4123ms` ≤5000ms ✅
+  - `aggregate.passed: true` ✅
+  - All 5 browsers passed individually ✅
+  - `epochPreserved: 10/10` per browser ✅
+  - `bufferedReplayed: 10/10` per browser ✅
+- **Output:** ✅ PASS or ❌ — browser-specific fix
+
+### 5. Lighthouse Performance (Criterion 9)
+- **Artifact:** `qa/reports/lighthouse/*.json` + CI gate
+- **Task:** Verify Lighthouse ≥95 on perf/accessibility/best-practice
+- **Budgets:** bundle <120kB gz (without WASM), WASM 150KB async, TBT <200ms, CLS 0
+- **Check:** CI gate passes with `Total Blocking Time <200ms` and `CLS 0`
+- **Output:** ✅ CI PASS or ❌ — bundle/WASM tuning
+
+### 6. Screen Share Validation (Criterion 5)
+- **Artifact:** `qa/reports/screen-share-validation.json`
+- **Task:** Verify `getDisplayMedia` on all 4 browsers
+- **Checks:** Screen share succeeds ≥720p remote, audio stays, no extra SFU config, permissions `NotAllowedError` handled
+- **Output:** ✅ 4-browser PASS or ❌ — browser fallback
+
+### 7. TURN Validation (Criterion 8)
+- **Artifact:** `qa/reports/turn-validation.json` + `chrome://webrtc-internals`
+- **Task:** Verify relay functioning
+- **Checks:** `candidateType=relay` confirmed, allocation <2s, coturn HMAC 24h, no IP retention >24h
+- **Output:** ✅ PASS or ❌ — TURN config
+
+### 8. QA Gate Artifact Completeness
+- **Required artifacts for `p0-gate-verify`:**
+  - [`qa/reports/browser-matrix.html`](http://qa/reports/browser-matrix.html) — 4-browser matrix ✅
+  - [`qa/reports/key-rotation-latency.json`](http://qa/reports/key-rotation-latency.json) — p95 ≤500ms ✅
+  - [`qa/reports/reconnect-latency.json`](http://qa/reports/reconnect-latency.json) — p95 ≤5s ✅
+  - [`qa/reports/lighthouse/*.json`](http://qa/reports/lighthouse/*.json) — ≥95 ✅
+  - [`qa/reports/wireshark-livekit-sframe.pcapng`](http://qa/reports/wireshark-livekit-sframe.pcapng) — SFrame ciphertext ✅
+  - [`qa/reports/turn-validation.json`](http://qa/reports/turn-validation.json) — TURN relay ✅
+  - [`qa/reports/screen-share-validation.json`](http://qa/reports/screen-share-validation.json) — getDisplayMedia ✅
+  - Privacy scan output + inventory page URL ✅
+  - `npm audit telemetry` clean ✅
+  - `grep -r analytics` clean ✅
+
+### 9. Headless Worker Validation (2x Workers)
+- **Command:** `npm --prefix poc/meet-webrtc-core run test:browser`
+- **Setup:** Two headless workers in parallel:
+  - **Worker A:** Chrome 127 + Edge 127 (headless Chromium)
+  - **Worker B:** Firefox 128 + Safari 17.4 macOS + Safari iOS PWA (WebKit-based)
+- **Each worker produces:**
+  - Browser-specific histogram data
+  - Pass/fail per core flow
+  - Artifacts merged into aggregate reports
+- **Output:** Combined p95 metrics meet thresholds; `browser-matrix.html` generated
+
+### Success Criteria
+- [ ] QA gate: **APPROVED** (all 10 criteria reproducible)
+- [ ] `p0-gate-verify` label QA condition met
+- [ ] 4-browser matrix: 100% core flows pass
+- [ ] Key rotation p95 ≤500ms (20 trials) confirmed
+- [ ] Reconnect p95 ≤5s (10 trials/browser, 50 total) confirmed
+- [ ] Lighthouse ≥95 perf/accessibility/best-practice
+- [ ] Screen share on all 4 browsers
+- [ ] TURN relay functioning confirmed
+- [ ] Zero persistent telemetry verified
+- [ ] All QA artifacts present and valid
+
+### Deliverables
+1. Sign the QA gate on `docs/gates/architecture-exit-checklist.md`
+2. Confirm `p0-gate-verify` label QA requirements satisfied
+3. Verify all 9 artifact sets present in `qa/reports/`
+4. Run `npm --prefix poc/meet-webrtc-core run test:browser` and confirm pass
+5. Generate `qa/reports/browser-matrix.html` if not present
+6. Confirm histograms meet thresholds (key-rotation, reconnect)
+7. Run Lighthouse CI and confirm ≥95
+8. Validate privacy scan: `npm audit telemetry` + `grep -r analytics`
+9. Ensure `p0-gate-verify` label can be applied

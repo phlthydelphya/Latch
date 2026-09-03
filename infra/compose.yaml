@@ -1,0 +1,127 @@
+# P0 Compose — Single `docker compose up` for ≤50 rooms / 20p room
+# Validated: docker compose up --build --wait && curl -f http://localhost:8080/healthz
+name: meet-secure-p0
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: meet, POSTGRES_USER: meet, POSTGRES_PASSWORD: "${PG_PASSWORD:-p0-dev-pass}" }
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL","pg_isready -U meet"], interval: 5s, retries: 10 }
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server","--appendonly","yes"]
+    healthcheck: { test: ["CMD","redis-cli","ping"], interval: 5s, retries: 10 }
+    ports: ["6379:6379"]
+    volumes: ["redisdata:/data"]
+
+  minio:
+    image: minio/minio:RELEASE.2024-08-17T01-24-54Z
+    command: ["server","/data","--console-address",":9001"]
+    environment: { MINIO_ROOT_USER: minioadmin, MINIO_ROOT_PASSWORD: minioadmin }
+    ports: ["9000:9000","9001:9001"]
+    volumes: ["mindata:/data"]
+    healthcheck: { test: ["CMD","curl","-f","http://localhost:9000/minio/health/live"], interval: 10s }
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: "${KC_ADMIN_PASSWORD:-admin}"
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meet
+      KC_DB_USERNAME: meet
+      KC_DB_PASSWORD: "${PG_PASSWORD:-p0-dev-pass}"
+    ports: ["8180:8080"]
+    depends_on: { postgres: {condition: service_healthy} }
+
+  coturn:
+    image: coturn/coturn:4.6.2-alpine
+    network_mode: host # for P0 single host; K8s uses DaemonSet
+    command: ["turnserver","--log-file=stdout","--lt-cred-mech","--use-auth-secret","--static-auth-secret=${TURN_SECRET:-p0-turn-secret-0123456789abcdef0123456789}","--realm=turn.meet-secure.local","--listening-port=3478","--tls-listening-port=5349","--alt-listening-port=3479","--min-port=40000","--max-port=40200","--no-cli"]
+    depends_on: { redis: {condition: service_healthy} }
+
+  turn-auth:
+    image: meet-secure/turn-auth:local
+    build: { context: ../services/turn-auth }
+    environment: { TURN_SECRET: "${TURN_SECRET:-p0-turn-secret-0123456789abcdef0123456789}", REDIS_URL: "redis://redis:6379/0", TURN_TTL: "86400" }
+    ports: ["8082:8080"]
+    depends_on: { redis: {condition: service_healthy} }
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8080/healthz"], interval: 5s }
+
+  livekit:
+    image: livekit/livekit-server:latest
+    cpus: '2.0'
+    mem_limit: 4g
+    ports: ["7880:7880","7881:7881","7881:7881/udp","9600:9600"]
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-dev}: ${LIVEKIT_API_SECRET:-dev-secret-32chars-at-least}"
+      LIVEKIT_E2EE_ENABLED: "true"
+      LIVEKIT_E2EE_MODE: "blind"
+      LIVEKIT_REDIS_URL: "redis://redis:6379/0"
+    volumes: ["./livekit.yaml:/etc/livekit.yaml:ro"]
+    command: ["--config","/etc/livekit.yaml"]
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:9600/healthz"], interval: 5s }
+    depends_on: { redis: {condition: service_healthy} }
+
+  meet-signal:
+    image: meet-secure/meet-signal:local
+    build: { context: ../services/meet-signal }
+    environment:
+      PORT: "8080"
+      REDIS_URL: "redis://redis:6379/0"
+      PG_URL: "postgres://meet:${PG_PASSWORD:-p0-dev-pass}@postgres:5432/meet?sslmode=disable"
+      OIDC_ISSUER: "http://keycloak:8080/realms/meet-secure"
+      SFU_MANAGER_URL: "http://meet-sfu-manager:8081"
+      TURN_AUTH_URL: "http://turn-auth:8080"
+      JWT_SECRET: "${JWT_SECRET:-p0-jwt-secret-0123456789abcdef0123456789}"
+      JWT_ISSUER: "${JWT_ISSUER:-meet-signal}"
+      JWT_TTL_SECONDS: "${JWT_TTL_SECONDS:-3600}"
+      LOG_LEVEL: "info"
+      # privacy: no PII logs
+    ports: ["8080:8080","9091:9091"] # 9091 /metrics
+    depends_on: { postgres: {condition: service_healthy}, redis: {condition: service_healthy}, meet-sfu-manager: {condition: service_healthy} }
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8080/healthz"], interval: 5s }
+    # self-host claim: scale 2 still works via Redis pub/sub
+    # replicas: 2
+
+  meet-sfu-manager:
+    image: meet-secure/meet-sfu-manager:local
+    build: { context: ../services/meet-sfu-manager }
+    environment:
+      PORT: "8081"
+      SFU_NODES: "livekit:7880"
+      SFU_HASH_SALT: "${SFU_HASH_SALT:-p0-salt-2026}"
+      REDIS_URL: "redis://redis:6379/0"
+    ports: ["8081:8081"]
+    depends_on: { redis: {condition: service_healthy}, livekit: {condition: service_healthy} }
+    healthcheck: { test: ["CMD","wget","-qO-","http://localhost:8081/healthz"], interval: 5s }
+
+  prometheus:
+    image: prom/prometheus:v2.53.2
+    ports: ["9090:9090"]
+    volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    ports: ["3000:3000"]
+    environment: { GF_SECURITY_ADMIN_PASSWORD: admin }
+    volumes: ["./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro"]
+
+  caddy:
+    image: caddy:2.9-alpine
+    ports: ["443:443","80:80"]
+    volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro","caddy_data:/data","caddy_config:/config"]
+    depends_on: { meet-signal: {condition: service_healthy}, livekit: {condition: service_healthy} }
+
+volumes: { pgdata: {}, redisdata: {}, mindata: {}, caddy_data: {}, caddy_config: {} }
+
+# Validation (CI):
+# docker compose -f infra/compose.yaml up --build --wait
+# curl -f http://localhost:8080/healthz && curl -f http://localhost:8081/healthz && curl -f http://localhost:9600/healthz
+# prom: curl -f http://localhost:9090/-/healthy ; grafana: curl -f http://localhost:3000/api/health
+# load: pnpm meet-load --rooms 50 --participants 20 --duration 600

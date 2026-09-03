@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "pm",
+
+  "workflow": {
+    "mode": "autonomous",
+    "auto_delegate": true,
+    "require_user_approval_for_delegation": false,
+    "parallel_subagent_limit": 4,
+    "subagent_timeout_seconds": 600
+  },
+
+  "agents": {
+    "pm": {
+      "auto_create_tasks": true,
+      "auto_assign_reviewers": true,
+      "track_progress": true,
+      "report_on_completion": true
+    }
+  },
+
+  "gates": {
+    "require_all_approvals": true,
+    "approval_order": ["architect", "security", "privacy", "qa", "reviewer"],
+    "auto_escalate_on_block": true
+  }
+}

@@ -1,0 +1,39 @@
+# Prometheus P0 — scrapes meet-signal, LiveKit SFU, coturn/turn-auth, Redis
+# Ref: docs/c4/p0-context.md, docs/architecture-brief.md §3/7/10, docs/media-p0-proof.md §9
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'meet-signal'
+    static_configs:
+      - targets: ['meet-signal:9091']
+    metrics_path: /metrics
+    scrape_timeout: 5s
+
+  - job_name: 'livekit-sfu'
+    static_configs:
+      - targets: ['livekit:9600']
+    metrics_path: /metrics
+    scrape_timeout: 5s
+    # Required per M0-P0 §3 #3: livekit_rooms_active, sfu_load
+    # Dashboard: Grafana rooms_active panel
+
+  - job_name: 'turn-auth'
+    static_configs:
+      - targets: ['turn-auth:8080']
+    metrics_path: /metrics
+    scrape_timeout: 5s
+
+  - job_name: 'coturn'
+    static_configs:
+      - targets: ['coturn:9100'] # if coturn exporter enabled; else via turn-auth proxy
+    metrics_path: /metrics
+    scrape_timeout: 5s
+
+  - job_name: 'prometheus-self'
+    static_configs:
+      - targets: ['localhost:9090']
+
+# Alert note (P0): alert at sfu_cpu >70% or turn_allocations_active >70% capacity
+# Logs: Loki sanitized, no SDP/PII/IP beyond 24h hash (see architecture-brief §1)

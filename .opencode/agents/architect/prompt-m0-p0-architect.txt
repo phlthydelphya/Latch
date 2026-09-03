@@ -1,0 +1,66 @@
+# Subagent Prompt: @architect
+
+## Mission: Validate Architecture Exit Checklist & Consistent Hash Design for M0-P0
+
+### Context
+M0-P0 freeze is active. All 10 criteria + 5 gates must pass before any Zoom features merge. This prompt focuses on architecture validation, consistent hashing, and pivot criteria.
+
+### Assignment
+Review and validate the following architecture artifacts for the QA gate plan:
+
+### 1. Consistent Hash Design Review
+- **Artifact:** `docs/architecture-brief.md` §6 + `docs/c4/p0-context.md`
+- **Task:** Verify rendezvous HRW hash function `h=xxhash(roomId|nodeID)/weight` is correctly implemented in `meet-sfu-manager`
+- **Check:** Single-node degeneracy to one SFU entry `SFU_NODES=livekit:7880` is valid for P0; K8s DaemonSet parity documented
+- **Redis cache:** `sfu:assign:{roomId}` TTL 5m; re-hash on health fail (`/healthz` 5s)
+- **Output:** Architecture gate checklist sign-off or documented NO-GO pivot
+
+### 2. Pivot Criteria (Honest Downgrade) — ADR-004 §4
+- **Artifact:** `docs/adr/ADR-004-livekit-vs-mediasoup.md` + `architecture-brief.md` §9
+- **Task:** Ensure honest downgrade path is documented if SFrame+SFU forwarding contradiction emerges
+- **Options A/B/C:**
+  - Option A: Mesh-E2EE capped 5p + non-E2EE SFU for >5 (explicit consent, no facade)
+  - Option B: Descope E2EE to 1:1 only
+  - Option C: Replace LiveKit with mediasoup
+- **Output:** Pivot plan ready within 48h if NO-GO; adversarial reviewer sign-off
+
+### 3. Compose Parity Proof
+- **Artifact:** `infra/compose.yaml` + CI `docker compose up --wait`
+- **Task:** Verify single command supports ≤50 rooms / 20p room on 4 vCPU/8GB
+- **Check:** All services healthz: meet-signal:8080, meet-sfu-manager:8081, livekit:9600, turn-auth:8082, prometheus:9090, grafana:3000
+- **Output:** ✅ PASS or ❌ FAIL with remediation
+
+### 4. Architecture Exit Checklist Validation
+- **Artifact:** `docs/gates/architecture-exit-checklist.md`
+- **Task:** Ensure all 22 architecture deliverables are complete and reviewed
+- **Specific attention:** 
+  - ADR-001/002/004/005 signed
+  - C4 L1/L2 context complete
+  - HA/RTO Note <60s recovery
+  - Pivot criteria documented
+  - Compose parity proof
+- **Output:** All ☐ R ☐ A ☐ G marked + signatures
+
+### 5. Key Deliverables for Sign-off
+| Artifact | Path | Required | Sign |
+|----------|------|----------|------|
+| Architecture Brief M0-P0 | `docs/architecture-brief.md` v0.2.0-p0 | ✅ | @architect ___ @reviewer ___ |
+| C4 L1/L2 | `docs/c4/p0-context.md` | ✅ | @architect + @backend + @frontend |
+| ADR-004 | `docs/adr/ADR-004-livekit-vs-mediasoup.md` | ✅ | @architect + @webrtc + @backend + @reviewer |
+| Consistent Hash Design | `architecture-brief.md` §6 + `c4/p0-context.md` | ✅ | @backend |
+| HA/RTO Note | `architecture-brief.md` §7 | ✅ | @backend + @qa |
+| Pivot Criteria | `architecture-brief.md` §9 + ADR-004 §4 | ✅ | @reviewer (adversarial) |
+| Compose Parity | `infra/compose.yaml` + CI | ✅ | @backend + @qa |
+
+### Success Criteria
+- [ ] Architecture gate all-green (no RED/AMBER)
+- [ ] `p0-gate-verify` label ready for PR
+- [ ] Honest downgrade documented if SFrame contradiction persists
+- [ ] Compose single-command validated for ≤50 rooms
+- [ ] All ADRs signed and archived
+
+### Deliverables
+1. Sign the architecture exit checklist
+2. Update `docs/architecture-brief.md` §11 with any new ADR choices
+3. Ensure pivot criteria are draft within 48h if NO-GO path needed
+4. Confirm `p0-gate-verify` label requirements are met

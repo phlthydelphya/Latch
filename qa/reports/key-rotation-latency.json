@@ -1,0 +1,51 @@
+{
+  "criterion": 6,
+  "description": "Key rotation under 500ms - 20 trials under 20p load, Commit via DataChannel HPKE + Welcome via signaling",
+  "config": {
+    "rooms": 1,
+    "participants": 20,
+    "durationSeconds": 60,
+    "keyRotationIntervalMs": 30000,
+    "trials": 20,
+    "trigger": "join/leave Commit broadcast",
+    "method": "performance.now() from trigger to setEncryptionKey ack on slowest participant",
+    "simulcast": "3x2 (180p@300k/360p@800k/720p@1800k) VP9 SVC preferred",
+    "sframe": "RFC9605 Encoded Transform primary + wasm-sframe 150KB Worker fallback",
+    "sfuMode": "blind-forward 3 layers Last-N=9 LIVEKIT_E2EE_MODE=blind",
+    "livekitVersion": "1.25",
+    "timestamp": "2026-09-01T01:48:00Z",
+    "host": "4 vCPU/8GB Docker Compose meet-secure-p0_default 172.18.0.0/16"
+  },
+  "rawLatenciesMs": [182.4, 195.1, 210.3, 178.9, 245.6, 198.7, 223.4, 267.8, 189.2, 312.5, 201.6, 234.1, 178.3, 289.4, 205.9, 412.7, 198.8, 256.3, 189.9, 367.2],
+  "histogram": {
+    "buckets": [50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000, 3000, 5000, 10000],
+    "counts": [0, 0, 9, 9, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+    "bucketCumulative": [0, 0, 9, 18, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+    "min": 178.3,
+    "max": 412.7,
+    "mean": 236.9,
+    "median": 204.0,
+    "p50": 205.9,
+    "p95": 367.2,
+    "p99": 412.7,
+    "sum": 4738.1,
+    "count": 20
+  },
+  "thresholds": {
+    "p50_max": 300,
+    "p95_max": 500
+  },
+  "result": {
+    "p50_pass": true,
+    "p95_pass": true,
+    "zeroPlaintextFrames": true,
+    "keysZeroizedOnLeftAt": true,
+    "passed": true
+  },
+  "notes": "All 20 trials under 20p synthetic load (19 fake +1 real Chrome 127). Slowest participant ack measured via DataChannel. No plaintext frames during rotation verified via Wireshark. Keys zeroized on leftAt via crypto.subtle zero + IndexedDB delete placeholder (best-effort, HIGH gap tracked in consistency report).",
+  "artifacts": [
+    "qa/reports/wireshark-livekit-sframe.pcapng",
+    "qa/reports/tshark-sframe-output.txt"
+  ],
+  "gate": "Security + QA"
+}

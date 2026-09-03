@@ -1,0 +1,92 @@
+# Subagent Prompt: @privacy
+
+## Mission: Validate Privacy Invariants & Zero-Telemetry for M0-P0
+
+### Context
+M0-P0 freeze active. Privacy gate must APPROVE (F1-F4 closed, F6 statement merged) before `p0-gate-verify` label can be placed. This prompt focuses on data minimization, GDPR, ROPA, and zero persistent telemetry.
+
+### Assignment
+Validate the following privacy artifacts for the QA gate plan:
+
+### 1. Zero Persistent Telemetry (Criterion 10)
+- **Artifact:** `npm audit telemetry` + `grep -r analytics` + CSP check
+- **Task:** Verify no analytics SDK, no persistent cookies, no PII in logs
+- **Checks:**
+  - `npm audit telemetry` — zero telemetry findings ✅
+  - `grep -r analytics` across entire repo — no matches ✅
+  - No GA, Mixpanel, Sentry without PII scrub ✅
+  - CSP `default-src 'none'` blocks 3rd-party ✅
+  - No `localStorage` tracking keys ✅
+- **Output:** **APPROVED** (zero telemetry) or ❌ — remove/fix before gate
+
+### 2. Data Minimization Table (ROPA)
+- **Artifact:** `docs/privacy-inventory.md`
+- **Task:** Verify ROPA (Record of Processing Activities) compliance
+- **Checks:**
+  - Data inventory page URL present and current ✅
+  - Minimization table: only essential data collected ✅
+  - Categories: contact data, contract data, usage data ✅
+  - Lawful basis documented for each ✅
+  - Retention periods: 24h TTL on all ephemeral Redis/PG rows ✅
+  - No media stored in PG ✅
+- **Output:** ✅ PASS or ❌ — update inventory
+
+### 3. GDPR & DSR Compliance
+- **Artifact:** DSR endpoint `DELETE /accounts/me`
+- **Task:** Verify data subject rights are actionable
+- **Checks:**
+  - `DELETE /accounts/me` endpoint exists and works ✅
+  - Erasure request processed within 24h ✅
+  - All ephemeral Redis rows GC'd hourly ✅
+  - No persistent media in PG (only hashes) ✅
+  - TURN HMAC creds purged 24h post-session ✅
+- **Output:** ✅ PASS or ❌ — implement DSR endpoint
+
+### 4. `__Host-` Cookie Policy
+- **Artifact:** Caddyfile + `infra/compose.yaml` env defaults
+- **Task:** Verify cookie same-site policy
+- **Checks:**
+  - `__Host-` cookies `SameSite=Strict` only ✅
+  - No `SameSite=None` without `Secure` flag ✅
+  - No analytics cookies beyond essential ✅
+  - Cookie list trimmed to auth-only ✅
+- **Output:** ✅ PASS or ❌ — fix cookie policy
+
+### 5. Privacy & Security Interface
+- **Artifact:** Interface between @security and @privacy artifact sets
+- **Task:** Ensure no conflict between security audit and privacy minimization
+- **Checks:**
+  - STRIDE 8 does not force PII collection ✅
+  - CSP does not enable 3rd-party tracking ✅
+  - TURN audit does not retain IPs >24h ✅
+  - Key rotation does not persist epoch secrets ✅
+- **Output:** ✅ Alignment confirmed or ❌ — resolve conflict
+
+### 6. Privacy Inventory & ROPA
+- **Artifact:** `docs/privacy-inventory.md` checked against `ROADMAP.md` §7
+- **Specific attention:**
+  - F1-F4 closed ✅
+  - F6 statement merged ✅
+  - TURN rotation policy documented ✅
+  - Zero-telemetry statement merged ✅
+- **Output:** ✅ PASS or ❌ — merge missing items
+
+### Success Criteria
+- [ ] Privacy gate: **APPROVED** (F1-F4 closed, F6 statement merged)
+- [ ] Zero persistent telemetry confirmed
+- [ ] GDPR + ROPA compliance verified
+- [ ] DSR `DELETE /accounts/me` operational
+- [ ] `__Host-` cookies `SameSite=Strict` only
+- [ ] No analytics/Sentry without PII scrub
+- [ ] `npm audit telemetry` clean
+- [ ] `grep -r analytics` clean across repo
+- [ ] `p0-gate-verify` label privacy condition met
+
+### Deliverables
+1. Sign the privacy gate on `docs/gates/architecture-exit-checklist.md`
+2. Confirm `p0-gate-verify` label privacy requirements satisfied
+3. Verify `DELETE /accounts/me` endpoint operational
+4. Confirm `npm audit telemetry` and `grep -r analytics` clean
+5. Ensure `__Host-` cookie policy is `SameSite=Strict`
+6. Update `docs/privacy-inventory.md` if any items missing
+7. Merge zero-telemetry statement if not already present

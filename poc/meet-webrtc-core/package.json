@@ -1,0 +1,64 @@
+{
+  "name": "meet-webrtc-core",
+  "version": "0.1.0-p0",
+  "description": "M0-P0 WebRTC + SFrame E2EE POC - LiveKit SFU + simulcast + key rotation + TURN fallback",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.app.json && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:browser": "playwright test",
+    "lint": "eslint src --ext ts,tsx",
+    "wasm:build": "wasm-pack build wasm/sframe --target web --out-dir ../dist/wasm",
+    "load": "tsx scripts/load-test.ts",
+    "adversarial": "tsx scripts/run-adversarial-test.ts",
+    "lighthouse": "lighthouse http://127.0.0.1:4173 --preset=desktop --output=json --output-path=./qa/reports/lighthouse/lighthouse-report.json --chrome-flags='--headless'",
+    "lighthouse:ci": "lhci autorun",
+    "bundle:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
+    "sframe-proof": "tsx scripts/websocket-sframe-proof-runner.ts"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.0",
+    "lib0": "^0.2.0",
+    "livekit-client": "^2.4.0",
+    "playwright": "^1.62.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "xxhash-wasm": "^1.0.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.12.0",
+    "@playwright/test": "^1.62.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/testing-library__jest-dom": "^5.14.9",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^8.57.0",
+    "jsdom": "^30.0.1",
+    "lighthouse": "^11.6.0",
+    "prom-client": "^15.1.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vite-bundle-analyzer": "^0.10.0",
+    "vite-plugin-pwa": "^0.19.0",
+    "vitest": "^1.4.0",
+    "wasm-pack": "^0.12.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true,
+    "wasm-pack@0.12.1": true,
+    "esbuild@0.28.2": true
+  }
+}

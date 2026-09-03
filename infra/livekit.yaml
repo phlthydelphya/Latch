@@ -1,0 +1,40 @@
+# LiveKit 1.25 — P0 single-SFU, Redis, SFrame blind-forward
+# Ref: docs/architecture-brief.md §5/9, docs/adr/ADR-004-livekit-vs-mediasoup.md, docs/adr/ADR-002-sframe-pivot-criteria.md
+# Status: REVIEW REQUIRED — validated via `docker compose -f infra/compose.yaml up --build --wait`
+port: 7880
+rtc:
+  port_range_start: 40000
+  port_range_end: 40200
+  tcp_port: 7881
+  use_external_ip: false
+  # Single-host P0; K8s uses hostNetwork or NodePort via Helm
+redis:
+  address: redis:6379
+  username: ""
+  password: ""
+  db: 0
+keys:
+  # Injected via LIVEKIT_KEYS env; placeholder for yaml lint
+  dev: dev-secret-32chars-at-least
+room:
+  auto_create: true
+  enabled_codecs:
+    - mime: video/VP9
+    - mime: video/H264
+    - mime: audio/opus
+  max_participants: 20
+  empty_timeout: 300 # 5min
+  departure_timeout: 20
+turn:
+  enabled: false # coturn is external service (infra/coturn), not LiveKit embedded TURN
+  domain: turn.meet-secure.local
+  tls_port: 5349
+  udp_port: 3478
+logging:
+  level: info
+  json: true
+  # Privacy: no PII/SDP in SFU logs
+prometheus:
+  port: 9600
+# HA: liveness via :9600/healthz every 5s (see infra/compose.yaml healthcheck)
+# Scale tier: ≤20p single SFU, 2 vCPU/4g (or 1 vCPU/2g marginal per ADR-004 benchmark CPU 48% avg, 66.8% p95)

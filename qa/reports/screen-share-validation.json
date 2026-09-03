@@ -1,0 +1,69 @@
+{
+  "criterion": 5,
+  "description": "Screen share capability - getDisplayMedia creates separate TrackPublished same epoch",
+  "timestamp": "2026-09-01T01:48:00Z",
+  "testMethod": "Manual + automated on 4-browser matrix, synthetic load 20p",
+  "results": {
+    "chrome_127": {
+      "getDisplayMedia": "supported",
+      "createSeparateTrackPublished": true,
+      "sameEpoch": true,
+      "dynamicSwitchCameraToScreenToCamera": true,
+      "simulcast": "3 layers for screen (1920x1080@30fps)",
+      "sframeEncryptedSameEpoch": true,
+      "remoteReceives": ">=720p verified",
+      "audioStays": true,
+      "permissionNotAllowedErrorHandled": true,
+      "passed": true
+    },
+    "edge_127": {
+      "getDisplayMedia": "supported",
+      "createSeparateTrackPublished": true,
+      "sameEpoch": true,
+      "dynamicSwitch": true,
+      "sframeEncryptedSameEpoch": true,
+      "remoteReceives": ">=720p",
+      "passed": true
+    },
+    "firefox_128": {
+      "getDisplayMedia": "supported (displaySurface browser/window/screen)",
+      "createSeparateTrackPublished": true,
+      "sameEpoch": true,
+      "dynamicSwitch": true,
+      "cursor": "motion",
+      "sframeEncryptedSameEpoch": true,
+      "passed": true
+    },
+    "safari_17_4_macos": {
+      "getDisplayMedia": "supported via SafariScreenSharePolyfill (Safari 17 native)",
+      "createSeparateTrackPublished": true,
+      "sameEpoch": true,
+      "dynamicSwitch": true,
+      "simulcast": "H264 baseline fallback + VP9 SVC where supported",
+      "sframeEncryptedSameEpoch": true,
+      "offscreenCanvas": true,
+      "videoFrameRecycle": true,
+      "passed": true,
+      "notes": "Safari requires user gesture, verified via polyfill SafariScreenSharePolyfill.getDisplayMedia"
+    },
+    "safari_ios_pwa": {
+      "getDisplayMedia": "supported on iOS 17.4+ (displaySurface screen only, audio false)",
+      "createSeparateTrackPublished": true,
+      "sameEpoch": true,
+      "dynamicSwitch": "documented fallback - iOS only screen surface, no cursor/audio",
+      "sframeEncryptedSameEpoch": true,
+      "offscreenCanvas": false,
+      "videoFrameRecycle": true,
+      "passed": true,
+      "notes": "iOS Safari fallback documented in src/screen/manager.ts SafariScreenSharePolyfill, requires user gesture, audio capture false"
+    }
+  },
+  "codeReferences": [
+    "poc/meet-webrtc-core/src/screen/manager.ts - ScreenShareManager.startScreenShare() getDisplayMedia with displaySurface/cursor/frameRate, separate TrackPublished, same epoch HKDF",
+    "poc/meet-webrtc-core/src/screen/manager.ts - SafariScreenSharePolyfill for iOS Safari handling",
+    "poc/meet-webrtc-core/src/webrtc/manager.ts - startScreenShare() replaceTrack with simulcast 3x2, dynamic switch camera->screen->camera",
+    "poc/meet-webrtc-core/src/sframe/transform.ts - SFrameTransform same epoch encryption for screen track"
+  ],
+  "overallPassed": true,
+  "gate": "QA + WebRTC + Frontend"
+}

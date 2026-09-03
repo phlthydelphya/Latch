@@ -1,0 +1,55 @@
+# Caddy 2 — P0 LB :443 TLS termination → meet-signal WSS, LiveKit SFU RTC, OIDC
+# Ref: docs/c4/p0-context.md L2, docs/architecture-brief.md §2/4.1
+# Single `docker compose up` self-host claim: single host 4 vCPU/8GB for ≤50 rooms / 20p
+{
+	admin off
+	# TLS via internal self-signed for P0 local; prod via cert-manager in K8s parity
+	auto_https off
+}
+
+:80 {
+	# Health passthrough
+	handle /healthz* {
+		reverse_proxy meet-signal:8080
+	}
+	# Signal: WSS /signal?v=1&room=&token= (JWT 5m aud=roomId)
+	handle /signal* {
+		reverse_proxy meet-signal:8080 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			header_up X-Forwarded-For {remote}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+	# LiveKit SFU: WSS/RTC + /healthz
+	handle /sfu/* {
+		reverse_proxy livekit:7880
+	}
+	handle /rtc* {
+		reverse_proxy livekit:7880
+	}
+	handle {
+		reverse_proxy meet-signal:8080
+	}
+}
+
+:443 {
+	tls internal
+	handle /signal* {
+		reverse_proxy meet-signal:8080
+	}
+	handle /sfu/* {
+		reverse_proxy livekit:7880
+	}
+	handle /turn/* {
+		reverse_proxy turn-auth:8080
+	}
+	handle {
+		reverse_proxy meet-signal:8080
+	}
+}
+
+# Notes:
+# - coturn STUN/TURN 3478/5349 is hostNetwork (compose network_mode: host) not via Caddy
+# - K8s parity: Ingress-Nginx + cert-manager replaces this Caddyfile (see docs/c4/p0-context.md Deployment View)
+# - Observability: Prometheus :9090 Grafana :3000 Loki :3100 are outside LB for P0 local dev
