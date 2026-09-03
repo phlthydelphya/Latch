@@ -3,7 +3,9 @@
     "argv": [
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\node_modules\\@playwright\\test\\cli.js",
-      "test"
+      "test",
+      "--list",
+      "--config=C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\playwright.config.ts"
     ],
     "configFile": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\playwright.config.ts",
     "rootDir": "C:/Users/joshu/meet-secure-core/poc/meet-webrtc-core/tests/e2e",
@@ -137,18 +139,142 @@
       "timeout": 120000
     }
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: Process from config.webServer was not able to start. Exit code: 1",
-      "stack": "Error: Process from config.webServer was not able to start. Exit code: 1"
+      "title": "webrtc-session.spec.ts",
+      "file": "webrtc-session.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-2326f64b5c0f1e1e1f85",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-82d0f68ad5fdfba09378",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-0bc51e8d859db20aac14",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "msedge",
+              "projectName": "msedge",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-dd576ea55a59486e817c",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "Mobile Chrome",
+              "projectName": "Mobile Chrome",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-339c0b963f572862c166",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        },
+        {
+          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 300000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "Mobile Safari",
+              "projectName": "Mobile Safari",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "303db5f3e175c9a4b995-33d548d45593618bea3c",
+          "file": "webrtc-session.spec.ts",
+          "line": 13,
+          "column": 1
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-09-03T00:49:05.423Z",
-    "duration": 193.96499999999992,
+    "startTime": "2026-09-03T09:23:57.208Z",
+    "duration": 40.77100000000007,
     "expected": 0,
-    "skipped": 0,
+    "skipped": 6,
     "unexpected": 0,
     "flaky": 0
   }
