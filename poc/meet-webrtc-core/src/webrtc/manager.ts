@@ -98,6 +98,9 @@ export class WebRTCManager extends EventEmitter {
   private connected = false;
   private isReconnecting = false;
   private iceRestartPending = false;
+  // ICE candidate queue for ordering race (M0-P0 fix 2026-09-03)
+  private pendingIceCandidates: RTCIceCandidateInit[] = [];
+  private remoteDescriptionReady = false;
   // Perfect negotiation (RFC 8829) state
   private polite = false;
   private makingOffer = false;
@@ -432,8 +435,19 @@ export class WebRTCManager extends EventEmitter {
     if (this.ignoreOffer) return;
 
     this.isSettingRemoteAnswerPending = description.type === 'answer';
+    this.remoteDescriptionReady = false;
     try {
       await this.pc.setRemoteDescription(description); // rolls back implicitly on glare
+      this.remoteDescriptionReady = true;
+      // Drain queued ICE candidates now that remote description is set
+      for (const candidate of this.pendingIceCandidates) {
+        try {
+          await this.pc.addIceCandidate(candidate);
+        } catch (e) {
+          console.error('Failed to add queued ICE candidate:', e);
+        }
+      }
+      this.pendingIceCandidates = [];
     } finally {
       this.isSettingRemoteAnswerPending = false;
     }
@@ -447,7 +461,12 @@ export class WebRTCManager extends EventEmitter {
   }
 
   private async handleIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    if (!this.pc) return;
+    if (!this.pc || !candidate) return;
+    // Queue candidates until remote description ready (fixes “remote description was null”)
+    if (!this.pc.remoteDescription || !this.remoteDescriptionReady) {
+      this.pendingIceCandidates.push(candidate);
+      return;
+    }
     try {
       await this.pc.addIceCandidate(candidate);
     } catch (error) {

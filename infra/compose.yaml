@@ -58,7 +58,7 @@ services:
     mem_limit: 4g
     ports: ["7880:7880","7881:7881","7881:7881/udp","9600:9600"]
     environment:
-      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-dev}: ${LIVEKIT_API_SECRET:-dev-secret-32chars-at-least}"
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-dev}: ${LIVEKIT_API_SECRET:-p0-dev-pass-32chars-0123456789abcdef012345}"
       LIVEKIT_E2EE_ENABLED: "true"
       LIVEKIT_E2EE_MODE: "blind"
       LIVEKIT_REDIS_URL: "redis://redis:6379/0"

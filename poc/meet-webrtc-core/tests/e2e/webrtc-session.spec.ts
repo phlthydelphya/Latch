@@ -20,8 +20,10 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
   
   // Enable fake media for page1
   await page1.addInitScript(() => {
+    // WebKit on Windows may not have navigator.mediaDevices defined
+    if (!navigator.mediaDevices) (navigator as any).mediaDevices = {} as any;
     // Override getUserMedia to return fake stream
-    const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+    const originalGetUserMedia = navigator.mediaDevices.getUserMedia?.bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia = async (constraints) => {
       console.log('[Page1] getUserMedia called with:', constraints);
       
@@ -68,7 +70,8 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
   const page2 = await context2.newPage();
   
   await page2.addInitScript(() => {
-    const originalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+    if (!navigator.mediaDevices) (navigator as any).mediaDevices = {} as any;
+    const originalGetUserMedia = navigator.mediaDevices.getUserMedia?.bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia = async (constraints) => {
       console.log('[Page2] getUserMedia called with:', constraints);
       
