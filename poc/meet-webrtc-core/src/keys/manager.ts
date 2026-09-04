@@ -45,11 +45,11 @@ export class KeyManager {
   }
 
   async initialize(participantId: string): Promise<void> {
-    // Generate HPKE key pair for this participant (best-effort: X25519 ECDH is
-    // not available in every browser; MLS key distribution can be added later).
+    // Generate HPKE key pair for this participant (best-effort: P-256 ECDH for
+    // browser WebCrypto compatibility; X25519 not universally supported).
     try {
       this.hpkeKeyPair = await crypto.subtle.generateKey(
-        { name: 'ECDH', namedCurve: 'X25519' },
+        { name: 'ECDH', namedCurve: 'P-256' },
         true,
         ['deriveKey', 'deriveBits']
       );
@@ -355,7 +355,7 @@ export class KeyManager {
 export class HPKE {
   static async generateKeyPair(): Promise<CryptoKeyPair> {
     return crypto.subtle.generateKey(
-      { name: 'ECDH', namedCurve: 'X25519' },
+      { name: 'ECDH', namedCurve: 'P-256' },
       true,
       ['deriveKey', 'deriveBits']
     );
@@ -398,7 +398,7 @@ export class HPKE {
     const data = ciphertext.slice(24, -16);
     const tag = ciphertext.slice(-16);
     
-    const senderPubKey = await crypto.subtle.importKey('raw', senderPubKeyBytes, { name: 'ECDH', namedCurve: 'X25519' }, false, []);
+    const senderPubKey = await crypto.subtle.importKey('raw', senderPubKeyBytes, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
     
     const sharedSecret = await crypto.subtle.deriveBits(
       { name: 'ECDH', public: senderPubKey },

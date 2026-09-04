@@ -67,7 +67,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'C:/Users/joshu/meet-secure-core/poc/meet-webrtc-core/node_modules/.bin/vite.cmd',
+    command: 'npm run dev',
     url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:5173',
     reuseExistingServer: true,
     timeout: 120000,
