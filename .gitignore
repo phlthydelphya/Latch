@@ -9,3 +9,4 @@ infra/pgdata/
 .vite/
 *.log
 .env
+backups/
