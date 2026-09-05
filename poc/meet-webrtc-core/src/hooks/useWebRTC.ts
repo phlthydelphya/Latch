@@ -25,6 +25,8 @@ import { LayoutAdapter, SPOTLIGHT_TOPIC } from '../layout/layoutAdapter';
 import { useLayoutStore } from '../layout/layoutStore';
 import { CollaborationAdapter } from '../collaboration/collaborationAdapter';
 import { useCollaborationStore } from '../collaboration/collaborationStore';
+import { DeviceManager } from '../devices/deviceManager';
+import { useDeviceStore } from '../devices/deviceStore';
 import {
   CHAT_TOPIC,
   REACTION_TOPIC,
@@ -256,6 +258,10 @@ export function useWebRTC() {
           } else {
             collaborationAdapterRef.current.attach(room);
           }
+
+          // M2 Phase D: Enumerate devices and start change listener
+          DeviceManager.getInstance().enumerateAndSyncDevices();
+          DeviceManager.getInstance().startDeviceChangeListener();
 
           // Flush HPKE key publish
           if (sframeEnabled) {
@@ -984,6 +990,9 @@ export function useWebRTC() {
     }
     useCollaborationStore.getState().reset();
 
+    DeviceManager.getInstance().destroy();
+    useDeviceStore.getState().reset();
+
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
@@ -1146,6 +1155,10 @@ export function useWebRTC() {
     }
   }, []);
 
+  const switchDevice = useCallback(async (kind: MediaDeviceKind, deviceId: string) => {
+    await DeviceManager.getInstance().switchActiveDevice(roomRef.current, kind, deviceId);
+  }, []);
+
   return {
     room: roomRef.current,
     localStream,
@@ -1163,5 +1176,6 @@ export function useWebRTC() {
     publishReaction,
     publishAnnouncement,
     lowerParticipantHand,
+    switchDevice,
   };
 }

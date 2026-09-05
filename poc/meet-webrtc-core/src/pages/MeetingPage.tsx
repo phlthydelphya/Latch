@@ -13,6 +13,7 @@ import { ChatDrawer } from '../components/collaboration/ChatDrawer';
 import { ReactionsBar } from '../components/collaboration/ReactionsBar';
 import { ReactionsOverlay } from '../components/collaboration/ReactionsOverlay';
 import { HostAnnouncementBanner } from '../components/collaboration/HostAnnouncementBanner';
+import { DeviceSettingsModal } from '../components/devices/DeviceSettingsModal';
 
 export function MeetingPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -36,6 +37,7 @@ export function MeetingPage() {
     publishReaction,
     publishAnnouncement,
     lowerParticipantHand,
+    switchDevice,
   } = useWebRTC();
 
   const localParticipant = useAppStore((s) => s.localParticipant);
@@ -131,6 +133,7 @@ export function MeetingPage() {
       <ReactionsBar onSendReaction={publishReaction} />
       <ChatDrawer onSendMessage={publishChatMessage} />
       <RosterDrawer onLowerHand={lowerParticipantHand} />
+      <DeviceSettingsModal onSwitchDevice={switchDevice} />
       <ToastContainer />
     </div>
   );

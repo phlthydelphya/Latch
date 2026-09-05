@@ -5,6 +5,7 @@ import { downloadDiagnosticBundle } from '../utils/diagnostics';
 import { HandRaiseButton } from './HandRaiseButton';
 import { usePresenceStore } from '../presence/presenceStore';
 import { useCollaborationStore } from '../collaboration/collaborationStore';
+import { useDeviceStore } from '../devices/deviceStore';
 
 interface ControlBarProps {
   onToggleHand?: (raised: boolean) => Promise<void> | void;
@@ -179,11 +180,23 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           </svg>
           Participants ({participantCount})
         </button>
+
         <button
           className="btn btn-secondary"
-          onClick={() => downloadDiagnosticBundle()}
-          aria-label="Download Sanitized Diagnostics"
-          title="Export Privacy-Preserving Diagnostic Bundle"
+          onClick={() => useDeviceStore.getState().setSettingsOpen(true, 'audio')}
+          aria-label="Device and Hardware Settings"
+          title="Microphone, Speaker, and Camera Settings"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+        >
+          <span style={{ marginRight: '4px' }}>⚙️</span>
+          Settings
+        </button>
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => useDeviceStore.getState().setSettingsOpen(true, 'diagnostics')}
+          aria-label="Real-Time Network Diagnostics"
+          title="Real-Time WebRTC Diagnostics & Health"
           style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginRight: '4px', verticalAlign: 'text-bottom' }}>
