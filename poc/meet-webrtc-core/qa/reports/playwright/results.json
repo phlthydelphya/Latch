@@ -5,10 +5,7 @@
       "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\node_modules\\@playwright\\test\\cli.js",
       "test",
       "tests/e2e/webrtc-session.spec.ts",
-      "--project=chromium",
-      "--project=msedge",
-      "--project=firefox",
-      "--project=webkit"
+      "--project=chromium"
     ],
     "configFile": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\playwright.config.ts",
     "rootDir": "C:/Users/joshu/meet-secure-core/poc/meet-webrtc-core/tests/e2e",
@@ -22,7 +19,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 4
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "projects": [
@@ -31,7 +28,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -47,7 +44,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "firefox",
         "name": "firefox",
@@ -63,7 +60,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "webkit",
         "name": "webkit",
@@ -79,7 +76,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "msedge",
         "name": "msedge",
@@ -95,7 +92,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
@@ -111,7 +108,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 4
+          "actualWorkers": 1
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
@@ -179,7 +176,7 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 23036,
+                  "duration": 16852,
                   "errors": [],
                   "stdout": [
                     {
@@ -201,10 +198,13 @@
                       "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
                     },
                     {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommtnsrr1g, participantId: p-e63cc9a5, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
+                      "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
                     },
                     {
-                      "text": "[Page1] Navigated to pre-join page, room: testroommtnsrr1g\n"
+                      "text": "[Page1 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-334c89ec, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
+                    },
+                    {
+                      "text": "[Page1] Navigated to pre-join page, room: testroommto2eojt\n"
                     },
                     {
                       "text": "[Page1 Console] [Browser 1] getUserMedia called with: {audio: true, video: true}\n"
@@ -219,10 +219,7 @@
                       "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
                     },
                     {
-                      "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommtnsrr1g, participantId: p-a9b3aaf1, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
+                      "text": "[Page1 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-5080c63b, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
                     },
                     {
                       "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: Object}\n"
@@ -240,16 +237,22 @@
                       "text": "[Page1 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
                     },
                     {
-                      "text": "[Page1 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlBEfiwgAAAAAAAAK7Vzbbtw4EoUD7GJgwA-Tp3kksI8LuVm86MKgHxI7ngtmAmOcZIF5Wllit7VpXUCx7XY-YH9gf2g-bUF125KbpCeJs8BgwQcD9mGxDqu6qtTUAXz47TcHz_9Kjgk5hu--_eezfx08e_7smwPyn98PDv_SLhZSPf_37wfXc3x02M4jRGgGcZzgmMQZY5ikSYII-vEN-vGcISDJMT7Gx3B02M-jo0M9xwgfHeZzudF13kX5atXeRHW1kaVB674qo17WeaOrQiD0j18uDLxU7boTr969Of35NcIIEEEUMcRRfHRYz_N1WbUoQ-9Oz2dvf76Y_fr2fHbx8v35GQIAFFOUIYxSBBQBYAQkPjos5rvz4eF0w4mU7uq8E2ZP2637GUsxxjMyWYopUrJ0LGTo-4SQmcEnKEbnJ7-820dTg77cR4GikzcWCBhpuZLdVdvISF7LRm_JpzYktmzuTBa13sZTV02nq1rOAb9Y97JqLvOmXMhiDvdmsckOzABg67wwUbmSVHTR4nLwqpRWU8ykZw_KLARbSGohYDsyqbAwEjvsAGmVN33XKh0VxVhqAtBaNaKSeiG6XOV1L5TuoqtSyY0Wfa-KaCikaCWv5Wqyj6ArrTsxm93c3BzfyEuli-NWLWdy00lV1bLR_Wz0NMsv-6iXTRmZhE_c0Kkbc4rBSVXOSpUvdHTVrmqpIlUXuY7GCG6qUkZFEcmNlk1ftU0fYZh4ZY8GVcpe1NXQWb3U607khe7yvh9arSrF9iOVxXXbrG7N71Uho_VC5UtR_f2n3-6Q7qYU8cd3b179xs_JYh3Pqver77vrnz728GoooKpZStWpqtGiv8ojwmP0-lTwTJy9FjwVp5mIM8FOxBkXhIkzEOSlwFTEVLwCY5Mm4gwLeirIa0GZOEnEyzPBY7PrlAvMRJaYvTgVhAs4ESfp3dHaTpukCK2q4sNK3pdCvd7c_6766uO4slFCFdcqUlrP89UqDJAwQMIA-dIBAmGAhAESBkgYIF86QEgYIGaAXFeldA-QLEZZgrIUZRkCjBFgQJQjGiOaIJoiwAQBpggwQ4ATBNhgGQJgCIAjgBgBJIhmiGHEADGCGEWMIcYRixFLEEsRgPnJEBAzngCxDHGMOCBOEBDzQxEQhjh9dHJlMXp_ns4y_HBCZAlSemPDKXp_ntlw5rQ2wbvMTUJc9pQ7zWnstk7c1qnnLAT9QGLmWKCeDcy3wZ0b8zF6NnjSAz4G4J4NsW-D-0g0c9sz7DRn4DEnbnPqMWduc45evgcbdn-6LHFbez5d8OUePLkn2LOBuGuTDankFs7dqeTgMXen0jSs-ZZg457iJAytV91CFjYDRYuV3CxkEWE6rg7P6yxBeafnWTwiKepUu6hWMqrK-cQy21qm41cCjKemZLIAgy1MiCif2o5fGGg8mFI-IsnUko54urVMJjwEDY_ZKO9v61pqdbt9FyXLObzo8uKD1NXH3Iz2qG5LacCd5-22qpwzgjEsJi7p7ujTcNjn0eBPoEl2NGyCpV8hGvmQJtvRTD41-BrRPKQBvqWBSTQQPz2a8mHSYJc0GKuVZk8P5iELw9syy0YEnhzJgj3kIAMHG9uA0SfHsc_BthxjAzGO7ow3c37nYI5f6EqqSaezbUuysSVZ4twJ1s5ti7JJi8LTizpme2WwK2qYFDXBT87fPg3ZDTEyiS-7z8Mc0tGH-XPIRbRY5UuT0c2W5uLXi7f3u_m2sthYWRy8_sgn-NtWEYfJmXfTi4zTi5vbZpdXKrqpmrK9MVMZj0-IP7igZfbdyHwR3Ifsy1dm39nM88LG7Asg5TZkH4Pax6COOyAmDsxxMcTMgdkUZkjbmCNWcPgDOzAzJm3MEZpNwexsMjuZzI6f2eEz-7TMPiyzz8rsozJHhsCFObJGXNdzR1D2Vm7v5PZG7qgG4sIcFULsHHHHq4oYLdt2GSlZX-7h-y8UJktFUaNFte-oyYsPDgh1q2qv-9yUqZ8ydVKmNmXqpDSt7OQ0Cz5Ss-ZgNfA-7R22z0u5m5ZyLyvlLlLKLc4dZFEmHsrET5k4KRObMvFkl_iySx7JLnFnlziySzy8zMfLHuFlbl7m4GUeXk8FmwU_r7OGDWzzeqoYfPHCI_GCO15wxAueeMEzJMyCn9c5Jgxs87oHBc08pZz5SzlzlnJml3LmpGTgpmT2-9XJkoOSgUW5gyxK6qGkfkrqpKQ2JXVTesYS848l5hxLzB5LzD2WmGcsMf9YYs6xxOyxxDxjCXxtCo-0KbjbFBxtCp42Jb6HDXnkYUPcDxvieNgQ98OGedqF-duFOduF2e3C3O3CPe3C_e3Cne3C7Xbh7nbhnnbhdrvcKSCPqgW6XSx6qY--uvIBdKCly64Tw6v2qFWVbPRwqzv6Xysk_POC6Fb5bbvWUSlX-e3ETfx5brZxFm2jZaMjfdtNE5J8iS9d1VWznHhJP89L0a5aFfVdXkyP8sn60d1nif9wg_m710rmdfRw6-MC3LB1uO_KMvL62JZkL2azvK1lWeVFW8rieFnpq_XlcdXO8mvY7u5kMftbKTvZlLIpbqNS9oWqOt2qYf1K5qVUY9Uc-TSy4TVM0MiCRjaBg0YWNLIRDxpZ0MiCRhY0sqCRBY0saGQjEjSyoJEFjezB26qgkd2jQSMLGlnQyIJGdr8WNDIHFDSyPTxoZEEjCxpZ0MiCRvYn0siGN2NBIwsa2QQOGlnQyEY8aGRBIwsaWdDIgkYWNLKgkY1I0MiCRhY0sgdvq4JGdo8GjSxoZEEjCxrZ_VrQyBxQ0Mj28KCRBY0saGRBIwsa2Z9IIxtepgSNLO-6VVUMLbtTyk6NVHZx8vYcbYsvKnOdF1d505h_w-nSqZz5jf9fctoXuovMSBJ895KmzjdRLfs-X8rI5FeQmABjR4ffHfwX0ePkBi5gAAA%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
+                      "text": "[Page1 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmREfiwgAAAAAAAAK7Vzbbtw4EoUD7GBgwA-Tp3kksM9ys3jRhUE_-JbZLJLAGDsZzNvKErutTesCiW235wP2B_aH5tMGlNqW3CQ9SZwFBgs-GLAPi3VY1VWlFg_g_R--33v5HTkk5BB-_OFfL_699-Lli-_3yH9_39v_W71YyPblf37fu5njg_16HqAQx4TTJA5xSJOYJTFPEEFv3qM35wwBiQ7xIT6Eg_1uHhzsqzlG-GA_ncuNKtMmSFer-jYoi43MNVp2RR50skwrVWQCoV_eXWh42dbrRhx_eH_69gxhBIggihjiKDzYL-fpOi9qlKAPp-ezy7cXs58vz2cXRx_PXyMAQCFFCcIoRkARAEZAwoP9bL49H-5P15-oVU2ZNkLvqZt1N2MxxnhGJkshRa3MLQsJ-ikiZKbxCYrR-cm7D7torNGjXRQoOnlvgICRkivZXNeVDOSNrNRAPrUhoWFzb7Io1RBPWVSNKko5B_xq3cmiukqrfCGzOTyYhTo7MAOAwXmmo7IlKWuCxVXvtW1VO8V0enagxECwgcQGAqYjnQoDI6HFDpBq06pr6lYFWTaWmgC0bitRSLUQTdqmZSda1QTXeSs3SnRdmwV9IQUreSNXk30EXSvViNns9vb28FZetSo7rNvlTG4a2RalrFQ3Gz3N0qsu6GSVBzrhEzd06kafondS5LO8TRcquK5XpWyDtsxSFYwR3Ba5DLIskBslq66oqy7AMPHKngwql50oi76zOqnWjUgz1aRd17dakYvhI5XZTV2t7vTvRSaD9aJNlyJJFpf3SHObi18u3l2-uwv_-etP-Fd4vcrevL2sqzdS9QVUVEvZNm1RKdFdpwHhISIn4uy1iI9EdCL4qTgmgh0LysTxmWAn4oiLkyNBmOBngoDAJwJTcZaIJBY0Fq_PRHQsolBER-LsTMTHAo4EDUV4Jk6xODoRjN8frW6UTopQbZF9WsmHUijXm4ff2674bVzZtKLNbtqgVWqerlZ-gPgB4gfI1w4Q8APEDxA_QPwA-doBQvwA0QPkpsilfYAkIUoilMQoSRBgjAADohzRENEI0RgBJggwRYAZAhwhwBpLEABDABwBhAggQjRBDCMGiBHEKGIMMY5YiFiEWIwA9E-CgOjxBIgliGPEAXGCgOgfioAwxOmTkysJ0cfzeJbgxxMiiVCrNiYco4_niQknVmsdvM1cJ8RmT7nVnIZ268huHTvOQtA_SMgsC9Sxgbk22HOjP0bHBkd6wMUA3LEhdG2wH4kmdnuGreYMHObEbk4d5sxuztHRRzBh-6fLIru149MFV-7BkXuCHRuIvTZZn0pu4NyeSg4Oc3sqdcPqbwkm7ihOwtB61SxkZjJQtFjJzUJmAabjav-8TiKUNmqehCMSo6atF8VKBkU-n1gmg2U8fiXAeGpKJgvQ28KEiPKp7fiFgYa9KeUjEk0t6YjHg2U04SGof8wGaXdXllK1d8NdlMzn8KpJs09SFb-lerQHZZ1LDW49D9uKfM4IxrCYuKTbo0_DYV9Ggz-DJtrSsAkWf4No5GOaZEsz-dTgW0TzmAb4QAOTaCB8fjT546TBNmkwVitNnh_MYxaGhzJLRgSeHcmCPeYgPQcb24DRZ8exy8EGjrGBGEf3xps5v3cwx69UIdtJp7OhJdnYkiyy7gRj59CibNKi8PyiDtlOGWyLGiZFTfCz87dLQ7ZDjEziSx7yMId49KH_7HMRLFbpUmd0M9Bc_Hxx-bCbD5XFxsri4PRHPsPfUEUcJmfeTi8yTi-u3zabtGiD26LK61s9lfH4hPiTF7TEfDfSXwR3IfPlKzHf2fTzwsTMF0DKTcg8BjWPQS3vgJhYMMuLIWYWzKTQQ9rELLGCxR-YgekxaWKW0EwKZmaTmclkZvzMDJ-Zp2XmYZl5VmYelVkyBDbMkjViez23BGVu5eZObm7klmogNsxSIcTMEbdcVYRoWdfLoJXl1Q6-e6EwWcqyEi2KXUdVmn2yQKhZFTvdZ6eM3ZSxlTI2KWMrpW5lK6decJHqNQurhndp77FdXsrttJQ7WSm3kVJucG4hgzJyUEZuyshKGZmUkSO7xJVd8kR2iT27xJJd4uBlLl72BC-z8zILL3PwOipYL7h5rTWsYZPXUcXgiheeiBfs8YIlXnDEC44hoRfcvNYxoWGT1z4oaOIo5cRdyom1lBOzlBMrJQM7JTPvVydLFkoGBuUWMiipg5K6KamVkpqU1E7pGEvMPZaYdSwxcywx-1hijrHE3GOJWccSM8cSc4wlcLUpPNGmYG9TsLQpONqUuB425ImHDbE_bIjlYUPsDxvmaBfmbhdmbRdmtguztwt3tAt3twu3tgs324Xb24U72oWb7XKvgDypFqh6seiGC_1vq3wA7WnpsmlEf9Ue1G0hK9W_1R38rxUS_mVBNKv0rl6rIJer9G7iJvwyN0OcWV0pWalA3TXThERf40sVZVEtJ17iL_OS1au6DbomzaZH-Wz96P6zxH-6Qf_dqVamZfB469MCXL-1f9-VeeD0MZRkJ2aztC5lXqRZncvscFmo6_XVYVHP0hsYdjcym_09l42scllld0Euu6wtGlW3_fq1THPZjlVz4NLI-msYr5F5jWwCe43Ma2Qj7jUyr5F5jcxrZF4j8xqZ18hGxGtkXiPzGtmj2yqvkT2gXiPzGpnXyLxG9rDmNTIL5DWyHdxrZF4j8xqZ18i8RvYX0sj6mzGvkXmNbAJ7jcxrZCPuNTKvkXmNzGtkXiPzGpnXyEbEa2ReI_Ma2aPbKq-RPaBeI_MamdfIvEb2sOY1MgvkNbId3GtkXiPzGpnXyLxG9hfSyPrLFK-RpU2zKrK-ZbdK2amWyi5OLs_RUHxBnqo0u06rSv8bTptOZc1v-P-S0y5TTaBHkuDbS5oy3QSl7Lp0KQOdX0FCAowd7P-49wdHSKDELmAAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
                     },
                     {
                       "text": "[Page1] Clicked Join Meeting\n"
                     },
                     {
-                      "text": "[Page1] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr1g/join#k=bb07abd5109f3a9cd8cd522ba010e435de095dda0911565ed2580611d74b31b7\n"
+                      "text": "[Page1] Joined meeting at: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
                     },
                     {
-                      "text": "[Page1] Key param: bb07abd5...\n"
+                      "text": "[Page1] Key param: 42d22f40...\n"
+                    },
+                    {
+                      "text": "[Page1 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
+                    },
+                    {
+                      "text": "[Page1 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_jPBwXXQe2vQ5, debugInfo: , agentProtocol: 1 {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf}\n"
                     },
                     {
                       "text": "[Page1] Connected to meeting\n"
@@ -258,43 +261,22 @@
                       "text": "\n=== BROWSER 2: Joining room ===\n"
                     },
                     {
-                      "text": "[Page1 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
+                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1205229217 1 udp 2122260223 172.28.96.1 53053 typ host generation 0 ufrag 99fT network-id 5\n"
                     },
                     {
-                      "text": "[Page1 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-a9b3aaf1, participantID: PA_CvZsCMGSXuMs}\n"
+                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:823187956 1 udp 2121998079 192.168.1.253 58950 typ host generation 0 ufrag 99fT network-id 1 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:164864580 1 udp 2122197247 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 58951 typ host generation 0 ufrag 99fT network-id 2 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2381220899 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 58952 typ host generation 0 ufrag 99fT network-id 3 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:644914926 1 udp 2122066175 2600:382:af78:21c3::b06 58953 typ host generation 0 ufrag 99fT network-id 4 network-cost 10\n"
                     },
                     {
                       "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1305706513 1 udp 2122260223 172.28.96.1 56695 typ host generation 0 ufrag i+JZ network-id 5\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1453646821 1 udp 2121998079 192.168.1.253 56696 typ host generation 0 ufrag i+JZ network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1624574001 1 udp 2122197247 2600:382:af78:21c3:7caa:f33e:dd11:c609 56697 typ host generation 0 ufrag i+JZ network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1320114887 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 56698 typ host generation 0 ufrag i+JZ network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2882632408 1 udp 2122066175 2600:382:af78:21c3::b06 56699 typ host generation 0 ufrag i+JZ network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:3011073157 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag i+JZ network-id 5\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2819503985 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag i+JZ network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2659179685 1 tcp 1518217471 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active generation 0 ufrag i+JZ network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2953154131 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag i+JZ network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1434168908 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag i+JZ network-id 4 network-cost 10\n"
                     },
                     {
                       "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
@@ -303,31 +285,31 @@
                       "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
                     },
                     {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                    },
+                    {
                       "text": "[Page2 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
                     },
                     {
                       "text": "[Page2 Console] [vite] connected.\n"
                     },
                     {
-                      "text": "[Page1 Console] connection state changed: connecting -> connected {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-a9b3aaf1, participantID: PA_CvZsCMGSXuMs}\n"
+                      "text": "[Page1 Console] connection state changed: connecting -> connected {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf}\n"
                     },
                     {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1g, state: connected, localIdentity: p-a9b3aaf1, trackPublicationsSize: 0}\n"
+                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, localIdentity: p-5080c63b, trackPublicationsSize: 0}\n"
                     },
                     {
-                      "text": "[Page1 Console] [LiveKit] room.name testroommtnsrr1g state connected localParticipant p-a9b3aaf1\n"
+                      "text": "[Page1 Console] [LiveKit] room.name testroommto2eojt state connected localParticipant p-5080c63b\n"
                     },
                     {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1g, state: connected, trackPublicationsSize: 0}\n"
+                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, trackPublicationsSize: 0}\n"
                     },
                     {
                       "text": "[Page1 Console] [LiveKit] setCameraEnabled start\n"
@@ -342,22 +324,22 @@
                       "text": "[Page1 Console] [SFrame] Published hpke-pubkey on Connected\n"
                     },
                     {
-                      "text": "[Page1 Console] publishing track {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-a9b3aaf1, participantID: PA_CvZsCMGSXuMs, trackID: undefined}\n"
+                      "text": "[Page1 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf, trackID: undefined}\n"
                     },
                     {
                       "text": "[Page2 Console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
                     },
                     {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCjP6U5YpDJovs, kind: video, source: camera, participantIdentity: p-a9b3aaf1, trackPublicationsSize: 1}\n"
+                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCN77EUTiVm53k, kind: video, source: camera, participantIdentity: p-5080c63b, trackPublicationsSize: 1}\n"
                     },
                     {
                       "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
+                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCjP6U5YpDJovs, globalCounter: 0}\n"
+                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCN77EUTiVm53k, globalCounter: 0}\n"
                     },
                     {
                       "text": "[Page1 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
@@ -375,22 +357,19 @@
                       "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio]\n"
                     },
                     {
-                      "text": "[Page1 Console] publishing track {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-a9b3aaf1, participantID: PA_CvZsCMGSXuMs, trackID: undefined}\n"
+                      "text": "[Page1 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf, trackID: undefined}\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {audio: true, video: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMMvWesma3fWiy, kind: audio, source: microphone, participantIdentity: p-a9b3aaf1, trackPublicationsSize: 2}\n"
+                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMu59FwGzpF2Dd, kind: audio, source: microphone, participantIdentity: p-5080c63b, trackPublicationsSize: 2}\n"
                     },
                     {
                       "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
+                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMMvWesma3fWiy, globalCounter: 0}\n"
+                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMu59FwGzpF2Dd, globalCounter: 0}\n"
                     },
                     {
                       "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
@@ -399,13 +378,10 @@
                       "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
                     },
                     {
+                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {audio: true, video: true}\n"
+                    },
+                    {
                       "text": "[Page2] Navigated to pre-join with key\n"
-                    },
-                    {
-                      "text": "[Page2] Already on pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] On pre-join page\n"
                     },
                     {
                       "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
@@ -417,13 +393,22 @@
                       "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
                     },
                     {
-                      "text": "[Page2 Console] [Token] fetched {roomId: testroommtnsrr1g, participantId: p-37612b01, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
+                      "text": "[Page2 Console] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-75e7bb7e, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
                     },
                     {
                       "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: Object, audio: Object}\n"
                     },
                     {
                       "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
+                    },
+                    {
+                      "text": "[Page2] Already on pre-join page\n"
+                    },
+                    {
+                      "text": "[Page2] On pre-join page\n"
                     },
                     {
                       "text": "[Page2] Preview video element found\n"
@@ -435,19 +420,19 @@
                       "text": "[Page2 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
                     },
                     {
-                      "text": "[Page2 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlhEfiwgAAAAAAAAK7VzNbhy5EYYMJFgI0GF92iOBHIPWsPjTPzTmYFlyssCuoV3ZDnJLq5szau_0z7I50sgPkBfIC-2jBewZqVtDUmtbDrAIeBAgfSzWx6qpqh72B-jw228Onv-ZHBNyDN99-69nHw6ePX_2zQH5z28Hh39qFwupnv_7t4PrOT46bOcRIixNWAo8y7IEQwwJzxBB379B358zBCQ5xsf4GI4O-3l0dKjnGOGjw3wuN7rOuyhfrdqbqK42sjRo3Vdl1Ms6b3RVCIT-8eOFgZeqXXfi5N2b0x_OEEaACKKIIY7io8N6nq_LqkUZend6Pnv7w8Xs57fns4uX789fIwBAMUUZwihFQBEARkDio8NivjsfHk43nEjprs47Yfa03bqfsRRjPCOTpZgiJUvHQob-lhAyM_gExej81Y_v9tHUoC_3UaDo1RsLBIy0XMnuqm1kJK9lo7fkUxsSWzZ3Jotab-Opq6bTVS3ngF-se1k1l3lTLmQxh3uz2GQHZgCwdV6YqFxJKrpocTl4VUqrKWbSswdlFoItJLUQsB2ZVFgYiR12gLTKm75rlY6KYiw1AWitGlFJvRBdrvK6F0p30VWp5EaLvldFNBRStJLXcjXZR9CV1p2YzW5ubo5v5KXSxXGrljO56aSqatnofjZ6muWXfdTLpoxMwidu6NSNOcXgpCpnpcoXOrpqV7VUkaqLXEdjBDdVKaOiiORGy6av2qaPMEy8skeDKmUv6mrorF7qdSfyQnd53w-tVpVi-5HK4rptVrfm96qQ0Xqh8qV4x4vqDuluSrFue_rr7N31R3xRXMYfrv75018_UIV_GgqoapZSdapqtOiv8ojwGJ0xQYnIQLBXIk0FnIjTTJydiZMzQc4EZAKngjJxkgh-Ks5OBCfilA5LRMCpYCBenQl8JvCJiE9FAoKcChyL09fi7LUg_O5obadNUoRWVfHLSt6XQr3e3P-u-urjuLJRQhXXKlJaz_PVKgyQMEDCAPnSAQJhgIQBEgZIGCBfOkBIGCBmgFxXpXQPkCxGWYKyFGUZAowRYECUIxojmiCaIsAEAaYIMEOAEwTYYBkCYAiAI4AYASSIZohhxAAxghhFjCHGEYsRSxBLEYD5yRAQM54AsQxxjDggThAQ80MREIY4fXRyZTF6f57OMvxwQmQJUnpjwyl6f57ZcOa0NsG7zE1CXPaUO81p7LZO3Nap5ywE_Z3EzLFAPRuYb4M7N-Zj9GzwpAd8DMA9G2LfBveRaOa2Z9hpzsBjTtzm1GPO3OYcvXwPNuz-dFnitvZ8uuDLPXhyT7BnA3HXJhtSyS2cu1PJwWPuTqVpWPMtwcY9xUkYWq-6hSxsBooWK7lZyCLCdFwdntdZgvJOz7N4RFLUqXZRrWRUlfOJZba1TMevBBhPTclkAQZbmBBRPrUdvzDQeDClfESSqSUd8XRrmUx4CBoes1He39a11Op2-y5KlnN40eXFL1JXH3Mz2qO6LaUBd56326pyzgjGsJi4pLujT8Nhn0eDP4Em2dGwCZZ-hWjkQ5psRzP51OBrRPOQBviWBibRQPz0aMqHSYNd0mCsVpo9PZiHLAxvyywbEXhyJAv2kIMMHGxsA0afHMc-B9tyjA3EOLoz3sz5nYM5fqErqSadzrYtycaWZIlzJ1g7ty3KJi0KTy_qmO2Vwa6oYVLUBD85f_s0ZDfEyCS-7D4Pc0hHH-bPIRfRYpUvTUY3W5qLny_e3u_m28piY2Vx8Pojn-BvW0UcJmfeTS8yTi9ubptdXqnopmrK9sZMZTw-IX7ngpbZdyPzRXAfsi9fmX1nM88LG7MvgJTbkH0Mah-DOu6AmDgwx8UQMwdmU5ghbWOOWMHhD-zAzJi0MUdoNgWzs8nsZDI7fmaHz-zTMvuwzD4rs4_KHBkCF-bIGnFdzx1B2Vu5vZPbG7mjGogLc1QIsXPEHa8qYrRs22WkZH25h--_UJgsFUWNFtW-oyYvfnFAqFtVe93npkz9lKmTMrUpUyelaWUnp1nwkZo1B6uB92nvsH1eyt20lHtZKXeRUm5x7iCLMvFQJn7KxEmZ2JSJJ7vEl13ySHaJO7vEkV3i4WU-XvYIL3PzMgcv8_B6Ktgs-HmdNWxgm9dTxeCLFx6JF9zxgiNe8MQLniFhFvy8zjFhYJvXPSho5inlzF_KmbOUM7uUMyclAzcls9-vTpYclAwsyh1kUVIPJfVTUicltSmpm9Izlph_LDHnWGL2WGLuscQ8Y4n5xxJzjiVmjyXmGUvga1N4pE3B3abgaFPwtCnxPWzIIw8b4n7YEMfDhrgfNszTLszfLszZLsxuF-ZuF-5pF-5vF-5sF263C3e3C_e0C7fb5U4BeVQt0O1i0Ut99NWVD6ADLV12nRhetUetqmSjh1vd0f9aIeGfF0S3ym_btY5KucpvJ27iz3OzjbNoGy0bHenbbpqQ5Et86aqumuXES_p5Xop21aqo7_JiepRP1o_uPkv8uxvM371WMq-jh1sfF-CGrcN9V5aR18e2JHsxm-VtLcsqL9pSFsfLSl-tL4-rdpZfw3Z3J4vZX0rZyaaUTXEblbIvVNXpVg3rVzIvpRqr5sinkQ2vYYJGFjSyCRw0sqCRjXjQyIJGFjSyoJEFjSxoZEEjG5GgkQWNLGhkD95WBY3sHg0aWdDIgkYWNLL7taCROaCgke3hQSMLGlnQyIJGFjSyP5BGNrwZCxpZ0MgmcNDIgkY24kEjCxpZ0MiCRhY0sqCRBY1sRIJGFjSyoJE9eFsVNLJ7NGhkQSMLGlnQyO7XgkbmgIJGtocHjSxoZEEjCxpZ0Mj-QBrZ8DIlaGR5162qYmjZnVJ2aqSyi1dvz9G2-KIy13lxlTeN-TecLp3Kmd_4_yWnfaG7yIwkwXcvaep8E9Wy7_OljEx-BYkJMHZ0-N3BfwHo9SLkLmAAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
+                      "text": "[Page2 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlREfiwgAAAAAAAAK7VzNbtw4EoYD7GJgwIfJaY4E9iw3iz_6YdAHx8nsBshkPOMke11aYreVtH5GYtvtPMC-wL7QPNqC6rYlN0lPEmeBwYIHA_bHYn2s6qpSUx_gw--_O3j6V3JMyDH88P2_nnw4ePL0yXcH5D-_Hxz-pVksVPf0378fXM3x0WEzj1Ac0wQSQmOcpCxLEpJQRNCrN-jVGUNAkmN8jI_h6LCfR0eHeo4RPjqUc7XRlWwjuVo111FVblRh0Kovi6hXlax1mQuE_vnTuYGXXbNuxfN3b168fokwAkQQRQxxFB8dVnO5LsoGZejdi7PZ29fns1_fns3OT96f_YgAAMUUZQijFAFFABgBiY8O8_nufHg43XCiTreVbIXZ07TrfsZSjPGMTJZiijpVOBYy9PeEkJnBJyhGZ6c_vdtHU4Oe7KNA0ekbCwSMtFqp9rKpVaSuVK235FMbEls2tyaLSm_jqcq61WWl5oCfrXtV1heyLhYqn8OdWWyyAzMA2DrPTVSuJOVttLgYvHad7qaYSc8elFkItpDUQsB2ZFJhYSR22AHSnaz7tul0lOdjqQlA664WpdIL0cpOVr3odBtdFp3aaNH3XR4NhRSt1JVaTfYRdKl1K2az6-vr42t10en8uOmWM7VpVVdWqtb9bPQ0kxd91Ku6iEzCJ27o1I05xeCkLGZFJxc6umxWleqirsqljsYIrstCRXkeqY1WdV82dR9hmHhlDwZVqF5U5dBZvdLrVshct7Lvh1YrC7H9SFV-1dSrG_N7matovejkUrz67UN9i7TXhbi4Xv6Wlz_LN5_ku1_eXCzwKtusT15_GAqorJeqa7uy1qK_lBHhMTrBAqggWMQvRXYqXp4Ilgn8XMSn4oQIDoKciCQVgMWPL8TJc8ETkVIRPxenqUiZYERQLPhzkXIBXJwygV-KjAtORJYJxm-P1rTaJEXorsw_rtRdKVTrzd3vXV9-Glc2nejyqy7qtJ7L1SoMkDBAwgD52gECYYCEARIGSBggXztASBggZoBclYVyD5AsRlmCshRlGQKMEWBAlCMaI5ogmiLABAGmCDBDgBME2GAZAmAIgCOAGAEkiGaIYcQAMYIYRYwhxhGLEUsQSxGA-ckQEDOeALEMcYw4IE4QEPNDERCGOH1wcmUxen-WzjJ8f0JkCer0xoZT9P4ss-HMaW2Cd5mbhLjsKXea09htnbitU89ZCPoHiZljgXo2MN8Gd27Mx-jZ4EkP-BiAezbEvg3uI9HMbc-w05yBx5y4zanHnLnNOTp5Dzbs_nRZ4rb2fLrgyz14ck-wZwNx1yYbUsktnLtTycFj7k6laVjzLcHGPcVJGFqv2oXKbQaKFiu1Wag8wnRcHZ7XWYJkq-dZPCIpartmUa5UVBbziWW2tUzHrwQYT03JZAEGW5gQUT61Hb8w0HgwpXxEkqklHfF0a5lMeAgaHrOR7G-qSunuZvsuShVzeNbK_KPS5SdpRntUNYUy4M7zdltZzBnBGBYTl3R39Gk47Mto8GfQJDsaNsHSbxCNuk-T7Wgmnxp8i2ju0wDf0sAkGogfH01xP2mwSxqM1Uqzxwdzn4XhbZllIwKPjmTB7nOQgYONbcDoo-PY52BbjrGBGEe3xps5v3Uwx890qbpJp7NtS7KxJVni3AnWzm2LskmLwuOLOmZ7ZbArapgUNcGPzt8-DdkNMTKJL7vLwxzS0Yf5c8hFtFjJpcnoZktz_uv527vdfFtZbKwsDl5_5DP8bauIw-TMu-lFxunFzW2zlWUXXZd10VybqYzHJ8QfXNAy-25kvgjuQ_blK7PvbOZ5YWP2BZByG7KPQe1jUMcdEBMH5rgYYubAbAozpG3MESs4_IEdmBmTNuYIzaZgdjaZnUxmx8_s8Jl9WmYfltlnZfZRmSND4MIcWSOu67kjKHsrt3dyeyN3VANxYY4KIXaOuONVRYyWTbOMOlVd7OH7LxQmS3leoUW576iW-UcHhNpVudd9bsrUT5k6KVObMnVSmlZ2cpoFH6lZc7AaeJ_2FtvnpdxNS7mXlXIXKeUW5w6yKBMPZeKnTJyUiU2ZeLJLfNklD2SXuLNLHNklHl7m42UP8DI3L3PwMg-vp4LNgp_XWcMGtnk9VQy-eOGBeMEdLzjiBU-84BkSZsHP6xwTBrZ53YOCZp5SzvylnDlLObNLOXNSMnBTMvv96mTJQcnAotxBFiX1UFI_JXVSUpuSuik9Y4n5xxJzjiVmjyXmHkvMM5aYfywx51hi9lhinrEEvjaFB9oU3G0KjjYFT5sS38OGPPCwIe6HDXE8bIj7YcM87cL87cKc7cLsdmHuduGeduH-duHOduF2u3B3u3BPu3C7XW4VkAfVAt0sFr3SR99c-QA60NJl24rhVXvUdKWq9XCrO_pfKyT8y4JoV_KmWeuoUCt5M3ETf5mbbZx5U2tV60jftNOEJF_jS5dVWS8nXtIv85I3q6aL-lbm06N8tn50-1niP9xg_u51p2QV3d_6sAA3bB3uu6qIvD62JdmL2Uw2lSpKmTeFyo-Xpb5cXxyXzUxewXZ3q_LZ3wrVqrpQdX4TFarPu7LVTTesXypZqG6smiOfRja8hgkaWdDIJnDQyIJGNuJBIwsaWdDIgkYWNLKgkQWNbESCRhY0sqCR3XtbFTSyOzRoZEEjCxpZ0Mju1oJG5oCCRraHB40saGRBIwsaWdDI_kQa2fBmLGhkQSObwEEjCxrZiAeNLGhkQSMLGlnQyIJGFjSyEQkaWdDIgkZ2721V0Mju0KCRBY0saGRBI7tbCxqZAwoa2R4eNLKgkQWNLGhkQSP7E2lkw8uUoJHJtl2V-dCyO6XshZHKzk_fnqFt8UWF1DK_lHVt_g2nS6dy5jf-f8lpn-s2MiNJ8N1Lmkpuokr1vVyqyORXkJgAY0eHPxz8F2u-ZL4uYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
                     },
                     {
                       "text": "[Page2] Clicked Join Meeting\n"
                     },
                     {
-                      "text": "[Page2] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr1g/join#k=bb07abd5109f3a9cd8cd522ba010e435de095dda0911565ed2580611d74b31b7\n"
+                      "text": "[Page2] Joined meeting at: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
                     },
                     {
                       "text": "[Page2 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
                     },
                     {
-                      "text": "[Page2 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-37612b01, participantID: PA_VJioBaAQ9hAF}\n"
+                      "text": "[Page2 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_jPBwXXQe2vQ5, debugInfo: , agentProtocol: 1 {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh}\n"
                     },
                     {
                       "text": "[Page2] Connected to meeting\n"
@@ -456,37 +441,46 @@
                       "text": "\n=== VERIFYING WEBRTC CONNECTION ===\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2610775257 1 udp 2122260223 172.28.96.1 58363 typ host generation 0 ufrag U5ci network-id 5\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1850290095 1 udp 2122260223 172.28.96.1 53180 typ host generation 0 ufrag Iqjn network-id 5\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2162829101 1 udp 2121998079 192.168.1.253 58364 typ host generation 0 ufrag U5ci network-id 1 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1967017051 1 udp 2121998079 192.168.1.253 53181 typ host generation 0 ufrag Iqjn network-id 1 network-cost 10\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:3063663865 1 udp 2122197247 2600:382:af78:21c3:7caa:f33e:dd11:c609 58365 typ host generation 0 ufrag U5ci network-id 2 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:3194436780 1 udp 2122197247 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 53182 typ host generation 0 ufrag Iqjn network-id 2 network-cost 10\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2564922895 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 58366 typ host generation 0 ufrag U5ci network-id 3 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1832252793 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 53183 typ host generation 0 ufrag Iqjn network-id 3 network-cost 10\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2107620880 1 udp 2122066175 2600:382:af78:21c3::b06 58367 typ host generation 0 ufrag U5ci network-id 4 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2286671206 1 udp 2122066175 2600:382:af78:21c3::b06 53184 typ host generation 0 ufrag Iqjn network-id 4 network-cost 10\n"
                     },
                     {
                       "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1698140237 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag U5ci network-id 5\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2118185913 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag U5ci network-id 1 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1211177069 1 tcp 1518217471 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active generation 0 ufrag U5ci network-id 2 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1716210331 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag U5ci network-id 3 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2430860091 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag Iqjn network-id 5\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2201315972 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag U5ci network-id 4 network-cost 10\n"
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2341771471 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag Iqjn network-id 1 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1087236152 1 tcp 1518217471 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 9 typ host tcptype active generation 0 ufrag Iqjn network-id 2 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2476679661 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag Iqjn network-id 3 network-cost 10\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1994457586 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag Iqjn network-id 4 network-cost 10\n"
                     },
                     {
                       "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
@@ -495,37 +489,28 @@
                       "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                      "text": "[Page2 Console] connection state changed: connecting -> connected {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh}\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, localIdentity: p-75e7bb7e, trackPublicationsSize: 0}\n"
                     },
                     {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
+                      "text": "[Page2 Console] [LiveKit] room.name testroommto2eojt state connected localParticipant p-75e7bb7e\n"
                     },
                     {
-                      "text": "[Page2 Console] connection state changed: connecting -> connected {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-37612b01, participantID: PA_VJioBaAQ9hAF}\n"
+                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
                     },
                     {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1g, state: connected, localIdentity: p-37612b01, trackPublicationsSize: 0}\n"
+                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
                     },
                     {
-                      "text": "[Page2 Console] [LiveKit] room.name testroommtnsrr1g state connected localParticipant p-37612b01\n"
+                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-5080c6, kid: 0, lastCounter: -1}\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
+                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-5080c6, kid: 0, lastCounter: -1}\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-a9b3aa, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-a9b3aa, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1g, state: connected, trackPublicationsSize: 0}\n"
+                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, trackPublicationsSize: 0}\n"
                     },
                     {
                       "text": "[Page2 Console] [LiveKit] setCameraEnabled start\n"
@@ -537,64 +522,25 @@
                       "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [video]\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
                       "text": "[Page1 Console] [LiveKit] Data received from undefined topic: hpke-pubkey\n"
                     },
                     {
-                      "text": "[Page2 Console] publishing track {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-37612b01, participantID: PA_VJioBaAQ9hAF, trackID: undefined}\n"
+                      "text": "[Page2 Console] [SFrame] Published hpke-pubkey on Connected\n"
                     },
                     {
-                      "text": "[Page2 Console] [SW] Registered: http://127.0.0.1:5173/\n"
+                      "text": "[Page2 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh, trackID: undefined}\n"
                     },
                     {
-                      "text": "[Page1] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page1] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-37612b01'\u001b[39m,\n      name: \u001b[32m'Participant p-3761'\u001b[39m,\n      audio: \u001b[33mfalse\u001b[39m,\n      video: \u001b[33mfalse\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "[Page2] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-a9b3aaf1'\u001b[39m,\n      name: \u001b[32m'Participant p-a9b3'\u001b[39m,\n      audio: \u001b[33mtrue\u001b[39m,\n      video: \u001b[33mtrue\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "\n=== KEEPING BROWSERS ALIVE FOR MEDIA CAPTURE ===\n"
-                    },
-                    {
-                      "text": "Room ID: testroommtnsrr1g\n"
-                    },
-                    {
-                      "text": "Key Param: bb07abd5109f3a9cd8cd522ba010e435de095dda0911565ed2580611d74b31b7\n"
-                    },
-                    {
-                      "text": "Page1 URL: http://127.0.0.1:5173/r/testroommtnsrr1g/join#k=bb07abd5109f3a9cd8cd522ba010e435de095dda0911565ed2580611d74b31b7\n"
-                    },
-                    {
-                      "text": "Page2 URL: http://127.0.0.1:5173/r/testroommtnsrr1g/join#k=bb07abd5109f3a9cd8cd522ba010e435de095dda0911565ed2580611d74b31b7\n"
-                    },
-                    {
-                      "text": "Both browsers streaming... (will keep alive for 5 seconds)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCWUgUdnx2ZA2k, kind: video, source: camera, participantIdentity: p-37612b01, trackPublicationsSize: 1}\n"
+                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCP6X2caUUySa4, kind: video, source: camera, participantIdentity: p-75e7bb7e, trackPublicationsSize: 1}\n"
                     },
                     {
                       "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
+                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCWUgUdnx2ZA2k, globalCounter: 0}\n"
+                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCP6X2caUUySa4, globalCounter: 0}\n"
                     },
                     {
                       "text": "[Page2 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
@@ -609,28 +555,70 @@
                       "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: false, audio: Object}\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-37612b, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
                       "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio]\n"
                     },
                     {
-                      "text": "[Page2 Console] publishing track {room: testroommtnsrr1g, roomID: RM_Pu4NtQHxVRxc, participant: p-37612b01, participantID: PA_VJioBaAQ9hAF, trackID: undefined}\n"
+                      "text": "[Page2 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh, trackID: undefined}\n"
                     },
                     {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AM2HcAHgFiqDyA, kind: audio, source: microphone, participantIdentity: p-37612b01, trackPublicationsSize: 2}\n"
+                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-75e7bb, kid: 0, lastCounter: -1}\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=1 backoffMs=500\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
+                    },
+                    {
+                      "text": "[Page1] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
+                    },
+                    {
+                      "text": "[Page2] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
+                    },
+                    {
+                      "text": "[Page1] Connection stats available: \u001b[33mfalse\u001b[39m\n"
+                    },
+                    {
+                      "text": "[Page2] Connection stats available: \u001b[33mfalse\u001b[39m\n"
+                    },
+                    {
+                      "text": "[Page1] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-75e7bb7e'\u001b[39m,\n      name: \u001b[32m'Participant p-75e7'\u001b[39m,\n      audio: \u001b[33mfalse\u001b[39m,\n      video: \u001b[33mfalse\u001b[39m\n    }\n  ]\n}\n"
+                    },
+                    {
+                      "text": "[Page2] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-5080c63b'\u001b[39m,\n      name: \u001b[32m'Participant p-5080'\u001b[39m,\n      audio: \u001b[33mtrue\u001b[39m,\n      video: \u001b[33mtrue\u001b[39m\n    }\n  ]\n}\n"
+                    },
+                    {
+                      "text": "\n=== KEEPING BROWSERS ALIVE FOR MEDIA CAPTURE ===\n"
+                    },
+                    {
+                      "text": "Room ID: testroommto2eojt\n"
+                    },
+                    {
+                      "text": "Key Param: 42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
+                    },
+                    {
+                      "text": "Page1 URL: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
+                    },
+                    {
+                      "text": "Page2 URL: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
+                    },
+                    {
+                      "text": "Both browsers streaming... (will keep alive for 5 seconds)\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMvrSnj9588GkB, kind: audio, source: microphone, participantIdentity: p-75e7bb7e, trackPublicationsSize: 2}\n"
                     },
                     {
                       "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
+                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
                     },
                     {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AM2HcAHgFiqDyA, globalCounter: 0}\n"
+                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMvrSnj9588GkB, globalCounter: 0}\n"
                     },
                     {
                       "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
@@ -639,10 +627,22 @@
                       "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
+                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
                     },
                     {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-37612b, kid: 0, lastCounter: -1}\n"
+                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-75e7bb, kid: 0, lastCounter: -1}\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=2 backoffMs=1000\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
+                    },
+                    {
+                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=3 backoffMs=2000\n"
+                    },
+                    {
+                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
                     },
                     {
                       "text": "[Page1] Final stats available: \u001b[33mfalse\u001b[39m\n"
@@ -668,7 +668,7 @@
                   ],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-05T03:02:23.930Z",
+                  "startTime": "2026-09-05T07:32:10.337Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -680,1523 +680,16 @@
           "file": "webrtc-session.spec.ts",
           "line": 13,
           "column": 1
-        },
-        {
-          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 300000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "firefox",
-              "projectName": "firefox",
-              "results": [
-                {
-                  "workerIndex": 1,
-                  "parallelIndex": 1,
-                  "status": "passed",
-                  "duration": 28879,
-                  "errors": [],
-                  "stdout": [
-                    {
-                      "text": "\n=== BROWSER 1: Creating room ===\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1] Navigated to pre-join page, room: testroommtnsrr33\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page1] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page1] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page1] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr33/join#k=27ebe87df83fb26e08b92cff69dc3be3e018b82b900e94e0bf69fabd6d823550\n"
-                    },
-                    {
-                      "text": "[Page1] Key param: 27ebe87d...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect start JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: disconnected -> connecting JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESKx-LCAAAAAAAAArjEuRgFGIz0jMy0jOUEExgymJkEmLiYAQArhm-IBcAAAA%3D JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== BROWSER 2: Joining room ===\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connected JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 52421 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 52422 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 52423 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 52424 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 52425 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 52426 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 52427 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 52428 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 52429 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 52430 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 1 UDP 1685986815 99.95.85.191 52421 typ srflx raddr 192.168.1.253 rport 52421\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 1 UDP 1685986815 99.95.85.191 52427 typ srflx raddr 192.168.1.253 rport 52427\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 2 UDP 1685986814 99.95.85.191 52425 typ srflx raddr 192.168.1.253 rport 52425\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 1 UDP 1685986815 99.95.85.191 52423 typ srflx raddr 192.168.1.253 rport 52423\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 2 UDP 1685986814 99.95.85.191 52429 typ srflx raddr 192.168.1.253 rport 52429\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 1 UDP 1685987327 99.95.85.191 52421 typ srflx raddr 192.168.1.253 rport 52421\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 2 UDP 1685987326 99.95.85.191 52425 typ srflx raddr 192.168.1.253 rport 52425\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1 1 UDP 1685987327 99.95.85.191 52423 typ srflx raddr 192.168.1.253 rport 52423\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: connecting -> connected JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] room.name testroommtnsrr33 state connected localParticipant p-cb717c0d\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 55897 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 55898 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 55899 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 55900 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 55901 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 55902 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] \n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 49868 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 49869 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 49870 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 49871 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 49872 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 49873 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2] Navigated to pre-join with key\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 101}]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Token] fetched JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page2] Already on pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] On pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page2] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page2] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr33/join#k=27ebe87df83fb26e08b92cff69dc3be3e018b82b900e94e0bf69fabd6d823550\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect start JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: disconnected -> connecting JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESKx-LCAAAAAAAAArjEuRgFGIz0jMy0jOUEExgymJkEmLiYAQArhm-IBcAAAA%3D JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== VERIFYING WEBRTC CONNECTION ===\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connected JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 53373 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 53374 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 53375 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 53376 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 53377 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 53378 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 53379 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 53380 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 53381 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 53382 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1 1 UDP 1685987327 99.95.85.191 24834 typ srflx raddr 192.168.1.253 rport 53373\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1 1 UDP 1685986815 99.95.85.191 53375 typ srflx raddr 192.168.1.253 rport 53375\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1 1 UDP 1685987327 99.95.85.191 53375 typ srflx raddr 192.168.1.253 rport 53375\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] \n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1 2 UDP 1685987326 99.95.85.191 53377 typ srflx raddr 192.168.1.253 rport 53377\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 54403 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 54404 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 54405 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 54406 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 54407 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 54408 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] \n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1 1 UDP 1685987327 99.95.85.191 54403 typ srflx raddr 192.168.1.253 rport 54403\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: connecting -> connected JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] room.name testroommtnsrr33 state connected localParticipant p-9a7a3d4f\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 54422 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 54423 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 54424 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 54425 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 54426 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 54427 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: Array\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from p-9a7a3d4f topic: hpke-pubkey\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Registered HPKE public key for p-9a7a3d4f\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 57205 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 57206 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 57207 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 57208 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 57209 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 57210 typ host\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled success JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 57212 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 57213 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 1 UDP 2122187007 192.168.1.253 57214 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 1 UDP 2122252543 2600:382:af78:21c3:7caa:f33e:dd11:c609 57215 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 1 TCP 2105458943 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page2] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 1 TCP 2105524479 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:0 2 UDP 2122187006 192.168.1.253 57216 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2 2 UDP 2122252542 2600:382:af78:21c3:7caa:f33e:dd11:c609 57217 typ host\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4 2 TCP 2105458942 192.168.1.253 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:5 2 TCP 2105524478 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701  stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Page1] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-9a7a3d4f'\u001b[39m,\n      name: \u001b[32m'Participant p-9a7a'\u001b[39m,\n      audio: \u001b[33mfalse\u001b[39m,\n      video: \u001b[33mfalse\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "[Page2] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-cb717c0d'\u001b[39m,\n      name: \u001b[32m'Participant p-cb71'\u001b[39m,\n      audio: \u001b[33mtrue\u001b[39m,\n      video: \u001b[33mtrue\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "\n=== KEEPING BROWSERS ALIVE FOR MEDIA CAPTURE ===\n"
-                    },
-                    {
-                      "text": "Room ID: testroommtnsrr33\n"
-                    },
-                    {
-                      "text": "Key Param: 27ebe87df83fb26e08b92cff69dc3be3e018b82b900e94e0bf69fabd6d823550\n"
-                    },
-                    {
-                      "text": "Page1 URL: http://127.0.0.1:5173/r/testroommtnsrr33/join#k=27ebe87df83fb26e08b92cff69dc3be3e018b82b900e94e0bf69fabd6d823550\n"
-                    },
-                    {
-                      "text": "Page2 URL: http://127.0.0.1:5173/r/testroommtnsrr33/join#k=27ebe87df83fb26e08b92cff69dc3be3e018b82b900e94e0bf69fabd6d823550\n"
-                    },
-                    {
-                      "text": "Both browsers streaming... (will keep alive for 5 seconds)\n"
-                    },
-                    {
-                      "text": "[Page1] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "\n✅ LIVE WebRTC session established and sustained for media capture!\n"
-                    },
-                    {
-                      "text": "\n⚠️ Test ending - browsers will be closed by test runner\n"
-                    },
-                    {
-                      "text": "If you need browsers to stay open longer, run with --headed or increase timeout\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-09-05T03:02:23.995Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "303db5f3e175c9a4b995-82d0f68ad5fdfba09378",
-          "file": "webrtc-session.spec.ts",
-          "line": 13,
-          "column": 1
-        },
-        {
-          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 300000,
-              "annotations": [
-                {
-                  "type": "skip",
-                  "description": "WebKit on Windows lacks WebRTC — requires macOS Safari 17.4+",
-                  "location": {
-                    "file": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\webrtc-session.spec.ts",
-                    "line": 17,
-                    "column": 8
-                  }
-                }
-              ],
-              "expectedStatus": "skipped",
-              "projectId": "webkit",
-              "projectName": "webkit",
-              "results": [
-                {
-                  "workerIndex": 2,
-                  "parallelIndex": 2,
-                  "status": "skipped",
-                  "duration": 5,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-09-05T03:02:23.950Z",
-                  "annotations": [
-                    {
-                      "type": "skip",
-                      "description": "WebKit on Windows lacks WebRTC — requires macOS Safari 17.4+",
-                      "location": {
-                        "file": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\webrtc-session.spec.ts",
-                        "line": 17,
-                        "column": 8
-                      }
-                    }
-                  ],
-                  "attachments": []
-                }
-              ],
-              "status": "skipped"
-            }
-          ],
-          "id": "303db5f3e175c9a4b995-0bc51e8d859db20aac14",
-          "file": "webrtc-session.spec.ts",
-          "line": 13,
-          "column": 1
-        },
-        {
-          "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 300000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "msedge",
-              "projectName": "msedge",
-              "results": [
-                {
-                  "workerIndex": 3,
-                  "parallelIndex": 3,
-                  "status": "passed",
-                  "duration": 26287,
-                  "errors": [],
-                  "stdout": [
-                    {
-                      "text": "\n=== BROWSER 1: Creating room ===\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommtnsrr1r, participantId: p-de0c41a5, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
-                    },
-                    {
-                      "text": "[Page1] Navigated to pre-join page, room: testroommtnsrr1r\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {audio: true, video: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommtnsrr1r, participantId: p-d6f5872d, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page1] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESkxAfiwgAAAAAAAAK7Vzbbhy5EYUMJFgI0MP6aR8LyHNrWCT7RmMedLE2DmxDiC_JY1rdnFGvpy_Lpm77Wfsp-YH8SsCekac1JLVrywEWAR8MyIdFHlZ1VVHkAbT__Xd7z_9MDyk9xB--_9ezn_aePX_23R79z697-3_qFgupnv_7173rOTnY7-YRpIQkaZomKSc8SeM4TjlQePUWXp1zQJoekkNyiAf7wzw62NdzAuRgv5jLW90UfVSsVt1N1NS3sjJoM9RVNMimaHVdCoB_vHln4KXqrnpx_OHt6euXQACBAgMOMSQH-828uKrqDnL4cHo-e__63ezv789n744-np8BIkLCIAcCGSADRAJIk4P9cr7ZHxl3N-5I6b4pemHmdP3VMOMZIWRGJ0MJAyUrx0AOP6aUzgw-QQmcn7z5sItmBj3aRZHByVsLRAJarmR_2bUyktey1WvyqQ1NLJt7k0Wj1_40ddvrupFzJC-uBlm3F0VbLWQ5x89miYkOzhBxvXhpvHIFqeyjxcW4qlJaTTETnh0otxBiIZmFoL2QCYWF0cRhh6BV0Q59p3RUlttUEwhXqhW11AvRF6poBqF0H11WSt5qMQyqjMZEilbyWq4m8yhcat2L2ezm5ubwRl4oXR52ajmTt71UdSNbPcy2K82KiyEaZFtFJuCTZdh0GbOLcZG6mlWqWOjosls1UkWqKQsdbT24qSsZlWUkb7Vsh7prh4jgZFX-qFOVHERTj5U1SH3Vi6LUfTEMY6nVlVh_Ulled-3qzvxclzK6WqhiKf72qe_vkf6mEq-S18nph7c_vlz-nA0fXt29-emf2fHpcqyCRd0upepV3WoxXBYRjROIX4qjI3GGglERJ4IkIskEZ4Im4uxUnOTiLBWYi5e5ODoTJ0ycZeLoVKRn4mScGFNBzsTJqchR0Ezkp4KhOD4WKRfxsTg5vt9a12sTFKFVXX5ayc-p0Fzdfv5ZDfUv25FbJVR5rSKl9bxYrUIDCQ0kNJCvbSAYGkhoIKGBhAbytQ2EhgZiGsh1XUl3A8kTyFPIM8hzQEIACQKLgSXAUmAZIKGAhAESDkhSQGKwHBA5IMaAmABiCiwHToAjcAqcAefAY-AJ8BR4BojmXw5ITXtCQEoBKQOkHHj-aLfKE_h4ns1y8rAr5CkofWvDGXw8z204d1obh13mJgguexY7zVnitk7d1plnLxT-ShPuGGCeCdw3wR0b8-k8EzzhQR8Dxp4JiW-Ce0ssd9tz4jTn6DGnbnPmMedu8xiOPqINu78uT93Wnq-LvtijJ_aUeCZQd26akjJnt4170odyuFr1C1naPuSwWMnbhSwjwraj4ymap1D0ep4nWySDXnWLeiWjuppPLPO1ZbY9qAmZmtLJAI62OCFi8dR2e4yzZDRl8RZJp5Zsi2dry3TCQ2E8_KJiuGsaqdXd-oVIVnN80RflJ6nrXwrTcKOmq6QBNyuvp9XVnFNCcDFZkm22PnWHfxkN-R006YaGT7DsG3gjH9LkG5rJV8Nv4c1DGozXNDjxBpOne1M9DBpugobbbGX50515yMLJOs3yLYJP9mTBH3LQkYNvy4CzJ_uxy8HXHNsC4jHcG9_O4_sF5uSFrqWaVDpflyTfliRPnTPRmrkuUT4pUXx6Uid8Jw02SY2TpKbkyfHbpaGbJkYnVxO66Q502x14Dkr2Ra2im7qtuhvT9ci2A__GtSS3bwTmV6FdyL5y5PZNxfRjG7OvPSy2IXsbzN4Gc9x8CHVgjusQ4Q7MpjBN0MYcvqJjPbQdM23Ixhyu2RTcjia3g8lt_7ntPrd3y-3Ncnuv3N4qd0QIXZgjatR1KbWdGn_5sDDHV6UOv2zaPIFl1y0jJZuLHXz36jsZKssGFvXuQm1RfnJA0K_qnYpxU2Z-ysxJmdmUmZPSlJ-T0wz4SM2Yg9XAu7T32C4vi920LPaysthFymKLcwNZlKmHMvVTpk7K1KZMPdGlvujSR6JL3dGljuhSDy_38fJHeLmblzt4uYfXk8FmwM_rzGED27yeLEafv_iIv-j2Fx3-osdf9DQJM-DndbYJA9u87kbBck8q5_5Uzp2pnNupnDspObopuf0SOBlyUHK0KDeQRck8lMxPyZyUzKZkbkpPW-L-tsSdbYnbbYm72xL3tCXub0vc2Za43Za4py2hr0zxkTJFd5mio0zRU6bUd9jQRw4b6j5sqOOwoe7DhnvKhdvlcv-K_eiLr-4Wi0Hqg2_-eo1spGXLvhfjc2nUqVq2erwDHPyvX7njL3OiXxV33ZWOKrkq7ibLJF-2zNrPsmu1bHWk7_ppQNKvWUvXTd0uJ6tkX7ZK2a06FQ19UU638rs1gPtvSX5zgvn_oJUsmujh1MdFlHHqeHuTVeRdY52Sg5jNiq6RVV2UXSXLw2WtL68uDutuVlzjenYvy9lfKtnLtpJteRdVcihV3etOjeOXsqik2mbNgU_nGC_tQecIOkfQOYLOEXSOB3jQOYLOEXSOoHMEnSPoHBMs6BxB55i-XgSdI-gcQecIOkfQOYLOEXSOoHMEnSPoHEHn-IPpHOM7StA5gs4RdI6gcwSd4wEedI6gcwSdI-gcQecIOscECzpH0DmmrxdB5wg6R9A5gs4RdI6gcwSdI-gcQecIOkfQOf5gOsd49Q46R9H3q7ocS3ajdpwauePdyftzWCdfVBW6KC-LtjV_0sylOzjjm_y_xHQodR-ZliTizZNDU9xGjRyGYikjE19BE4qcH-z_sPdf4fa3r3pZAAA%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page1] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr1r/join#k=84db3dd25adfa389f01d326c22a47f74f78c6d82420141bb73c6c2b87e8d3246\n"
-                    },
-                    {
-                      "text": "[Page1] Key param: 84db3dd2...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-d6f5872d, participantID: PA_UVb4edtuLXnV}\n"
-                    },
-                    {
-                      "text": "[Page1] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== BROWSER 2: Joining room ===\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:582314976 1 udp 2122260223 172.28.96.1 62670 typ host generation 0 ufrag Jkpp network-id 5\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:969017364 1 udp 2121998079 192.168.1.253 62671 typ host generation 0 ufrag Jkpp network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:263447488 1 udp 2122197247 2600:382:af78:21c3:7caa:f33e:dd11:c609 62672 typ host generation 0 ufrag Jkpp network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:566866230 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 62673 typ host generation 0 ufrag Jkpp network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:3300364585 1 udp 2122066175 2600:382:af78:21c3::b06 62674 typ host generation 0 ufrag Jkpp network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4161560414 1 udp 1685790463 99.95.85.191 62671 typ srflx raddr 192.168.1.253 rport 62671 generation 0 ufrag Jkpp network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:3693068148 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag Jkpp network-id 5\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:3345538176 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag Jkpp network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:4044961620 1 tcp 1518217471 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active generation 0 ufrag Jkpp network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:3747833250 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag Jkpp network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:974996925 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag Jkpp network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: connecting -> connected {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-d6f5872d, participantID: PA_UVb4edtuLXnV}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1r, state: connected, localIdentity: p-d6f5872d, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] room.name testroommtnsrr1r state connected localParticipant p-d6f5872d\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1r, state: connected, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: false}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-d6f5872d, participantID: PA_UVb4edtuLXnV, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCZRGiDXGKGYTj, kind: video, source: camera, participantIdentity: p-d6f5872d, trackPublicationsSize: 1}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCZRGiDXGKGYTj, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: false, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-d6f5872d, participantID: PA_UVb4edtuLXnV, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {audio: true, video: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMgiYfYR6wHr5Q, kind: audio, source: microphone, participantIdentity: p-d6f5872d, trackPublicationsSize: 2}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMgiYfYR6wHr5Q, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2] Navigated to pre-join with key\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page2] Already on pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] On pre-join page\n"
-                    },
-                    {
-                      "text": "[Page1 Console] The AudioContext encountered an error from the audio device or the WebAudio renderer.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Token] fetched {roomId: testroommtnsrr1r, participantId: p-35e4ffc8, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page2] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESkhAfiwgAAAAAAAAK7Vzbbhw3EoUMbBAI0EP8lMcC9nHRGhbJvpDGPNi67AawDWF92ddtdXOkjqcvYHOkUT4rn7I_sL8SdM_I0xqSSmx5gWDBBwPyYZGHVV1VFHkAHf7w_cHz7-gxpcf44w__fvbzwbPnz74_oP_99eDwL-1iofTz__x6cDMnR4ftPIIERUIETWiWoBCYYEyAwk9v4acLDkjTY3JMjvHosJ9HR4dmToAcHeZztTZ13kX5ctneRnW1VuWA1n1VRr2q88ZUhQT415t3A3yl21UnX314e_r6DAggUGDAIYbk6LCe56uyakHAh9OL2fvX72b_fH8xe_fy48U5ICIkDAQQyAAZIBJAmhwdFvPt_si4u3FH2nR13slhTtut-hnPCCEzOhlKGGhVOgYE_D2ldDbgE5TAxcmbD_toNqAv91FkcPLWApGAUUvVXbeNitSNasyGfGpDE8vm3mRRm40_ddV0pqrVHMmLVa-q5jJvyoUq5vjZLBmigzNE3CxeDF65glR00eJyXFVro6fYEJ49SFgIsZDMQtBeaAiFhdHEYYdgdN70XatNVBS7VJMIK93ISpmF7HKd173UpouuS63WRva9LqIxkaKlulHLyTwK18Z0cja7vb09vlWX2hTHrb6aqXWndFWrxvSz3Uqz_LKPetWU0RDwyTJsusywi3GRqpyVOl-Y6Lpd1kpHui5yE-08uK1KFRVFpNZGNX3VNn1EcLIqf9SpUvWyrsbK6pVZdTIvTJf3_VhqVSk3n1QVN22zvBt-rgoVrRY6v5L167NP90h3W0pdXZYnqk3efLz-28-v6duz_G1_c118GBOoaq6U7nTVGNlf5xGNE0hO5JmQp7FMuTw9lyKR_JUkVJJMnryS4lyenMmTWL48l-dcJkJm2QDyU_lSSMrlKyaTV_KUy5NTGccyOZXnsUQmCcokkTy731rbmSEo0uiq-LRUn1OhXq0__6z76pfdyFpLXdzoSBszz5fL0EBCAwkN5GsbCIYGEhpIaCChgXxtA6GhgQwN5KYqlbuBiARECiIDIQAJASQILAaWAEuBZYCEAhIGSDggSQHJgAlA5IAYA2ICiCkwAZwAR-AUOAPOgcfAE-Ap8AwQh38CkA7tCQEpBaQMkHLg4tFuJRL4eJHNBHnYFUQK2qxtOIOPF8KGhdN6cNhlPgTBZc9ipzlL3Nap2zrz7IXCP2jCHQPMM4H7JrhjM3w6zwRPeNDHgLFnQuKb4N4SE257TpzmHD3m1G3OPObcbR7Dy49ow-6vy1O3tefroi_26Ik9JZ4J1J2bQ0kNZ7eNe9KHclgtu4UqbB8ELJZqvVBFRNhudDxFRQp5Z-Yi2SEZdLpdVEsVVeV8Yik2ltnuoCZkakonAzja4oSIxVPb3THOktGUxTsknVqyHZ5tLNMJD4Xx8Ivy_q6uldF3mxciVc7xRZcXn5SpfsmHhhvVbakGcLvyZlpVzjklBBeTJdl261N3-JfRkD9Ak25p-ATLvoE36iGN2NJMvhp-C28e0mC8ocGJN5g83ZvyYdBwGzTcZSsTT3fmIQsnmzQTOwSf7MmCP-SgIwfflQFnT_Zjn4NvOHYFxGO4N17P4_sF5uSFqZSeVDrflCTflSRPnTPRmrkpUT4pUXx6Uid8Lw22SY2TpKbkyfHbp6HbJkYnVxO67Q501x24AK26vNLRbdWU7e3Q9ciuA__OtUTYN4LhV6F9yL5yCPumMvRjG7OvPSy2IXsbzN4Gc9x8CHVgjusQ4Q7MphiaoI05fEXHemg7NrQhG3O4ZlNwO5rcDia3_ee2-9zeLbc3y-29cnur3BEhdGGOqFHXpdR2avzlw8IcX5U6_LJpRQJXbXsVaVVf7uH7V9_JUFHUsKj2F2ry4pMDgm5Z7VWMmzLzU2ZOysymzJyUQ_k5OYcBH-kw5mAd4H3ae2yfl8VuWhZ7WVnsImWxxbmFLMrUQ5n6KVMnZWpTpp7oUl906SPRpe7oUkd0qYeX-3j5I7zczcsdvNzD68ngYcDP68zhAbZ5PVmMPn_xEX_R7S86_EWPv-hpEsOAn9fZJgbY5nU3CiY8qSz8qSycqSzsVBZOSo5uSm6_BE6GHJQcLcotZFEyDyXzUzInJbMpmZvS05a4vy1xZ1vidlvi7rbEPW2J-9sSd7Ylbrcl7mlL6CtTfKRM0V2m6ChT9JQp9R029JHDhroPG-o4bKj7sOGecuF2udy_Yj_64mvaxaJX5uibv14jG2nZVdfJ8bk0anWlGjPeAY7-16_c8Zc50S3zu3ZlolIt87vJMsmXLbPxs2gboxoTmbtuGpD0a9YyVV01V5NVsi9bpWiXrY76Li-mW_nDGsD9tyS_O2H4f2-0yuvo4dTHRZRx6nh7U2XkXWOTkr2czfK2VmWVF22piuOrylyvLo-rdpbf4GZ2p4rZX0vVqaZUTXEXlaovdNWZVo_j1yovld5lzZFP5xgv7UHnCDpH0DmCzhF0jgd40DmCzhF0jqBzBJ0j6BwTLOgcQeeYvl4EnSPoHEHnCDpH0DmCzhF0jqBzBJ0j6BxB5_iT6RzjO0rQOYLOEXSOoHMEneMBHnSOoHMEnSPoHEHnCDrHBAs6R9A5pq8XQecIOkfQOYLOEXSOoHMEnSPoHEHnCDpH0Dn-ZDrHePUOOkfedcuqGEt2q3acDnLHu5P3F7BJvqjMTV5c500z_Ekzl-7gjG_y_xLTvjBdNLQkGW-fHOp8HdWq7_MrFQ3xlTShyPnR4Y8HvwFTMmzMelkAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page2] Joined meeting at: http://127.0.0.1:5173/r/testroommtnsrr1r/join#k=84db3dd25adfa389f01d326c22a47f74f78c6d82420141bb73c6c2b87e8d3246\n"
-                    },
-                    {
-                      "text": "[Page2] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== VERIFYING WEBRTC CONNECTION ===\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-35e4ffc8, participantID: PA_ZhUebzmBqFHx}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2994142064 1 udp 2122260223 172.28.96.1 49876 typ host generation 0 ufrag mLEk network-id 5\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2835454084 1 udp 2121998079 192.168.1.253 49877 typ host generation 0 ufrag mLEk network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2674946896 1 udp 2122197247 2600:382:af78:21c3:7caa:f33e:dd11:c609 49878 typ host generation 0 ufrag mLEk network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2970231206 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 49879 typ host generation 0 ufrag mLEk network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1416888761 1 udp 2122066175 2600:382:af78:21c3::b06 49880 typ host generation 0 ufrag mLEk network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1289498596 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag mLEk network-id 5\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1470843920 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag mLEk network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1641719748 1 tcp 1518217471 2600:382:af78:21c3:7caa:f33e:dd11:c609 9 typ host tcptype active generation 0 ufrag mLEk network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1335948594 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag mLEk network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2866730285 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag mLEk network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: connecting -> connected {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-35e4ffc8, participantID: PA_ZhUebzmBqFHx}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1r, state: connected, localIdentity: p-35e4ffc8, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] room.name testroommtnsrr1r state connected localParticipant p-35e4ffc8\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-d6f587, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-d6f587, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommtnsrr1r, state: connected, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: Object, audio: false}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [video]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-35e4ffc8, participantID: PA_ZhUebzmBqFHx, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page1] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from p-35e4ffc8 topic: hpke-pubkey\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Registered HPKE public key for p-35e4ffc8\n"
-                    },
-                    {
-                      "text": "[Page2] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page1] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-35e4ffc8'\u001b[39m,\n      name: \u001b[32m'Participant p-35e4'\u001b[39m,\n      audio: \u001b[33mfalse\u001b[39m,\n      video: \u001b[33mfalse\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "[Page2] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-d6f5872d'\u001b[39m,\n      name: \u001b[32m'Participant p-d6f5'\u001b[39m,\n      audio: \u001b[33mtrue\u001b[39m,\n      video: \u001b[33mtrue\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "\n=== KEEPING BROWSERS ALIVE FOR MEDIA CAPTURE ===\n"
-                    },
-                    {
-                      "text": "Room ID: testroommtnsrr1r\n"
-                    },
-                    {
-                      "text": "Key Param: 84db3dd25adfa389f01d326c22a47f74f78c6d82420141bb73c6c2b87e8d3246\n"
-                    },
-                    {
-                      "text": "Page1 URL: http://127.0.0.1:5173/r/testroommtnsrr1r/join#k=84db3dd25adfa389f01d326c22a47f74f78c6d82420141bb73c6c2b87e8d3246\n"
-                    },
-                    {
-                      "text": "Page2 URL: http://127.0.0.1:5173/r/testroommtnsrr1r/join#k=84db3dd25adfa389f01d326c22a47f74f78c6d82420141bb73c6c2b87e8d3246\n"
-                    },
-                    {
-                      "text": "Both browsers streaming... (will keep alive for 5 seconds)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCHM6ffNM3nr9s, kind: video, source: camera, participantIdentity: p-35e4ffc8, trackPublicationsSize: 1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCHM6ffNM3nr9s, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: false, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track {room: testroommtnsrr1r, roomID: RM_Yhu8nLyVr56u, participant: p-35e4ffc8, participantID: PA_ZhUebzmBqFHx, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-35e4ff, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMtzyJe3JutzZm, kind: audio, source: microphone, participantIdentity: p-35e4ffc8, trackPublicationsSize: 2}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMtzyJe3JutzZm, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts?t=1788576787996:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts?t=1788576787996:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-35e4ff, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page1] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "\n✅ LIVE WebRTC session established and sustained for media capture!\n"
-                    },
-                    {
-                      "text": "\n⚠️ Test ending - browsers will be closed by test runner\n"
-                    },
-                    {
-                      "text": "If you need browsers to stay open longer, run with --headed or increase timeout\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-09-05T03:02:23.931Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "303db5f3e175c9a4b995-dd576ea55a59486e817c",
-          "file": "webrtc-session.spec.ts",
-          "line": 13,
-          "column": 1
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-05T03:02:23.082Z",
-    "duration": 32906.672999999995,
-    "expected": 3,
-    "skipped": 1,
+    "startTime": "2026-09-05T07:32:08.878Z",
+    "duration": 20906.017,
+    "expected": 1,
+    "skipped": 0,
     "unexpected": 0,
     "flaky": 0
   }
