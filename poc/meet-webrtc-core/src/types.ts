@@ -234,15 +234,20 @@ export interface KeyRatchetConfig {
 export interface KeyRotationMessage {
   type: 'commit' | 'welcome' | 'key-rotation' | 'key-rotation-ack' | 'sync-request' | 'sync-response';
   epoch: number;
+  /** Per-recipient HPKE-encrypted commits: participantId -> ciphertext bytes (S-02, DataChannel only) */
+  commits?: Record<string, number[]>;
+  /** Single commit ciphertext for the addressed recipient via DataChannel */
   commit?: number[];
   welcome?: number[];
   senderId?: string;
   requestId?: string;
   keys?: Record<string, string>;
+  /** HPKE public key broadcast during join (base64 raw 65 bytes) */
+  hpkePublicKey?: string;
 }
 
 export interface SignalingMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave' | 'mute' | 'speaking' | 'commit' | 'welcome' | 'session-update' | 'ping';
+  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'hpke-pubkey' | 'leave' | 'mute' | 'speaking' | 'welcome' | 'session-update' | 'ping';
   payload: any;
   roomId: string;
   participantId: string;

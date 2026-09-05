@@ -52,6 +52,28 @@ RECOMMENDATIONS:
 - next steps or infrastructure concerns
 ```
 
+## CONTRACT-FIRST RULE
+
+For integration work, the backend agent must first prove runtime behavior.
+
+Priority order:
+
+1. Runtime response
+2. Deployed container
+3. Environment variables
+4. Health endpoints
+5. Code
+
+Do not stop at code inspection.
+
+Implementation is not complete until:
+
+- built
+- deployed
+- runtime verified
+
+Required artifact: `curl` response or API result, not just source code.
+
 ## M0-P0 Specifics
 - LiveKit 1.25 with `LIVEKIT_E2EE_MODE=blind` via Compose env
 - Simulcast 3×2 (180p 300k/360p 800k/720p 1.8M) + Opus, VP9 SVC preferred

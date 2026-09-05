@@ -8,7 +8,7 @@ import (
 )
 
 // TestRendezvousHRW validates the deterministic HRW assignment per design doc.
-// Test vector: salt="p0-salt-2026", nodes=[sfu-0, sfu-1, sfu-2], roomId=abc123 → sfu-2
+// Test vector: salt="p0-salt-2026", nodes=[sfu-0, sfu-1, sfu-2], roomId=abc123 → sfu-1 (code truth D-037, livekit-* variant → livekit-2)
 func TestRendezvousHRW(t *testing.T) {
 	salt := "p0-salt-2026"
 	nodes := []struct {

@@ -2,7 +2,7 @@
 // Implements: GET /internal/sfu/assign?roomId=:id, GET /healthz, Redis cache sfu:assign:{roomId} EX 300,
 // background health poll 5s to SFU /healthz, re-hash on health fail.
 // Algorithm: h = xxhash(roomId|nodeID|salt) / weight, weight = 1+load*10
-// Test vector: roomId=abc123, nodes=[sfu-0,sfu-1,sfu-2], salt="p0-salt-2026" → sfu-2
+// Test vector: roomId=abc123, nodes=[sfu-0,sfu-1,sfu-2], salt="p0-salt-2026" → sfu-1
 package main
 
 import (

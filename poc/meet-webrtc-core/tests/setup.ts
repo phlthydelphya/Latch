@@ -44,9 +44,14 @@ Object.defineProperty(global, 'MediaStreamTrack', {
   })),
 });
 
+import { webcrypto } from 'node:crypto';
+
+const existingNavigator = (global as any).navigator || {};
 Object.defineProperty(global, 'navigator', {
   writable: true,
   value: {
+    ...existingNavigator,
+    userAgent: existingNavigator.userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
     mediaDevices: {
       getUserMedia: vi.fn().mockResolvedValue(new MediaStream()),
       enumerateDevices: vi.fn().mockResolvedValue([]),
@@ -56,19 +61,7 @@ Object.defineProperty(global, 'navigator', {
 
 Object.defineProperty(global, 'crypto', {
   writable: true,
-  value: {
-    getRandomValues: vi.fn((arr) => arr.map(() => Math.floor(Math.random() * 256))),
-    subtle: {
-      encrypt: vi.fn().mockResolvedValue(new ArrayBuffer(16)),
-      decrypt: vi.fn().mockResolvedValue(new ArrayBuffer(16)),
-      sign: vi.fn().mockResolvedValue(new ArrayBuffer(32)),
-      verify: vi.fn().mockResolvedValue(true),
-      deriveKey: vi.fn().mockResolvedValue({}),
-      generateKey: vi.fn().mockResolvedValue({}),
-      exportKey: vi.fn().mockResolvedValue(new ArrayBuffer(32)),
-      importKey: vi.fn().mockResolvedValue({}),
-    },
-  },
+  value: webcrypto,
 });
 
 Object.defineProperty(global, 'WebSocket', {

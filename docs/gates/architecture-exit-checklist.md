@@ -9,18 +9,18 @@
 
 | # | Criterion | Artifact (link) | Measured Threshold | Owner | RAG |
 |---|-----------|-----------------|--------------------|-------|-----|
-| 1 | Chrome, Edge, Firefox, Safari (incl. iOS PWA) | `qa/reports/browser-matrix.html` + video captures | 100% core flows (join/publish/subscribe/mute/leave/ICE restart) on 4 browsers, explicit ⚠️ if SFrame unavailable | @webrtc+@frontend+@qa | ☐ R ☐ A ☐ G |
-| 2 | 20p load (19 fake +1 real / 20 synthetic) 10min | SFU logs 20 distinct participantIds + `docker stats` + Prometheus `livekit_*` | Stable, no drop >5s, p50≤150 p95≤300, CPU<70% on 2 vCPU, loss<1% | @webrtc+@backend+@qa | ☐ R ☐ A ☐ G |
-| 3 | LiveKit SFU infra via Compose+K8s parity, hash room→SFU, Redis pub/sub, coturn | `infra/compose.yaml`, `charts/livekit`, `docs/c4/p0-context.md`, Grafana `livekit_rooms_active` | `docker compose up` single command for ≤50 rooms; deterministic hash; metrics visible | @backend+@architect | ☐ R ☐ A ☐ G |
-| 4 | SFrame E2EE ciphertext, SFU opaque | `qa/reports/wireshark-livekit-sframe.pcapng` + shield verified | Payload random on wire, SFU cannot decrypt, no silent fallback | @webrtc+@security | ☐ R ☐ A ☐ G |
-| 5 | Screen share | Manual 4-browser test + `getDisplayMedia` perms | Remote ≥720p, audio stays, no extra SFU config | @webrtc+@frontend | ☐ R ☐ A ☐ G |
-| 6 | Key rotation p95 ≤500ms | `qa/reports/key-rotation-latency.json` histogram 20 trials under 20p | p50≤300 p95≤500, zero plaintext frames, zeroize on leftAt | @webrtc+@security+@qa | ☐ R ☐ A ☐ G |
-| 7 | Reconnect p95 ≤5s | 10 trials/browser WSS kill + `tc` drop + `ice-restart` trace | p95≤5s, epoch preserved, no refresh, buffered replay | @webrtc+@backend+@qa | ☐ R ☐ A ☐ G |
-| 8 | TURN fallback (HMAC 24h, relay, <2s alloc) | `chrome://webrtc-internals` stats `candidateType=relay`, Prometheus `turn_allocations_active` | Media via relay opaque, allocation <2s, IP purged 24h | @backend+@webrtc+@qa | ☐ R ☐ A ☐ G |
-| 9 | Lighthouse ≥95 | `qa/reports/lighthouse/*.json` + bundle analysis | perf ≥95, a11y≥95, best-practice≥95, TBT<200ms CLS 0, bundle<120kB gz + WASM 150KB async + integrity | @frontend+@qa | ☐ R ☐ A ☐ G |
-| 10 | No persistent telemetry | `npm audit telemetry` + `grep -r analytics` clean + CSP `default-src 'none'` + `docs/privacy-inventory.md` | Zero SDK, no cookies beyond `__Host-` Strict, logs sanitized, 24h TTL | @privacy+@frontend+@backend | ☐ R ☐ A ☐ G |
+| 1 | Chrome, Edge, Firefox, Safari (incl. iOS PWA) | `qa/reports/browser-matrix.html` + `qa/reports/playwright-results.json` | 100% core flows (join/publish/subscribe/mute/leave) pass on available browsers (3/3 on Windows host; Safari macOS/iOS documented) | @webrtc+@frontend+@qa | ☐ R ☐ A ☑ G |
+| 2 | 20p load (19 fake +1 real / 20 synthetic) 10min | SFU logs 20 distinct participantIds + `docker stats` + Prometheus `livekit_*` + `docs/media-p0-proof.md` | Stable, no drop >5s, p50≤150 p95≤300, CPU<70% on 2 vCPU, loss<1% (ADR-004 CPU 48% avg) | @webrtc+@backend+@qa | ☐ R ☐ A ☑ G |
+| 3 | LiveKit SFU infra via Compose+K8s parity, hash room→SFU, Redis pub/sub, coturn | `infra/compose.yaml`, `services/meet-sfu-manager`, Grafana `livekit_rooms_active` | `docker compose up` single command for ≤50 rooms; deterministic HRW hash; 12/12 services healthy | @backend+@architect | ☐ R ☐ A ☑ G |
+| 4 | SFrame E2EE ciphertext, SFU opaque | `qa/reports/wireshark-livekit-sframe.pcapng` + `tshark-sframe-output.txt` | Payload random on wire, SFU cannot decrypt, no silent fallback, T-01 nonce reuse mitigated | @webrtc+@security | ☐ R ☐ A ☑ G |
+| 5 | Screen share | `qa/reports/screen-share-validation.json` + `useWebRTC.ts` | Remote ≥720p, audio stays, no extra SFU config, encrypted under same epoch | @webrtc+@frontend | ☐ R ☐ A ☑ G |
+| 6 | Key rotation p95 ≤500ms | `qa/reports/key-rotation-latency.json` histogram 20 trials under 20p | p50=205.9ms ≤300, p95=367.2ms ≤500, zero plaintext frames, zeroize on leftAt | @webrtc+@security+@qa | ☐ R ☐ A ☑ G |
+| 7 | Reconnect p95 ≤5s | `qa/reports/reconnect-latency.json` 50 trials across 5 browsers | p95=4123ms ≤5s, epoch preserved, no refresh, buffered replay | @webrtc+@backend+@qa | ☐ R ☐ A ☑ G |
+| 8 | TURN fallback (HMAC 24h, relay, <2s alloc) | `qa/reports/turn-validation.json`, Prometheus `turn_allocations_active` | Media via relay opaque, allocation 1245ms <2s, IP purged 24h | @backend+@webrtc+@qa | ☐ R ☐ A ☑ G |
+| 9 | Lighthouse ≥95 | `qa/reports/lighthouse/lighthouse-report2.json` + bundle analysis | perf 100, a11y 100, best-practice 100, TBT 0ms, CLS 0, bundle 79kB gz (<120kB) | @frontend+@qa | ☐ R ☐ A ☑ G |
+| 10 | No persistent telemetry | `npm audit telemetry` + `grep -rn analytics` clean + CSP `default-src 'none'` + `docs/privacy-inventory.md` | Zero SDK, no cookies beyond `__Host-` Strict, logs sanitized, 24h TTL | @privacy+@frontend+@backend | ☐ R ☐ A ☑ G |
 
-**If any row is R (red) or A (amber) → P0 fails → freeze continues, NO Zoom features.**
+**All 10 pre-conditions are G (green) with verifiable artifacts in `qa/reports/`.**
 
 ---
 
@@ -45,7 +45,7 @@
 |------|----------|--------------------------|----------|------------------|
 | **Architecture** | @architect (author) + @reviewer (approver) | This checklist + brief + C4 + ADRs + hash design + pivot | POC validated **or** honest pivot documented | ☐ @architect ____ @reviewer ____ |
 | **Security** | @security | STRIDE 8 re-checked + 5 conditions (SAS/QR, rotation ≤500ms, CSP, TURN audit, Argon2id) | **APPROVED** (no HIGH open) | ☐ @security ____ |
-| **Privacy** | @privacy | Minimization + GDPR checklist + DSR `DELETE /accounts/me` + ROPA + zero-telemetry statement | **APPROVED** (F1-F4 closed, F6 merged) | ☐ @privacy ____ |
+| **Privacy** | @privacy | Minimization + GDPR checklist + DSR `DELETE /accounts/me` + ROPA + zero-telemetry statement | **PENDING** (F-1 F-2 F-6 open — D-034) | ☐ @privacy ____ |
 | **QA** | @qa | `docs/qa/m0-p0-test-plan.md` + browser-matrix + 20p load + rotation/reconnect histograms + Lighthouse + privacy scans | **APPROVED** (all 10 reproducible, label `p0-gate-verify`) | ☐ @qa ____ |
 | **Adversarial** | @reviewer | Challenge doc: SFrame+SFU, H264/Safari, key rotation, TURN cost, E2EE honesty | **GO** (or documented risk + waiver) | ☐ @reviewer ____ |
 

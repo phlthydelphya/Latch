@@ -171,7 +171,7 @@ export default defineConfig({
     'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
   },
   server: {
-    host: process.env.VITE_HOST ?? '127.0.0.1',
+    host: process.env.VITE_HOST ?? '0.0.0.0',
     port: 5173,
     strictPort: true,
     headers: {

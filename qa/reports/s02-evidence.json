@@ -1,0 +1,58 @@
+{
+  "s02": "HPKE per-recipient commit — S-02 closure evidence",
+  "timestamp": "2026-09-04T01:38:00Z",
+  "criteria": {
+    "one_hpke_keypair_per_participant": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/keys/manager.ts:63-84 initialize() generates ECDH P-256 via crypto.subtle.generateKey extractable true",
+      "test": "tests/s02-hpke.test.ts:73 generates one HPKE keypair per participant and publishes base64 public key — alice/bob/carol distinct b64, length 65 (P-256) or 32 (X25519) not truncated"
+    },
+    "publish_hpke_during_join": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/webrtc/manager.ts:218-219 exportHPKEPublicKey + signaling.publishHPKEPublicKey; signaling/client.ts:255 publishHPKEPublicKey emits hpke-pubkey; handleHPKEPubKey imports via KeyManager.importHPKEPublicKey",
+      "test": "tests/s02-hpke.test.ts:35-56 exchange HPKE public keys via publish during join"
+    },
+    "remove_plaintext_oldSecret_newSecret": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/keys/manager.ts:198 createCommit(newSecretRaw: Uint8Array) — no oldSecret param; grep oldSecret returns 0 hits",
+      "grep": "grep -r oldSecret poc/meet-webrtc-core/src → 0 hits (exit 1)",
+      "grep_commit": "grep -r sendCommit poc/meet-webrtc-core/src → 0 hits in src (only test file mentions)"
+    },
+    "encrypt_per_recipient": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/keys/manager.ts:220-230 encrypt per-recipient using HPKE.encrypt(publicKey, payload) loop over participantKeys Map; commits is Map<string, Uint8Array>",
+      "test": "tests/s02-hpke.test.ts:82 recipient has entry, carol not registered has no entry"
+    },
+    "deliver_via_datachannel": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/webrtc/manager.ts:636 broadcastCommitsViaDataChannel sends JSON {type:'commit', epoch, commits} via this.dataChannel.send; signaling/client.ts no longer has commit type (only welcome + hpke-pubkey); signaling.on('commit') removed",
+      "test": "tests/s02-hpke.test.ts:124 dataChannelPayload type commit with ciphertext"
+    },
+    "fix_hpkeDecrypt_sender_enc": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/keys/manager.ts:266 hpkeDecrypt(ciphertext) delegates to HPKE.decrypt(privateKey, ciphertext) which parses sender enc from ciphertext 65+12 prefix, not self pubkey; deprecated getSenderHPKEPublicKey removed",
+      "test": "tests/s02-hpke.test.ts:219 HPKE decrypt uses sender enc, not self pubkey — cross-check with direct HPKE.decrypt"
+    },
+    "remove_EC_truncation": {
+      "status": "PASS",
+      "artifact": "poc/meet-webrtc-core/src/keys/manager.ts:272 exportHPKEPublicKey returns full 65 bytes (P-256 0x04 || X || Y) without slice(0,32); HPKE.encrypt encodes full 65 bytes; HPKE.decrypt parses 65 when 0x04 present; no 32 truncation",
+      "test": "tests/s02-hpke.test.ts:198 EC key not truncated — 65 bytes for P-256, 32 for X25519, ciphertext preamble matches"
+    }
+  },
+  "exit_criteria": {
+    "grep_no_plaintext": "PASS — grep -r oldSecret → 0, grep -r sendCommit → 0 in src",
+    "recipient_decrypt_succeeds": "PASS — tests/s02-hpke.test.ts:82 Bob decrypts Alice commit, derives senderKey",
+    "non_recipient_fails": "PASS — tests/s02-hpke.test.ts:102 Carol hpkeDecrypt throws, processCommit throws",
+    "signaling_ciphertext_only": "PASS — tests/s02-hpke.test.ts:122 signaling payload contains welcome: Array<number> ciphertext length >80, no epochSecret string, no oldSecret",
+    "packet_no_disclosure": "PASS — tests/s02-hpke.test.ts:185 ciphertext byteLength > plaintext+65+12, IV random so two commits differ, no 00 00 00 01 NAL"
+  },
+  "tests": {
+    "command": "npm --prefix poc/meet-webrtc-core run test -- tests/s02-hpke.test.ts",
+    "result": "8 passed, 0 failed (vitest 1.6.1)",
+    "output_excerpt": "✓ tests/s02-hpke.test.ts (8 tests) 19ms — all HPKE S-02 cases green"
+  },
+  "build": {
+    "command": "npx tsc -p tsconfig.app.json --noEmit && npx vite build",
+    "result": "PASS — tsc 0 errors, vite built 75 modules"
+  }
+}

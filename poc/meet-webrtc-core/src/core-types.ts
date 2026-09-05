@@ -164,11 +164,17 @@ export class KeyManager {
   deriveSenderKey(epochSecret: CryptoKey, participantId: string): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
   getCurrentSenderKey(): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
   zeroizeKey(key: CryptoKey): Promise<void> { return Promise.resolve(); }
-  processCommit(epochSecret: CryptoKey, commit: Uint8Array, senderId: string): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
+  processCommit(ciphertext: Uint8Array): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
   processWelcome(welcome: Uint8Array): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
-  rotateEpoch(newEpochSecret: CryptoKey): Promise<void> { return Promise.resolve(); }
+  rotateEpoch(trigger: string, leavingId?: string): Promise<{ commits: Map<string, Uint8Array>; newEpoch: number }> { return Promise.resolve({ commits: new Map(), newEpoch: 0 }); }
   exportKey(key: CryptoKey): Promise<string> { return Promise.resolve(''); }
   importKey(keyData: string): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
+  hpkeDecrypt(ciphertext: Uint8Array): Promise<Uint8Array> { return Promise.resolve(new Uint8Array()); }
+  exportHPKEPublicKey(): Promise<string> { return Promise.resolve(''); }
+  importHPKEPublicKey(b64: string): Promise<CryptoKey> { return Promise.resolve({} as CryptoKey); }
+  setParticipantHPKEPublicKey(participantId: string, key: CryptoKey): void {}
+  getParticipantHPKEPublicKey(participantId: string): CryptoKey | null { return null; }
+  removeParticipantHPKEPublicKey(participantId: string): void {}
 }
 
 export class SignalingClient extends EventTarget {
@@ -183,7 +189,7 @@ export class SignalingClient extends EventTarget {
   sendIceCandidate(candidate: RTCIceCandidateInit): void {}
   sendMute(mute: { audio?: boolean; video?: boolean }): void {}
   sendSpeaking(speaking: boolean): void {}
-  sendCommit(commit: Uint8Array, epoch: number, senderId: string): void {}
+  publishHPKEPublicKey(hpkePublicKeyB64: string): void {}
   sendWelcome(welcome: Uint8Array, epoch: number): void {}
   sendSessionUpdate(iceUfrag: string, icePwd: string): void {}
 }
@@ -199,7 +205,7 @@ export interface SignalingConfig {
 }
 
 export interface SignalingMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'leave' | 'mute' | 'speaking' | 'commit' | 'welcome' | 'session-update' | 'ping';
+  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'hpke-pubkey' | 'leave' | 'mute' | 'speaking' | 'welcome' | 'session-update' | 'ping';
   payload: unknown;
   roomId: string;
   participantId: string;

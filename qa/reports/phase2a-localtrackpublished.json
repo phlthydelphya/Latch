@@ -1,0 +1,1607 @@
+{
+  "verdict": "PASS",
+  "generatedAt": "2026-09-04T23:52:35.858Z",
+  "hypothesisA": {
+    "id": "A",
+    "description": "livekitToken + sfuUrl persisted in sessionStorage meet-secure-state",
+    "status": "PASS",
+    "evidence": [
+      {
+        "runId": 1,
+        "hasToken": true,
+        "hasSfuUrl": true,
+        "tokenPrefix": "eyJhbGciOiJIUzI1NiIs",
+        "roomId": "phase2a-granted-1-mt",
+        "participantId": "p-5ef9b8ab"
+      },
+      {
+        "runId": 2,
+        "hasToken": true,
+        "hasSfuUrl": true,
+        "tokenPrefix": "eyJhbGciOiJIUzI1NiIs",
+        "roomId": "phase2a-granted-2-mt",
+        "participantId": "p-3a134e93"
+      },
+      {
+        "runId": 3,
+        "hasToken": true,
+        "hasSfuUrl": true,
+        "tokenPrefix": "eyJhbGciOiJIUzI1NiIs",
+        "roomId": "phase2a-granted-3-mt",
+        "participantId": "p-77d4c79d"
+      },
+      {
+        "runId": 4,
+        "hasToken": true,
+        "hasSfuUrl": true,
+        "tokenPrefix": "eyJhbGciOiJIUzI1NiIs",
+        "roomId": "phase2a-granted-4-mt",
+        "participantId": "p-eff83012"
+      },
+      {
+        "runId": 5,
+        "hasToken": true,
+        "hasSfuUrl": true,
+        "tokenPrefix": "eyJhbGciOiJIUzI1NiIs",
+        "roomId": "phase2a-granted-5-mt",
+        "participantId": "p-8953f598"
+      }
+    ],
+    "corrected": true,
+    "note": "sessionStorage contains livekitToken+sfuUrl in nested state object; original FAIL was due to shallow check"
+  },
+  "hypothesisB": {
+    "id": "B",
+    "description": "getUserMedia/publish failures surfaced via role=alert banner, no silent failure",
+    "status": "PASS",
+    "evidence": [
+      {
+        "runId": 1,
+        "cameraFailure": {
+          "name": "otAllowedError",
+          "message": "ermission denied"
+        },
+        "alertVisible": true,
+        "alertText": "Camera access denied — grant permission and reload."
+      },
+      {
+        "runId": 2,
+        "cameraFailure": {
+          "name": "otAllowedError",
+          "message": "ermission denied"
+        },
+        "alertVisible": true,
+        "alertText": "Camera access denied — grant permission and reload."
+      },
+      {
+        "runId": 3,
+        "cameraFailure": {
+          "name": "otAllowedError",
+          "message": "ermission denied"
+        },
+        "alertVisible": true,
+        "alertText": "Camera access denied — grant permission and reload."
+      },
+      {
+        "runId": 4,
+        "cameraFailure": {
+          "name": "otAllowedError",
+          "message": "ermission denied"
+        },
+        "alertVisible": true,
+        "alertText": "Camera access denied — grant permission and reload."
+      },
+      {
+        "runId": 5,
+        "cameraFailure": {
+          "name": "otAllowedError",
+          "message": "ermission denied"
+        },
+        "alertVisible": true,
+        "alertText": "Camera access denied — grant permission and reload."
+      }
+    ]
+  },
+  "hypothesisC": {
+    "id": "C",
+    "description": "LocalTrackPublished fires for video+audio when granted, trackPublications.size reaches 2",
+    "status": "PASS",
+    "evidence": [
+      {
+        "runId": 1,
+        "events": [
+          {
+            "kind": "video",
+            "source": "camera",
+            "trackSid": "pr5Weh7NMR4",
+            "publicationsSize": 1
+          },
+          {
+            "kind": "audio",
+            "source": "microphone",
+            "trackSid": "sWLRUtZiiJNZ",
+            "publicationsSize": 2
+          }
+        ],
+        "trackPublicationsSize": 2,
+        "trackSizeLogs": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "runId": 2,
+        "events": [
+          {
+            "kind": "video",
+            "source": "camera",
+            "trackSid": "u2NCPhxwEo",
+            "publicationsSize": 1
+          },
+          {
+            "kind": "audio",
+            "source": "microphone",
+            "trackSid": "nVRz5tF3FUFG",
+            "publicationsSize": 2
+          }
+        ],
+        "trackPublicationsSize": 2,
+        "trackSizeLogs": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "runId": 3,
+        "events": [
+          {
+            "kind": "video",
+            "source": "camera",
+            "trackSid": "uwpzxU8xyLEp",
+            "publicationsSize": 1
+          },
+          {
+            "kind": "audio",
+            "source": "microphone",
+            "trackSid": "tUZGLDLQ",
+            "publicationsSize": 2
+          }
+        ],
+        "trackPublicationsSize": 2,
+        "trackSizeLogs": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "runId": 4,
+        "events": [
+          {
+            "kind": "video",
+            "source": "camera",
+            "trackSid": "axLQBGnBpJNR",
+            "publicationsSize": 1
+          },
+          {
+            "kind": "audio",
+            "source": "microphone",
+            "trackSid": "5eHE9ZbxrpvD",
+            "publicationsSize": 2
+          }
+        ],
+        "trackPublicationsSize": 2,
+        "trackSizeLogs": [
+          1,
+          1,
+          2,
+          2
+        ]
+      },
+      {
+        "runId": 5,
+        "events": [
+          {
+            "kind": "video",
+            "source": "camera",
+            "trackSid": "8vqHVZZxTuEZ",
+            "publicationsSize": 1
+          },
+          {
+            "kind": "audio",
+            "source": "microphone",
+            "trackSid": "gHEHnSyBPaWk",
+            "publicationsSize": 2
+          }
+        ],
+        "trackPublicationsSize": 2,
+        "trackSizeLogs": [
+          1,
+          1,
+          2,
+          2
+        ]
+      }
+    ]
+  },
+  "hypothesisD": {
+    "id": "D",
+    "description": "Room.connect succeeds despite publish failure (decoupled)",
+    "status": "PASS",
+    "evidence": [
+      {
+        "runId": 1,
+        "mode": "granted",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 2,
+        "mode": "granted",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 3,
+        "mode": "granted",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 4,
+        "mode": "granted",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 5,
+        "mode": "granted",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 1,
+        "mode": "denied",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 2,
+        "mode": "denied",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 3,
+        "mode": "denied",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 4,
+        "mode": "denied",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      },
+      {
+        "runId": 5,
+        "mode": "denied",
+        "roomConnectSuccess": true,
+        "roomConnectStart": true
+      }
+    ]
+  },
+  "hypothesisE": {
+    "id": "E",
+    "description": "sessionStorage meet-secure-state contains livekitToken+sfuUrl after fetch",
+    "status": "PASS",
+    "evidence": [
+      {
+        "state": {
+          "roomId": "phase2a-granted-1-mt",
+          "participantId": "p-5ef9b8ab",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0xLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtNWVmOWI4YWIiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTEtbXQiXSwiZXhwIjoxNzg4NTY2MTYzLCJuYmYiOjE3ODg1NjU4NjMsImlhdCI6MTc4ODU2NTg2MywianRpIjoiNDY4MmNjOTEtYThhOS00NGZlLWIyNjUtZDQwNDIzM2RmY2NjIiwibmFtZSI6Ikd1ZXN0In0.pCei_qgzYxOjecYqumPmbPDjtnXDsC5i9SZXhb7ed4Q",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0xLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtMGMzZGJjMGUiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTEtbXQiXSwiZXhwIjoxNzg4NTY2MTY3LCJuYmYiOjE3ODg1NjU4NjcsImlhdCI6MTc4ODU2NTg2NywianRpIjoiZTM3NTYzYjgtMTU3MC00NTU0LWFkN2UtMmJjNTc5NTFhMmQzIiwibmFtZSI6InVzZXItcC01ZWY5In0.U_9iv4WRPAooGN1Ik5PP47oiY3MN4kSxGGJRcn1vByk",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      {
+        "state": {
+          "roomId": "phase2a-granted-2-mt",
+          "participantId": "p-3a134e93",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0yLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2ExMzRlOTMiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTItbXQiXSwiZXhwIjoxNzg4NTY2MTcyLCJuYmYiOjE3ODg1NjU4NzIsImlhdCI6MTc4ODU2NTg3MiwianRpIjoiNWM3MGU3NDktZTdhMi00ZjQwLTk5MzEtMWFmM2FjZDljYmMyIiwibmFtZSI6Ikd1ZXN0In0.4Y1JazkwF2ZlydL4BiS1z2QgQpiOKutDjbMho_U41rI",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0yLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtOTE0ZTU2OTQiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTItbXQiXSwiZXhwIjoxNzg4NTY2MTc2LCJuYmYiOjE3ODg1NjU4NzYsImlhdCI6MTc4ODU2NTg3NiwianRpIjoiMGRmZWZhZDktNDk4NC00ZjdlLThkN2EtYWQyODdhY2E1NWRlIiwibmFtZSI6InVzZXItcC0zYTEzIn0.rGXwSow4xy0MteB1ui6spCopiTHXUZFrjF90CJzJBtg",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      {
+        "state": {
+          "roomId": "phase2a-granted-3-mt",
+          "participantId": "p-77d4c79d",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0zLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtNzdkNGM3OWQiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTMtbXQiXSwiZXhwIjoxNzg4NTY2MTgxLCJuYmYiOjE3ODg1NjU4ODEsImlhdCI6MTc4ODU2NTg4MSwianRpIjoiZDc2M2U2OWYtMjU4Zi00Yzk4LWE1NTgtMjUyYjkwZjdkNmI4IiwibmFtZSI6Ikd1ZXN0In0.1W6g1E3xfiGtGgvq89NnS3UzaHI9NkprIf6wf-JQkV0",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0zLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2E2ZWUyZDgiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTMtbXQiXSwiZXhwIjoxNzg4NTY2MTg1LCJuYmYiOjE3ODg1NjU4ODUsImlhdCI6MTc4ODU2NTg4NSwianRpIjoiYjE5Y2ZmYTUtOTU3Yy00NDkwLWIzMDYtZjg4N2VkNjIxNTU3IiwibmFtZSI6InVzZXItcC03N2Q0In0.sLFuMsTK9n1NFVz8XksYH3l_HvMvjuF3CiWs7gIKOJ4",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      {
+        "state": {
+          "roomId": "phase2a-granted-4-mt",
+          "participantId": "p-eff83012",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC00LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtZWZmODMwMTIiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTQtbXQiXSwiZXhwIjoxNzg4NTY2MTkwLCJuYmYiOjE3ODg1NjU4OTAsImlhdCI6MTc4ODU2NTg5MCwianRpIjoiY2M5ZTQyYTQtYWJhZS00YTc5LWFmM2ItMGNmZjNlMDI4MTVjIiwibmFtZSI6Ikd1ZXN0In0.PLH2PdohNa5SRZBaqHN8ZQMWtpzger3pyCe3n1NuIU8",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC00LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYzY5NTNiYjYiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTQtbXQiXSwiZXhwIjoxNzg4NTY2MTk1LCJuYmYiOjE3ODg1NjU4OTUsImlhdCI6MTc4ODU2NTg5NSwianRpIjoiNzk4OWE3M2QtMzY5Yy00NzIzLTk1ZjktZThhYzE1YTYyOTViIiwibmFtZSI6InVzZXItcC1lZmY4In0.KPh-xzVhk5XxA7i_lGJ1MmcV9OJEQptwqs3OJXoycUQ",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      {
+        "state": {
+          "roomId": "phase2a-granted-5-mt",
+          "participantId": "p-8953f598",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC01LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtODk1M2Y1OTgiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTUtbXQiXSwiZXhwIjoxNzg4NTY2MjAwLCJuYmYiOjE3ODg1NjU5MDAsImlhdCI6MTc4ODU2NTkwMCwianRpIjoiNDExMWMzMWEtNTljNy00YjFiLTlkOTAtN2FjODNjMzdmM2Q4IiwibmFtZSI6Ikd1ZXN0In0.gEnrJVWANsbIBmU-ULJru5eK28WXRXBMEJTararTaPw",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC01LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2ZmNWJkZTUiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTUtbXQiXSwiZXhwIjoxNzg4NTY2MjA0LCJuYmYiOjE3ODg1NjU5MDQsImlhdCI6MTc4ODU2NTkwNCwianRpIjoiODAwODliMjgtODAyYy00MDhkLWEyYmItMWM2YTU3YTc4M2FjIiwibmFtZSI6InVzZXItcC04OTUzIn0.vYnPBdyoM9wCwQu7YMeNw6uiDLR9BdkxWIpyp3lLSMc",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      }
+    ]
+  },
+  "hypothesisF": {
+    "id": "F",
+    "description": "Denied case trackPublications.size reflects actual published tracks (0 or 1)",
+    "status": "PASS",
+    "evidence": [
+      {
+        "runId": 1,
+        "trackPublicationsSize": 1,
+        "events": 1
+      },
+      {
+        "runId": 2,
+        "trackPublicationsSize": 1,
+        "events": 1
+      },
+      {
+        "runId": 3,
+        "trackPublicationsSize": 1,
+        "events": 1
+      },
+      {
+        "runId": 4,
+        "trackPublicationsSize": 1,
+        "events": 1
+      },
+      {
+        "runId": 5,
+        "trackPublicationsSize": 1,
+        "events": 1
+      }
+    ]
+  },
+  "grantedRuns": [
+    {
+      "runId": 1,
+      "mode": "granted",
+      "roomId": "phase2a-granted-1-mt",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia called granted {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-granted-1-mt, participantId: p-5ef9b8ab, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia called granted {\"video\":{},\"audio\":{}}",
+        "[Test] getUserMedia granted success audio,video",
+        "[Test] getUserMedia granted success audio,video",
+        "[Token] fetched {roomId: phase2a-granted-1-mt, participantId: p-0c3dbc0e, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-granted-1-mt, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESkxEfiwgAAAAAAAAK7Vxdb9w2FoWL7aIwYGCbpz4S2MdCHl5-SCKDeXDipA22DYw4yQJ9WlnijLUZfUDi2OO-7x_oL-pPW1AztuQh6SZxFigWfDBgH17ew3vn3quhDuDDb785ePJXckzIMXz37b---vfBV0_-8s3B3w7Ib78fHH7dLBaqe_Kf3w-u5vjosJlHKCECA8RCYCFojCGNEUGvXqNXZwwBSY7xMT6Go8N-Hh0d6jlG-Ogwm6uNrrI2ylar5jqqyo0qDFr1ZRH1qspqXeYSoX_-fG7gZdesW_ns3evTn14gjAARRBFDHMVHh9U8WxdlgwR6d3o2e_vT-ezN27PZ-cn7s5cIAFBMkUAYpQgoAsAISHx0mM9358PD6YYTdbqtslaaPU277mcsxRjPyGQppqhThWNBoB8SQmYGn6AYnT3_-d0-mhr0ZB8Fip6_tkDASKuVai-bWkXqStV6Sz61IbFlc2uyqPQ2nqqsW11Wag746bpXZX2R1cVC5XO4M4tNdmAGAFvnuYnKlaS8jRYXg9eu090UM-nZg4SFYAtJLQRsRyYVFkZihx0g3WV13zadjvJ8LDUJaN3VslR6Idusy6pedrqNLotObbTs-y6PhkKKVupKrSb7CLrUupWz2fX19fG1uuh0ftx0y5natKorK1XrfjZ6mmUXfdSruohMwidu6NSNOcXgpCxmRZctdHTZrCrVRV2VZzoaI7guCxXleaQ2WtV92dR9hGHilT0YVKF6WZVDZ_VKr1uZ5brN-n5otbKQ249U5VdNvboxv5e5itaLLlvKOK3Wt0h7Xcjly1evTk--_yB--B4uri9--ccvZ-sf36iXQwGV9VJ1bVfWWvaXWUR4jE65fAaSgkxOJBHyJJYM5LNEPn8h6XOZvJQYS_5SprFk1BiQE0mJxKl8AVIkMh723hm8EPLFqYRnMo7lCUgBt0drWm2SInVX5h9W6q4UqvXm7veuL38dVzad7PKrLuq0nmerVRggYYCEAfK5AwTCAAkDJAyQMEA-d4CQMEDMALkqC-UeICJGIkEiRUIgwBgBBkQ5ojGiCaIpAkwQYIoAMwQ4QYANJhAAQwAcAcQIIEFUIIYRA8QIYhQxhhhHLEYsQSxFAOZHICBmPAFiAnGMOCBOEBDzQxEQhjh9cHKJGL0_S2cC358QIkGd3thwit6fCRsWTmsTvMvcJMRlT7nTnMZu68RtnXrOQtCPJGaOBerZwHwb3LkxH6Nngyc94GMA7tkQ-za4j0SF255hpzkDjzlxm1OPOXObc3TyHmzY_emyxG3t-XTBl3vw5J5gzwbirk02pJJbOHenkoPH3J1K07DmW4KNe4qTMLRetQuV2wwULVZqs1B5hOm4OjyvRYKyVs9FPCIpartmUa5UVBbziaXYWqbjVwKMp6ZksgCDLUyIKJ_ajl8YaDyYUj4iydSSjni6tUwmPAQNj9ko62-qSunuZvsuShVzeNpm-Qely18zM9qjqimUAXeet9vKYs4IxrCYuKS7o0_DYZ9Ggz-CJtnRsAmWfoFo1H0asaOZfGrwJaK5TwN8SwOTaCB-fDTF_aTBLmkwVisVjw_mPgvD2zITIwKPjmTB7nOQgYONbcDoo-PY52BbjrGBGEe3xps5v3Uwx091qbpJp7NtS7KxJVni3AnWzm2LskmLwuOLOmZ7ZbArapgUNcGPzt8-DdkNMTKJT9zlYQ7p6MP8OeQiWqyypcnoZktz_ub87d1uvq0sNlYWB68_8hH-tlXEYXLm3fQi4_Ti5rbZZmUXXZd10VybqYzHJ8QfXNCEfTcyXwT3IfvyJew7m3le2Jh9AaTchuxjUPsY1HEHxMSBOS6GmDkwm8IMaRtzxAoOf2AHZsakjTlCsymYnU1mJ5PZ8TM7fGafltmHZfZZmX1U5sgQuDBH1ojreu4Iyt7K7Z3c3sgd1UBcmKNCiJ0j7nhVEaNl0yyjTlUXe_j-C4XJUp5XaFHuO6qz_IMDQu2q3Os-N2Xqp0ydlKlNmTopTSs7Oc2Cj9SsOVgNvE97i-3zUu6mpdzLSrmLlHKLcwdZlImHMvFTJk7KxKZMPNklvuySB7JL3NkljuwSDy_z8bIHeJmblzl4mYfXU8Fmwc_rrGED27yeKgZfvPBAvOCOFxzxgide8AwJs-DndY4JA9u87kFBhaeUhb-UhbOUhV3KwknJwE3J7PerkyUHJQOLcgdZlNRDSf2U1ElJbUrqpvSMJeYfS8w5lpg9lph7LDHPWGL-scScY4nZY4l5xhL42hQeaFNwtyk42hQ8bUp8DxvywMOGuB82xPGwIe6HDfO0C_O3C3O2C7PbhbnbhXvahfvbhTvbhdvtwt3twj3twu12uVVAHlQLdLNY9EoffXHlA-hAS5dtK4dX7VHTlarWw63u6H-tkPBPC6JdZTfNWkeFWmU3Ezfxp7nZxpk3tVa1jvRNO01I8jm-dFmV9XLiJf00L3mzarqob7N8epSP1o9uP0v8hxvM373uVFZF97c-LMANW4f7rioir49tSfZyNsuaShVlljeFyo-Xpb5cXxyXzSy7gu3uVuWzvxeqVXWh6vwmKlSfd2Wrm25Yv1RZobqxao58GtnwGiZoZEEjm8BBIwsa2YgHjSxoZEEjCxpZ0MiCRhY0shEJGlnQyIJGdu9tVdDI7tCgkQWNLGhkQSO7WwsamQMKGtkeHjSyoJEFjSxoZEEj-xNpZMObsaCRBY1sAgeNLGhkIx40sqCRBY0saGRBIwsaWdDIRiRoZEEjCxrZvbdVQSO7Q4NGFjSyoJEFjexuLWhkDihoZHt40MiCRhY0sqCRBY3sT6SRDS9TgkaWte2qzIeW3Sllp0YqO3_-9gxtiy8qMp3ll1ldm3_D6dKpnPmN_19y2ue6jcxIknz3kqbKNlGl-j5bqsjkV5KYAGNHh98d_BdxcAWSL2AAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W}",
+        "connection state changed: connecting -> connected {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W}",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-1-mt, state: connected, localIdentity: p-0c3dbc0e, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-granted-1-mt state connected localParticipant p-0c3dbc0e",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-1-mt, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia called granted {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[Test] getUserMedia granted success video",
+        "publishing track {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_VCGpr5Weh7NMR4, kind: video, source: camera, participantIdentity: p-0c3dbc0e, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia called granted {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia granted success audio",
+        "publishing track {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMsWLRUtZiiJNZ, kind: audio, source: microphone, participantIdentity: p-0c3dbc0e, trackPublicationsSize: 2}",
+        "[LiveKit] trackPublications.size 2",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 2",
+        "Page leave detected, disconnecting {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W}",
+        "disconnect from room {room: phase2a-granted-1-mt, roomID: RM_EqzfN8kKXgUM, participant: p-0c3dbc0e, participantID: PA_TjML5mttmm8W}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": true,
+      "setCameraEnabledFailure": null,
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "video",
+          "source": "camera",
+          "trackSid": "pr5Weh7NMR4",
+          "publicationsSize": 1
+        },
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "sWLRUtZiiJNZ",
+          "publicationsSize": 2
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-0c3dbc0e",
+      "trackPublicationsSize": 2,
+      "roomName": "phase2a-granted-1-mt",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-granted-1-mt",
+          "participantId": "p-5ef9b8ab",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0xLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtNWVmOWI4YWIiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTEtbXQiXSwiZXhwIjoxNzg4NTY2MTYzLCJuYmYiOjE3ODg1NjU4NjMsImlhdCI6MTc4ODU2NTg2MywianRpIjoiNDY4MmNjOTEtYThhOS00NGZlLWIyNjUtZDQwNDIzM2RmY2NjIiwibmFtZSI6Ikd1ZXN0In0.pCei_qgzYxOjecYqumPmbPDjtnXDsC5i9SZXhb7ed4Q",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0xLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtMGMzZGJjMGUiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTEtbXQiXSwiZXhwIjoxNzg4NTY2MTY3LCJuYmYiOjE3ODg1NjU4NjcsImlhdCI6MTc4ODU2NTg2NywianRpIjoiZTM3NTYzYjgtMTU3MC00NTU0LWFkN2UtMmJjNTc5NTFhMmQzIiwibmFtZSI6InVzZXItcC01ZWY5In0.U_9iv4WRPAooGN1Ik5PP47oiY3MN4kSxGGJRcn1vByk",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 2,
+      "localParticipantIdentity": "p-0c3dbc0e",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-granted-1-mt",
+      "rawRoomState": {
+        "roomName": "phase2a-granted-1-mt",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-0c3dbc0e",
+        "trackPublicationsSize": 2,
+        "trackPublications": [
+          {
+            "sid": "TR_VCGpr5Weh7NMR4",
+            "kind": "video",
+            "source": "camera"
+          },
+          {
+            "sid": "TR_AMsWLRUtZiiJNZ",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "LiveKit connection failed: Client initiated disconnect"
+    },
+    {
+      "runId": 2,
+      "mode": "granted",
+      "roomId": "phase2a-granted-2-mt",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia called granted {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-granted-2-mt, participantId: p-3a134e93, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia called granted {\"video\":{},\"audio\":{}}",
+        "[Test] getUserMedia granted success audio,video",
+        "[Test] getUserMedia granted success audio,video",
+        "[Token] fetched {roomId: phase2a-granted-2-mt, participantId: p-914e5694, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-granted-2-mt, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlxEfiwgAAAAAAAAK7Vzbbhy5EYUWSbAQICDrp30kkOfWsHjpC415kCwrMbBrKCvbeU2rmzPqePqybI402g_ID-SH9tMC9ozUrSGptS0HWAR8kCEdFuuwaqqqh30AH3737cGLP5FjQo7h--_--c2_Dr558YdvD_58QP7z68HhH9vFQqoX__714GaOjw7beYQYw5RCTBPOAMcxS0mCCHrzFr25YAhIcoyP8TEcHfbz6OhQzzHCR4f5XG50nXdRvlq1t1FdbWRp0LqvyqiXdd7oqhAI_ePHSwMvVbvuxOn7t2c_vEYYASKIIoY4io8O63m-LqsWZej92cXs3Q-Xs5_eXcwuTz5cnCMAQDFFGcIoRUARAEZA4qPDYr47Hx5ON5xI6a7OO2H2tN26n7EUYzwjk6WYIiVLx0KG_poQMjP4BMXo4tWP7_fR1KAn-yhQ9OqtBQJGWq5kd902MpI3stFb8qkNiS2be5NFrbfx1FXT6aqWc8Av172smqu8KReymMODWWyyAzMA2DovTFSuJBVdtLgavCql1RQz6dmDMgvBFpJaCNiOTCosjMQOO0Ba5U3ftUpHRTGWmgC0Vo2opF6ILld53Qulu-i6VHKjRd-rIhoKKVrJG7ma7CPoWutOzGa3t7fHt_JK6eK4VcuZ3HRSVbVsdD8bPc3yqz7qZVNGJuETN3TqxpxicFKVs1LlCx1dt6taqkjVRa6jMYLbqpRRUURyo2XTV23TRxgmXtmTQZWyF3U1dFYv9boTeaG7vO-HVqtKsf1IZXHTNqs783tVyGi9UPlSvE3eFfdId1uKGp9sfl7NLv7-Wi5u19Xy5ubNWXKzmQ0FVDVLqTpVNVr013lEeIzomeAn4vW5iIk4ZeJVLLJMnBPxmovTWLw6F-fn4pQLQgU9FTEXp1jAqTg5EWdUnMUiIYIRwV4LlogzLAAEGf49oQKwOE_uj9Z22iRFaFUVH1fyoRTq9ebhd9VXv4wrGyVUcaMipfU8X63CAAkDJAyQLx0gEAZIGCBhgIQB8qUDhIQBYgbITVVK9wDJYpQlKEtRliHAGAEGRDmiMaIJoikCTBBgigAzBDhBgA2WIQCGADgCiBFAgmiGGEYMECOIUcQYYhyxGLEEsRQBmJ8MATHjCRDLEMeIA-IEATE_FAFhiNMnJ1cWow8X6SzDjydEliClNzacog8XmQ1nTmsTvMvcJMRlT7nTnMZu68RtnXrOQtDfSMwcC9Szgfk2uHNjPkbPBk96wMcA3LMh9m1wH4lmbnuGneYMPObEbU495sxtztHJB7Bh96fLEre159MFX-7Bk3uCPRuIuzbZkEpu4dydSg4ec3cqTcOabwk27ilOwtB61S1kYTNQtFjJzUIWEabj6vC8zhKUd3qexSOSok61i2olo6qcTyyzrWU6fiXAeGpKJgsw2MKEiPKp7fiFgcaDKeUjkkwt6YinW8tkwkPQ8JiN8v6urqVWd9t3UbKcw8suLz5KXf2Sm9Ee1W0pDbjzvN1WlXNGMIbFxCXdHX0aDvs8GvwJNMmOhk2w9CtEIx_TZDuayacGXyOaxzTAtzQwiQbi50dTPk4a7JIGY7XS7PnBPGZheFtm2YjAsyNZsMccZOBgYxsw-uw49jnYlmNsIMbRvfFmzu8dzPFLXUk16XS2bUk2tiRLnDvB2rltUTZpUXh-Ucdsrwx2RQ2Toib42fnbpyG7IUYm8WUPeZhDOvowfw65iBarfGkyutnSXP50-e5hN99WFhsri4PXH_kEf9sq4jA58256kXF6cXPb7PJKRbdVU7a3Zirj8QnxGxe0zL4bmS-C-5B9-crsO5t5XtiYfQGk3IbsY1D7GNRxB8TEgTkuhpg5MJvCDGkbc8QKDn9gB2bGpI05QrMpmJ1NZieT2fEzO3xmn5bZh2X2WZl9VObIELgwR9aI63ruCMreyu2d3N7IHdVAXJijQoidI-54VRGjZdsuIyXrqz18_4XCZKkoarSo9h01efHRAaFuVe11n5sy9VOmTsrUpkydlKaVnZxmwUdq1hysBt6nvcf2eSl301LuZaXcRUq5xbmDLMrEQ5n4KRMnZWJTJp7sEl92yRPZJe7sEkd2iYeX-XjZE7zMzcscvMzD66lgs-DnddawgW1eTxWDL154Il5wxwuOeMETL3iGhFnw8zrHhIFtXvegoJmnlDN_KWfOUs7sUs6clAzclMx-vzpZclAysCh3kEVJPZTUT0mdlNSmpG5Kz1hi_rHEnGOJ2WOJuccS84wl5h9LzDmWmD2WmGcsga9N4Yk2BXebgqNNwdOmxPewIU88bIj7YUMcDxviftgwT7swf7swZ7swu12Yu124p124v124s1243S7c3S7c0y7cbpd7BeRJtUC3i0Uv9dFXVz6ADrR02XVieNUetaqSjR5udUf_a4WEf14Q3Sq_a9c6KuUqv5u4iT_PzTbOom20bHSk77ppQpIv8aWrumqWEy_p53kp2lWror7Li-lRPlk_uv8s8W9uMH_3Wsm8jh5vfVqAG7YO911ZRl4f25LsxWyWt7Usq7xoS1kcLyt9vb46rtpZfgPb3Z0sZn8pZSebUjbFXVTKvlBVp1s1rF_LvJRqrJojn0Y2vIYJGlnQyCZw0MiCRjbiQSMLGlnQyIJGFjSyoJEFjWxEgkYWNLKgkT16WxU0sgc0aGRBIwsaWdDIHtaCRuaAgka2hweNLGhkQSMLGlnQyH5HGtnwZixoZEEjm8BBIwsa2YgHjSxoZEEjCxpZ0MiCRhY0shEJGlnQyIJG9uhtVdDIHtCgkQWNLGhkQSN7WAsamQMKGtkeHjSyoJEFjSxoZEEj-x1pZMPLlKCR5V23qoqhZXdK2ZmRyi5fvbtA2-KLylznxXXeNOa_4XTpVM78xv8vOe0L3UVmJAm-e0lT55uoln2fL2Vk8itITICxo8PvD_4LDWVZ0DBgAAA%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL}",
+        "connection state changed: connecting -> connected {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL}",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-2-mt, state: connected, localIdentity: p-914e5694, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-granted-2-mt state connected localParticipant p-914e5694",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-2-mt, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia called granted {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[Test] getUserMedia granted success video",
+        "publishing track {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_VCVAu2NCPhxwEo, kind: video, source: camera, participantIdentity: p-914e5694, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia called granted {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia granted success audio",
+        "publishing track {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMnVRz5tF3FUFG, kind: audio, source: microphone, participantIdentity: p-914e5694, trackPublicationsSize: 2}",
+        "[LiveKit] trackPublications.size 2",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 2",
+        "Page leave detected, disconnecting {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL}",
+        "disconnect from room {room: phase2a-granted-2-mt, roomID: RM_brw6TpmV4j8b, participant: p-914e5694, participantID: PA_seszDVwpRAvL}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": true,
+      "setCameraEnabledFailure": null,
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "video",
+          "source": "camera",
+          "trackSid": "u2NCPhxwEo",
+          "publicationsSize": 1
+        },
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "nVRz5tF3FUFG",
+          "publicationsSize": 2
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-914e5694",
+      "trackPublicationsSize": 2,
+      "roomName": "phase2a-granted-2-mt",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-granted-2-mt",
+          "participantId": "p-3a134e93",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0yLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2ExMzRlOTMiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTItbXQiXSwiZXhwIjoxNzg4NTY2MTcyLCJuYmYiOjE3ODg1NjU4NzIsImlhdCI6MTc4ODU2NTg3MiwianRpIjoiNWM3MGU3NDktZTdhMi00ZjQwLTk5MzEtMWFmM2FjZDljYmMyIiwibmFtZSI6Ikd1ZXN0In0.4Y1JazkwF2ZlydL4BiS1z2QgQpiOKutDjbMho_U41rI",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0yLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtOTE0ZTU2OTQiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTItbXQiXSwiZXhwIjoxNzg4NTY2MTc2LCJuYmYiOjE3ODg1NjU4NzYsImlhdCI6MTc4ODU2NTg3NiwianRpIjoiMGRmZWZhZDktNDk4NC00ZjdlLThkN2EtYWQyODdhY2E1NWRlIiwibmFtZSI6InVzZXItcC0zYTEzIn0.rGXwSow4xy0MteB1ui6spCopiTHXUZFrjF90CJzJBtg",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 2,
+      "localParticipantIdentity": "p-914e5694",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-granted-2-mt",
+      "rawRoomState": {
+        "roomName": "phase2a-granted-2-mt",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-914e5694",
+        "trackPublicationsSize": 2,
+        "trackPublications": [
+          {
+            "sid": "TR_VCVAu2NCPhxwEo",
+            "kind": "video",
+            "source": "camera"
+          },
+          {
+            "sid": "TR_AMnVRz5tF3FUFG",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "LiveKit connection failed: Client initiated disconnect"
+    },
+    {
+      "runId": 3,
+      "mode": "granted",
+      "roomId": "phase2a-granted-3-mt",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia called granted {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-granted-3-mt, participantId: p-77d4c79d, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia called granted {\"video\":{},\"audio\":{}}",
+        "[Test] getUserMedia granted success audio,video",
+        "[Test] getUserMedia granted success audio,video",
+        "[Token] fetched {roomId: phase2a-granted-3-mt, participantId: p-3a6ee2d8, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-granted-3-mt, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlREfiwgAAAAAAAAK7Vzbbhy5EYUWSbAQICDrp30kkOfWsHjpC415kG0pu8jaUSzb-5pWN2fU8fQFbI402g_ID-SH9tMC9ozUrSGptS0HWAR8GGB0WORhVVdVD3kAHX737cGzP5FjQo7h--_--c2_Dr559odvD_58QP7z68HhH9vFQqpn__714HqOjw7beYRSzLOMZjgFAjQFSmiKCPrxDfrxnCEgyTE-xsdwdNjPo6NDPccIHx3mc7nRdd5F-WrV3kR1tZGlQeu-KqNe1nmjq0Ig9PPrCwMvVbvuxIv3b179dIowAkQQRQxxFB8d1vN8XVYtytD7V-ezdz9dzN6-O59dnHw4P0MAgGKKMoRRioAiAIyAxEeHxXy3PzzsbtiR0l2dd8LMabt1P2MpxnhGJkMxRUqWjoEM_TUhZGbwCYrR-cvX7_fR1KAn-yhQ9PKNBQJGWq5kd9U2MpLXstFb8qkNiS2bO5NFrbf-1FXT6aqWc8DP172smsu8KReymMO9WWyiAzMA2C5eGK9cQSq6aHE5rKqUVlPMhGcPyiwEW0hqIWAvZEJhYSR22AHSKm_6rlU6Koox1QSgtWpEJfVCdLnK614o3UVXpZIbLfpeFdGQSNFKXsvVZB5BV1p3Yja7ubk5vpGXShfHrVrO5KaTqqplo_vZuNIsv-yjXjZlZAI-WYZOlzG7GBapylmp8oWOrtpVLVWk6iLX0ejBTVXKqCgiudGy6au26SMMk1XZo06Vshd1NVRWL_W6E3mhu7zvh1KrSrF9pLK4bpvVrfleFTJaL1S-FJvlP1Z3SHdTCvVzssmXq8uTv7-Fomp09fqHv2Uf8sWQQFWzlKpTVaNFf5VHhMcoiwWJxempwIk4SUXKBctEGosXXJyciQQET813wgR7JeClOIvFKReMGEtKRUzEixPxMhVniUhTcZaJs1NBT0VCBD0TmN5tre20CYrQqio-ruR9KtTrzf131Ve_jCMbJVRxrSKl9TxfrUIDCQ0kNJAvbSAQGkhoIKGBhAbypQ2EhAZiGsh1VUp3A8lilCUoS1GWIcAYAQZEOaIxogmiKQJMEGCKADMEOEGADZYhAIYAOAKIEUCCaIYYRgwQI4hRxBhiHLEYsQSxFAGYT4aAmPYEiGWIY8QBcYKAmA9FQBji9NHOlcXow3k6y_DDDpElSOmNDafow3lmw5nT2jjvMjcBcdlT7jSnsds6cVunnr0Q9AOJmWOAeiYw3wR3bMxj9EzwhAd8DMA9E2LfBPeWaOa2Z9hpzsBjTtzm1GPO3OYcnXwAG3Y_XZa4rT1PF3yxB0_sCfZMIO7cZEMouYVzdyg5eMzdoTQFa34l2LgnOQlD61W3kIXNQNFiJTcLWUSYjqPD-zpLUN7peRaPSIo61S6qlYyqcj6xzLaW6fiTAOOpKZkMwGALEyLKp7bjDwYaD6aUj0gytaQjnm4tkwkPQcNrNsr727qWWt1u76JkOYfnXV58lLr6JTetParbUhpwt_J2WlXOGcEYFpMl6W7rU3fY59HgT6BJdjRsgqVfwRv5kCbb0UyeGnwNbx7SAN_SwMQbiJ_uTfkwaLALGozZSrOnO_OQheFtmmUjAk_2ZMEecpCBg41lwOiT_djnYFuOsYAYR3fGmzm_W2COn-tKqkmls21JsrEkWeKcCdbMbYmySYnC05M6ZntpsEtqmCQ1wU-O3z4N2TUxMvEvu4_DHNJxDfPnEItoscqXJqKbLc3F24t397P5NrPYmFkcvOuRT1hvm0UcJnvedS8ydi9uTptdXqnopmrK9sZ0ZTy-IX7jgJbZZyPzQ3Afsg9fmX1mM-8LG7MPgJTbkL0Nam-DOs6AmDgwx8EQMwdmU5gmbWMOX8GxHtiOmTZpYw7XbApmR5PZwWS2_8x2n9m7ZfZmmb1XZm-VOSIELswRNeI6njucsqdyeya3J3JHNhAX5sgQYseIO64qYrRs22WkZH25h-9fKEyGiqJGi2p_oSYvPjog1K2qvepzU6Z-ytRJmdqUqZPSlLKT0wz4SM2Yg9XA-7R32D4v5W5ayr2slLtIKbc4d5BFmXgoEz9l4qRMbMrEE13iiy55JLrEHV3iiC7x8DIfL3uEl7l5mYOXeXg9GWwG_LzOHDawzevJYvD5C4_4C25_weEvePwFT5MwA35eZ5swsM3rbhQ086Ry5k_lzJnKmZ3KmZOSgZuS2ferkyEHJQOLcgdZlNRDSf2U1ElJbUrqpvS0JeZvS8zZlpjdlpi7LTFPW2L-tsScbYnZbYl52hL4yhQeKVNwlyk4yhQ8ZUp8LxvyyMuGuF82xPGyIe6XDfOUC_OXC3OWC7PLhbnLhXvKhfvLhTvLhdvlwt3lwj3lwu1yuVNAHlULdLtY9FIffXXlA-hAS5ddJ4ar9qhVlWz0cKo7-l8rJPzznOhW-W271lEpV_ntZJn485bZ-lm0jZaNjvRtNw1I8iVr6aqumuVklfTzVinaVauivsuL6VY-WT-6e5b4NyeYv3utZF5HD6c-LsANU4fzriwj7xrblOzFbJa3tSyrvGhLWRwvK321vjyu2ll-DdvZnSxmfyllJ5tSNsVtVMq-UFWnWzWMX8m8lGrMmiOfRjZcwwSNLGhkEzhoZEEjG_GgkQWNLGhkQSMLGlnQyIJGNiJBIwsaWdDIHtxWBY3sHg0aWdDIgkYWNLL7saCROaCgke3hQSMLGlnQyIJGFjSy35FGNtyMBY0saGQTOGhkQSMb8aCRBY0saGRBIwsaWdDIgkY2IkEjCxpZ0Mge3FYFjeweDRpZ0MiCRhY0svuxoJE5oKCR7eFBIwsaWdDIgkYWNLLfkUY2XKYEjSzvulVVDCW7U8peGans4uW7c7RNvqjMdV5c5U1j_g2nS6dyxjf-f4lpX-guMi1J8N0lTZ1volr2fb6UkYmvIDEBxo4Ovz_4L4g-onowYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE}",
+        "connection state changed: connecting -> connected {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE}",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-3-mt, state: connected, localIdentity: p-3a6ee2d8, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-granted-3-mt state connected localParticipant p-3a6ee2d8",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-3-mt, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia called granted {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[Test] getUserMedia granted success video",
+        "publishing track {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_VCuwpzxU8xyLEp, kind: video, source: camera, participantIdentity: p-3a6ee2d8, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia called granted {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia granted success audio",
+        "publishing track {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMGCFFtUZGLDLQ, kind: audio, source: microphone, participantIdentity: p-3a6ee2d8, trackPublicationsSize: 2}",
+        "[LiveKit] trackPublications.size 2",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 2",
+        "Page leave detected, disconnecting {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE}",
+        "disconnect from room {room: phase2a-granted-3-mt, roomID: RM_cNEJjHTRsnrw, participant: p-3a6ee2d8, participantID: PA_nePMs9xoYgLE}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": true,
+      "setCameraEnabledFailure": null,
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "video",
+          "source": "camera",
+          "trackSid": "uwpzxU8xyLEp",
+          "publicationsSize": 1
+        },
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "tUZGLDLQ",
+          "publicationsSize": 2
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-3a6ee2d8",
+      "trackPublicationsSize": 2,
+      "roomName": "phase2a-granted-3-mt",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-granted-3-mt",
+          "participantId": "p-77d4c79d",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0zLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtNzdkNGM3OWQiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTMtbXQiXSwiZXhwIjoxNzg4NTY2MTgxLCJuYmYiOjE3ODg1NjU4ODEsImlhdCI6MTc4ODU2NTg4MSwianRpIjoiZDc2M2U2OWYtMjU4Zi00Yzk4LWE1NTgtMjUyYjkwZjdkNmI4IiwibmFtZSI6Ikd1ZXN0In0.1W6g1E3xfiGtGgvq89NnS3UzaHI9NkprIf6wf-JQkV0",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC0zLW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2E2ZWUyZDgiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTMtbXQiXSwiZXhwIjoxNzg4NTY2MTg1LCJuYmYiOjE3ODg1NjU4ODUsImlhdCI6MTc4ODU2NTg4NSwianRpIjoiYjE5Y2ZmYTUtOTU3Yy00NDkwLWIzMDYtZjg4N2VkNjIxNTU3IiwibmFtZSI6InVzZXItcC03N2Q0In0.sLFuMsTK9n1NFVz8XksYH3l_HvMvjuF3CiWs7gIKOJ4",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 2,
+      "localParticipantIdentity": "p-3a6ee2d8",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-granted-3-mt",
+      "rawRoomState": {
+        "roomName": "phase2a-granted-3-mt",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-3a6ee2d8",
+        "trackPublicationsSize": 2,
+        "trackPublications": [
+          {
+            "sid": "TR_VCuwpzxU8xyLEp",
+            "kind": "video",
+            "source": "camera"
+          },
+          {
+            "sid": "TR_AMGCFFtUZGLDLQ",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "LiveKit connection failed: Client initiated disconnect"
+    },
+    {
+      "runId": 4,
+      "mode": "granted",
+      "roomId": "phase2a-granted-4-mt",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Test] getUserMedia called granted {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[Token] fetched {roomId: phase2a-granted-4-mt, participantId: p-eff83012, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia called granted {\"video\":{},\"audio\":{}}",
+        "[Test] getUserMedia granted success audio,video",
+        "[Test] getUserMedia granted success audio,video",
+        "[Token] fetched {roomId: phase2a-granted-4-mt, participantId: p-c6953bb6, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-granted-4-mt, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmhEfiwgAAAAAAAAK7Vzdbtw2FoaL3UVhwMA2V70ksJcLeXj4I4kM5sKJk7SLNvDGSdrLlSXOWM3oBxLHHvcB9gX2hfpoC2rGljwk3STOAsWCFwOMPx7y4zk652jID_DhN18fPPkLOSbkGL795l9f_XLw1ZM_fX3w1wPyn98ODv_cLBaqe_Lv3w6u5vjosJlHiOIkiYngnOOYJzxOMUYEff8afX_GEJDkGB_jYzg67OfR0aGeY4SPDrO52ugqa6NstWquo6rcqMKgVV8WUa-qrNZlLhH66cdzAy-7Zt3KZ-9en_7wAmEEiCCKGOIoPjqs5tm6KBsk0LvTs9nbH85nb96ezc5P3p-9RACAYooEwihFQBEARkDio8N8vtsfHnY37KjTbZW10sxp2nU_YynGeEYmQzFFnSocAwK9SgiZGXyCYnT2_Md3-2hq0JN9FCh6_toCASOtVqq9bGoVqStV6y351IbEls2tyaLSW3-qsm51Wak54KfrXpX1RVYXC5XP4c4sNtGBGQBsF8-NV64g5W20uBhW7TrdTTETnj1IWAi2kNRCwF7IhMLCSOywA6S7rO7bptNRno-pJgGtu1qWSi9km3VZ1ctOt9Fl0amNln3f5dGQSNFKXanVZB5Bl1q3cja7vr4-vlYXnc6Pm245U5tWdWWlat3PxpVm2UUf9aouIhPwyTJ0uozZxbBIWcyKLlvo6LJZVaqLuirPdDR6cF0WKsrzSG20qvuyqfsIw2RV9qBTheplVQ6V1Su9bmWW6zbr-6HUykJuH6nKr5p6dWO-l7mK1osuW8qfN69-uUXa60Iu--6fJ-LD67-__UDe_PTz5fnp8vzVs7N_DAlU1kvVtV1Za9lfZhHhMTpNJTmVp0ymWAohn59IkUgmpHhpvp-cSiIkcHnCJWCZvpBxKp-lkmOZPpM4lYJIwWVKZYIlfilPqExeyGdg8BdMMnG7tabVJihSd2X-YaXuUqFab-6-d3356ziy6WSXX3VRp_U8W61CAwkNJDSQz20gEBpIaCChgYQG8rkNhIQGYhrIVVkodwMRMRIJEikSAgHGCDAgyhGNEU0QTRFgggBTBJghwAkCbDCBABgC4AggRgAJogIxjBggRhCjiDHEOGIxYgliKQIwH4GAmPYEiAnEMeKAOEFAzIciIAxx-mDnEjF6f5bOBL7fIUSCOr2x4RS9PxM2LJzWxnmXuQmIy55ypzmN3daJ2zr17IWg70jMHAPUM4H5JrhjYx6jZ4InPOBjAO6ZEPsmuLdEhdueYac5A485cZtTjzlzm3N08h5s2P10WeK29jxd8MUePLEn2DOBuHOTDaHkFs7doeTgMXeH0hSs-ZVg457kJAytV-1C5TYDRYuV2ixUHmE6jg7va5GgrNVzEY9IitquWZQrFZXFfGIptpbp-JMA46kpmQzAYAsTIsqntuMPBhoPppSPSDK1pCOebi2TCQ9Bw2s2yvqbqlK6u9neRaliDk_bLP-gdPlrZlp7VDWFMuBu5e20spgzgjEsJkvS3dan7rBPo8EfQZPsaNgES7-AN-o-jdjRTJ4afAlv7tMA39LAxBuIH-9NcT9osAsajNlKxeOduc_C8DbNxIjAoz1ZsPscZOBgYxkw-mg_9jnYlmMsIMbRrfFmzm8XmOOnulTdpNLZtiTZWJIscc4Ea-a2RNmkROHxSR2zvTTYJTVMkprgR8dvn4bsmhiZ-Cfu4jCHdFzD_DnEIlqssqWJ6GZLc_7m_O3dbL7NLDZmFgfveuQj1ttmEYfJnnfdi4zdi5vTZpuVXXRd1kVzbboyHt8Qv3NAE_bZyPwQ3Ifsw5ewz2zmfWFj9gGQchuyt0HtbVDHGRATB-Y4GGLmwGwK06RtzOErONYD2zHTJm3M4ZpNwexoMjuYzPaf2e4ze7fM3iyz98rsrTJHhMCFOaJGXMdzh1P2VG7P5PZE7sgG4sIcGULsGHHHVUWMlk2zjDpVXezh-xcKk6E8r9Ci3F-ozvIPDgi1q3Kv-tyUqZ8ydVKmNmXqpDSl7OQ0Az5SM-ZgNfA-7S22z0u5m5ZyLyvlLlLKLc4dZFEmHsrET5k4KRObMvFEl_iiSx6ILnFHlziiSzy8zMfLHuBlbl7m4GUeXk8GmwE_rzOHDWzzerIYfP7CA_6C219w-Asef8HTJMyAn9fZJgxs87obBRWeVBb-VBbOVBZ2KgsnJQM3JbPvVydDDkoGFuUOsiiph5L6KamTktqU1E3paUvM35aYsy0xuy0xd1tinrbE_G2JOdsSs9sS87Ql8JUpPFCm4C5TcJQpeMqU-F425IGXDXG_bIjjZUPcLxvmKRfmLxfmLBdmlwtzlwv3lAv3lwt3lgu3y4W7y4V7yoXb5XKrgDyoFuhmseiVPvriygfQgZYu21YOV-1R05Wq1sOp7uh_rZDwT3OiXWU3zVpHhVplN5Nl4k9bZutn3tRa1TrSN-00IMnnrKXLqqyXk1XST1slb1ZNF_Vtlk-38tH60e2zxL87wfzd605lVXR_6sMC3DB1OO-qIvKusU3JXs5mWVOposzyplD58bLUl-uL47KZZVewnd2qfPa3QrWqLlSd30SF6vOubHXTDeOXKitUN2bNkU8jG65hgkYWNLIJHDSyoJGNeNDIgkYWNLKgkQWNLGhkQSMbkaCRBY0saGT3bquCRnaHBo0saGRBIwsa2d1Y0MgcUNDI9vCgkQWNLGhkQSMLGtkfSCMbbsaCRhY0sgkcNLKgkY140MiCRhY0sqCRBY0saGRBIxuRoJEFjSxoZPduq4JGdocGjSxoZEEjCxrZ3VjQyBxQ0Mj28KCRBY0saGRBIwsa2R9IIxsuU4JGlrXtqsyHkt0pZadGKjt__vYMbZMvKjKd5ZdZXZt_w-nSqZzxjf9fYtrnuo1MS5J8d0lTZZuoUn2fLVVk4itJTICxo8NvD_4LHe6IcTBgAAA%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw}",
+        "connection state changed: connecting -> connected {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw}",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-4-mt, state: connected, localIdentity: p-c6953bb6, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-granted-4-mt state connected localParticipant p-c6953bb6",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-4-mt, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia called granted {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[Test] getUserMedia granted success video",
+        "publishing track {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_VCaxLQBGnBpJNR, kind: video, source: camera, participantIdentity: p-c6953bb6, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia called granted {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia granted success audio",
+        "publishing track {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AM5eHE9ZbxrpvD, kind: audio, source: microphone, participantIdentity: p-c6953bb6, trackPublicationsSize: 2}",
+        "[LiveKit] trackPublications.size 2",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 2",
+        "Page leave detected, disconnecting {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw}",
+        "disconnect from room {room: phase2a-granted-4-mt, roomID: RM_t2fduNiVweJS, participant: p-c6953bb6, participantID: PA_bRYqwp2pBCNw}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": true,
+      "setCameraEnabledFailure": null,
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "video",
+          "source": "camera",
+          "trackSid": "axLQBGnBpJNR",
+          "publicationsSize": 1
+        },
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "5eHE9ZbxrpvD",
+          "publicationsSize": 2
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-c6953bb6",
+      "trackPublicationsSize": 2,
+      "roomName": "phase2a-granted-4-mt",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-granted-4-mt",
+          "participantId": "p-eff83012",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC00LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtZWZmODMwMTIiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTQtbXQiXSwiZXhwIjoxNzg4NTY2MTkwLCJuYmYiOjE3ODg1NjU4OTAsImlhdCI6MTc4ODU2NTg5MCwianRpIjoiY2M5ZTQyYTQtYWJhZS00YTc5LWFmM2ItMGNmZjNlMDI4MTVjIiwibmFtZSI6Ikd1ZXN0In0.PLH2PdohNa5SRZBaqHN8ZQMWtpzger3pyCe3n1NuIU8",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC00LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYzY5NTNiYjYiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTQtbXQiXSwiZXhwIjoxNzg4NTY2MTk1LCJuYmYiOjE3ODg1NjU4OTUsImlhdCI6MTc4ODU2NTg5NSwianRpIjoiNzk4OWE3M2QtMzY5Yy00NzIzLTk1ZjktZThhYzE1YTYyOTViIiwibmFtZSI6InVzZXItcC1lZmY4In0.KPh-xzVhk5XxA7i_lGJ1MmcV9OJEQptwqs3OJXoycUQ",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 2,
+      "localParticipantIdentity": "p-c6953bb6",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-granted-4-mt",
+      "rawRoomState": {
+        "roomName": "phase2a-granted-4-mt",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-c6953bb6",
+        "trackPublicationsSize": 2,
+        "trackPublications": [
+          {
+            "sid": "TR_VCaxLQBGnBpJNR",
+            "kind": "video",
+            "source": "camera"
+          },
+          {
+            "sid": "TR_AM5eHE9ZbxrpvD",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "LiveKit connection failed: Client initiated disconnect"
+    },
+    {
+      "runId": 5,
+      "mode": "granted",
+      "roomId": "phase2a-granted-5-mt",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia called granted {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-granted-5-mt, participantId: p-8953f598, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia called granted {\"video\":{},\"audio\":{}}",
+        "[Test] getUserMedia granted success audio,video",
+        "[Test] getUserMedia granted success audio,video",
+        "[Token] fetched {roomId: phase2a-granted-5-mt, participantId: p-3ff5bde5, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-granted-5-mt, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmxEfiwgAAAAAAAAK7Vzbbhy5EYUWSbAQICDrp30kkOfWsHjpC415kGQ58WJtCyvb-5pWN2fU8fQFbEoa-QPyA_mh_bSAPSN1a0hqbcsBFgEfBEiHxTqsmqrqYR9A-z98v_fsL-SQkEP48Yd_fvevve-e_en7vb_ukf_8trf_53axkOrZv3_bu57jg_12HiHOGSZJzAklLKNxkhCCCHr1Br06YwhIcogP8SEc7Pfz6GBfzzHCB_v5XK51nXdRvlq1N1FdrWVp0LqvyqiXdd7oqhAI_fr63MBL1V514vj9mxc_nyKMABFEEUMcxQf79Ty_KqsWZej9i7PZu5_PZ7-8O5udH304e4kAAMUUZQijFAFFABgBiQ_2i_n2fHg43XAipbs674TZ03ZX_YylGOMZmSzFFClZOhYy9PeEkJnBJyhGZyev3--iqUGPdlGg6OSNBQJGWq5kd9k2MpLXstEb8qkNiS2bO5NFrTfx1FXT6aqWc8DPr3pZNRd5Uy5kMYd7s9hkB2YAsHFemKhcSSq6aHExeFVKqylm0rMDZRaCLSS1ELAdmVRYGIkddoC0ypu-a5WOimIsNQHoSjWiknohulzldS-U7qLLUsm1Fn2vimgopGglr-Vqso-gS607MZvd3Nwc3sgLpYvDVi1nct1JVdWy0f1s9DTLL_qol00ZmYRP3NCpG3OKwUlVzkqVL3R02a5qqSJVF7mOxghuqlJGRRHJtZZNX7VNH2GYeGWPBlXKXtTV0Fm91FedyAvd5X0_tFpVis1HKovrtlndmt-rQkZXC5Uvxafl0eoO6W5K8ab91Kvjn17_-umavnrz9u367atX5Kf29VBAVbOUqlNVo0V_mUeEx-j4RBzFIsPiiAhOxEkijpg4SgW8FCdYJKlgx4JRwWIBp4K8EBwLdiqyWEAmjhNxygQHkSXiNBUvj8QJFUeZSBJBYkEzcfri7mhtp01ShFZV8XEl70uhvlrf_6766tO4slZCFdcqUlrP89UqDJAwQMIA-doBAmGAhAESBkgYIF87QEgYIGaAXFeldA-QLEZZgrIUZRkCjBFgQJQjGiOaIJoiwAQBpggwQ4ATBNhgGQJgCIAjgBgBJIhmiGHEADGCGEWMIcYRixFLEEsRgPnJEBAzngCxDHGMOCBOEBDzQxEQhjh9dHJlMfpwls4y_HBCZAlSem3DKfpwltlw5rQ2wbvMTUJc9pQ7zWnstk7c1qnnLAT9g8TMsUA9G5hvgzs35mP0bPCkB3wMwD0bYt8G95Fo5rZn2GnOwGNO3ObUY87c5hwdfQAbdn-6LHFbez5d8OUePLkn2LOBuGuTDankFs7dqeTgMXen0jSs-ZZg457iJAxdrbqFLGwGihYruV7IIsJ0XB2e11mC8k7Ps3hEUtSpdlGtZFSV84lltrFMx68EGE9NyWQBBluYEFE-tR2_MNB4MKV8RJKpJR3xdGOZTHgIGh6zUd7f1rXU6nbzLkqWc3je5cVHqatPuRntUd2W0oBbz5ttVTlnBGNYTFzS7dGn4bAvo8GfQZNsadgES79BNPIhTbalmXxq8C2ieUgDfEMDk2ggfno05cOkwTZpMFYrzZ4ezEMWhjdllo0IPDmSBXvIQQYONrYBo0-OY5eDbTjGBmIc3Rmv5_zOwRw_15VUk05nm5ZkY0uyxLkTrJ2bFmWTFoWnF3XMdspgW9QwKWqCn5y_XRqyHWJkEl92n4c5pKMP8-eQi2ixypcmo-sNzfkv5-_ud_NNZbGxsjh4_ZHP8LepIg6TM2-nFxmnFze3zS6vVHRTNWV7Y6YyHp8Qv3NBy-y7kfkiuAvZl6_MvrOZ54WN2RdAym3IPga1j0Edd0BMHJjjYoiZA7MpzJC2MUes4PAHdmBmTNqYIzSbgtnZZHYymR0_s8Nn9mmZfVhmn5XZR2WODIELc2SNuK7njqDsrdzeye2N3FENxIU5KoTYOeKOVxUxWrbtMlKyvtjBd18oTJaKokaLatdRkxcfHRDqVtVO97kpUz9l6qRMbcrUSWla2clpFnykZs3BauBd2jtsl5dyNy3lXlbKXaSUW5xbyKJMPJSJnzJxUiY2ZeLJLvFllzySXeLOLnFkl3h4mY-XPcLL3LzMwcs8vJ4KNgt-XmcNG9jm9VQx-OKFR-IFd7zgiBc88YJnSJgFP69zTBjY5nUPCpp5Sjnzl3LmLOXMLuXMScnATcns96uTJQclA4tyC1mU1ENJ_ZTUSUltSuqm9Iwl5h9LzDmWmD2WmHssMc9YYv6xxJxjidljiXnGEvjaFB5pU3C3KTjaFDxtSnwPG_LIw4a4HzbE8bAh7ocN87QL87cLc7YLs9uFuduFe9qF-9uFO9uF2-3C3e3CPe3C7Xa5U0AeVQt0u1j0Uh98c-UD6EBLl10nhlftUasq2ejhVnfwv1ZI-JcF0a3y2_ZKR6Vc5bcTN_GXudnEWbSNlo2O9G03TUjyNb50VVfNcuIl_TIvRbtqVdR3eTE9ymfrR3efJf7dDebvXiuZ19HDrY8LcMPW4b4ry8jrY1OSvZjN8raWZZUXbSmLw2WlL68uDqt2ll_DZncni9nfStnJppRNcRuVsi9U1elWDeuXMi-lGqvmwKeRDa9hgkYWNLIJHDSyoJGNeNDIgkYWNLKgkQWNLGhkQSMbkaCRBY0saGQP3lYFjeweDRpZ0MiCRhY0svu1oJE5oKCR7eBBIwsaWdDIgkYWNLI_kEY2vBkLGlnQyCZw0MiCRjbiQSMLGlnQyIJGFjSyoJEFjWxEgkYWNLKgkT14WxU0sns0aGRBIwsaWdDI7teCRuaAgka2gweNLGhkQSMLGlnQyP5AGtnwMiVoZHnXrapiaNmtUvbCSGXnJ-_O0Kb4ojLXeXGZN435N5wuncqZ3_j_Jad9obvIjCTBty9p6nwd1bLv86WMTH4FiQkwdrD_495_Abk_Z28wYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu}",
+        "connection state changed: connecting -> connected {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu}",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-5-mt, state: connected, localIdentity: p-3ff5bde5, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-granted-5-mt state connected localParticipant p-3ff5bde5",
+        "[LiveKit] Room.connect success {roomName: phase2a-granted-5-mt, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia called granted {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[Test] getUserMedia granted success video",
+        "publishing track {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_VC8vqHVZZxTuEZ, kind: video, source: camera, participantIdentity: p-3ff5bde5, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia called granted {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia granted success audio",
+        "publishing track {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMgHEHnSyBPaWk, kind: audio, source: microphone, participantIdentity: p-3ff5bde5, trackPublicationsSize: 2}",
+        "[LiveKit] trackPublications.size 2",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 2",
+        "Page leave detected, disconnecting {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu}",
+        "disconnect from room {room: phase2a-granted-5-mt, roomID: RM_gSvey4Gn4gVm, participant: p-3ff5bde5, participantID: PA_gVZrfuJYd9Tu}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": true,
+      "setCameraEnabledFailure": null,
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "video",
+          "source": "camera",
+          "trackSid": "8vqHVZZxTuEZ",
+          "publicationsSize": 1
+        },
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "gHEHnSyBPaWk",
+          "publicationsSize": 2
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-3ff5bde5",
+      "trackPublicationsSize": 2,
+      "roomName": "phase2a-granted-5-mt",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-granted-5-mt",
+          "participantId": "p-8953f598",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC01LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtODk1M2Y1OTgiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTUtbXQiXSwiZXhwIjoxNzg4NTY2MjAwLCJuYmYiOjE3ODg1NjU5MDAsImlhdCI6MTc4ODU2NTkwMCwianRpIjoiNDExMWMzMWEtNTljNy00YjFiLTlkOTAtN2FjODNjMzdmM2Q4IiwibmFtZSI6Ikd1ZXN0In0.gEnrJVWANsbIBmU-ULJru5eK28WXRXBMEJTararTaPw",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZ3JhbnRlZC01LW10IiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtM2ZmNWJkZTUiLCJhdWQiOlsicGhhc2UyYS1ncmFudGVkLTUtbXQiXSwiZXhwIjoxNzg4NTY2MjA0LCJuYmYiOjE3ODg1NjU5MDQsImlhdCI6MTc4ODU2NTkwNCwianRpIjoiODAwODliMjgtODAyYy00MDhkLWEyYmItMWM2YTU3YTc4M2FjIiwibmFtZSI6InVzZXItcC04OTUzIn0.vYnPBdyoM9wCwQu7YMeNw6uiDLR9BdkxWIpyp3lLSMc",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 2,
+      "localParticipantIdentity": "p-3ff5bde5",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-granted-5-mt",
+      "rawRoomState": {
+        "roomName": "phase2a-granted-5-mt",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-3ff5bde5",
+        "trackPublicationsSize": 2,
+        "trackPublications": [
+          {
+            "sid": "TR_VC8vqHVZZxTuEZ",
+            "kind": "video",
+            "source": "camera"
+          },
+          {
+            "sid": "TR_AMgHEHnSyBPaWk",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "LiveKit connection failed: Client initiated disconnect"
+    }
+  ],
+  "deniedRuns": [
+    {
+      "runId": 1,
+      "mode": "denied",
+      "roomId": "phase2a-denied-1-mtn",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia denied shim called {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-denied-1-mtn, participantId: p-6c586006, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia denied shim called {\"video\":{},\"audio\":{}}",
+        "Preview failed: NotAllowedError: Permission denied",
+        "[Token] fetched {roomId: phase2a-denied-1-mtn, participantId: p-bb849527, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-denied-1-mtn, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmhEfiwgAAAAAAAAK7VzNbtw4EoYHu4uBAQM7Oc2RwJ7lZvFHEhn0oW0nswNkAmPsZOe4ssS2tWn9jETb7TzAvsC-0Dzaguq2JTdJTxJngcGCBwP2x2J9rOqqUlMf4P3vvt178RdySMghfP_dP7_51943L_707d5f98h_ftvb_3OzXKruxb9_27uZ44P9Zh6hhPFUEMHiBKhIOSGCIYJ-fIt-PGUISHKID_EhHOz38-hgX88xwgf72VytdZW1UbZaNbdRVa5VYdCqL4uoV1VW6zKXCP3jpzMDX3bNdSuP3r09efMKYQSIIIoY4ig-2K_m2XVRNkigdyens_M3Z7Ofz09nZ4v3p68RAKCYIoEwShFQBIARkPhgP59vz4eH0w0n6nRbZa00e5r2up-xFGM8I5OlmKJOFY4FgX5ICJkZfIJidHr807tdNDXoYhcFio7fWiBgpNVKtVdNrSJ1o2q9IZ_akNiyuTdZVnoTT1XWrS4rNQf88rpXZX2R1cVS5XN4MItNdmAGABvnuYnKlaS8jZYXg9eu090UM-nZgYSFYAtJLQRsRyYVFkZihx0g3WV13zadjvJ8LDUJ6LqrZan0UrZZl1W97HQbXRWdWmvZ910eDYUUrdSNWk32EXSldStns9vb28NbddHp_LDpLmdq3aqurFSt-9noaZZd9FGv6iIyCZ-4oVM35hSDk7KYFV221NFVs6pUF3VVnulojOC2LFSU55Faa1X3ZVP3EYaJV_ZkUIXqZVUOndUrfd3KLNdt1vdDq5WF3HykKr9p6tWd-b3MVXS97LJLecfY2T3S3hby7Jdf1x-r9s25OH374eKX89dqER_fvPphKKCyvlRd25W1lv1VFhEeo4WQx0fyeCHZiXx9LMWxTGMpFvJkIRmWJJULIfErmRxJGktgMl1I9kpikPSVJFSevJZHQhIh8YmkIDlITuXRwiwtYkmP7o_WtNokRequzD-s1EMpVNfrh9-7vvw4rqw72eU3XdRpPc9WqzBAwgAJA-RLBwiEARIGSBggYYB86QAhYYCYAXJTFso9QESMRIJEioRAgDECDIhyRGNEE0RTBJggwBQBZghwggAbTCAAhgA4AogRQIKoQAwjBogRxChiDDGOWIxYgliKAMyPQEDMeALEBOIYcUCcICDmhyIgDHH65OQSMXp_ms4EfjwhRII6vbbhFL0_FTYsnNYmeJe5SYjLnnKnOY3d1onbOvWchaC_k5g5FqhnA_NtcOfGfIyeDZ70gI8BuGdD7NvgPhIVbnuGneYMPObEbU495sxtztHiPdiw-9Nlidva8-mCL_fgyT3Bng3EXZtsSCW3cO5OJQePuTuVpmHNtwQb9xQnYeh61S5VbjNQtFyp9VLlEabj6vC8FgnKWj0X8YikqO2aZblSUVnMJ5ZiY5mOXwkwnpqSyQIMtjAhonxqO35hoPFgSvmIJFNLOuLpxjKZ8BA0PGajrL-rKqW7u827KFXM4WWb5R-ULj9mZrRHVVMoA249b7aVxZwRjGE5cUm3R5-Gwz6PBn8CTbKlYRMs_QrRqMc0Yksz-dTga0TzmAb4hgYm0UD8_GiKx0mDbdJgrFYqnh_MYxaGN2UmRgSeHcmSPeYgAwcb24DRZ8exy8E2HGMDMY7ujddzfu9gjl_qUnWTTmeblmRjS7LEuROsnZsWZZMWhecXdcx2ymBb1DApaoKfnb9dGrIdYmQSn3jIwxzS0Yf5c8hFtFxllyaj6w3N2c9n5w-7-aay2FhZHLz-yCf421QRh8mZt9OLjNOLm9tmm5VddFvWRXNrpjIenxC_c0ET9t3IfBHchezLl7DvbOZ5YWP2BZByG7KPQe1jUMcdEBMH5rgYYubAbAozpG3MESs4_IEdmBmTNuYIzaZgdjaZnUxmx8_s8Jl9WmYfltlnZfZRmSND4MIcWSOu67kjKHsrt3dyeyN3VANxYY4KIXaOuONVRYwum-Yy6lR1sYPvvlCYLOV5hZblrqM6yz84INSuyp3uc1OmfsrUSZnalKmT0rSyk9Ms-EjNmoPVwLu099guL-VuWsq9rJS7SCm3OLeQRZl4KBM_ZeKkTGzKxJNd4ssueSK7xJ1d4sgu8fAyHy97gpe5eZmDl3l4PRVsFvy8zho2sM3rqWLwxQtPxAvueMERL3jiBc-QMAt-XueYMLDN6x4UVHhKWfhLWThLWdilLJyUDNyUzH6_OllyUDKwKLeQRUk9lNRPSZ2U1KakbkrPWGL-scScY4nZY4m5xxLzjCXmH0vMOZaYPZaYZyyBr03hiTYFd5uCo03B06bE97AhTzxsiPthQxwPG-J-2DBPuzB_uzBnuzC7XZi7XbinXbi_XbizXbjdLtzdLtzTLtxul3sF5Em1QDfLZa_0wVdXPoAOtPSybeXwqj1qulLVerjVHfyvFRL-eUG0q-yuudZRoVbZ3cRN_HluNnHmTa1VrSN9104TknyJL11WZX058ZJ-npe8WTVd1LdZPj3KJ-tH958l_t0N5u9edyqrosdbnxbghq3DfVcVkdfHpiR7OZtlTaWKMsubQuWHl6W-ur44LJtZdgOb3a3KZ38rVKvqQtX5XVSoPu_KVjfdsH6lskJ1Y9Uc-DSy4TVM0MiCRjaBg0YWNLIRDxpZ0MiCRhY0sqCRBY0saGQjEjSyoJEFjezR26qgkT2gQSMLGlnQyIJG9rAWNDIHFDSyHTxoZEEjCxpZ0MiCRvYH0siGN2NBIwsa2QQOGlnQyEY8aGRBIwsaWdDIgkYWNLKgkY1I0MiCRhY0skdvq4JG9oAGjSxoZEEjCxrZw1rQyBxQ0Mh28KCRBY0saGRBIwsa2R9IIxtepgSNLGvbVZkPLbtVyk6MVHZ2fH6KNsUXFZnO8qusrs2_4XTpVM78xv8vOe1z3UZmJEm-fUlTZeuoUn2fXarI5FeSmABjB_vf7_0X-RFPcDBgAAA%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-denied-1-mtn, roomID: RM_jjjRsPXLDBNp, participant: p-bb849527, participantID: PA_a5MUmjcXnsWy}",
+        "connection state changed: connecting -> connected {room: phase2a-denied-1-mtn, roomID: RM_jjjRsPXLDBNp, participant: p-bb849527, participantID: PA_a5MUmjcXnsWy}",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-1-mtn, state: connected, localIdentity: p-bb849527, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-denied-1-mtn state connected localParticipant p-bb849527",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-1-mtn, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[LiveKit] setCameraEnabled failure {name: NotAllowedError, message: Permission denied}",
+        "[LiveKit] Camera publish failed (permission/device): Permission denied",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia denied shim audio success",
+        "publishing track {room: phase2a-denied-1-mtn, roomID: RM_jjjRsPXLDBNp, participant: p-bb849527, participantID: PA_a5MUmjcXnsWy, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMEZEmaYD8HYUs, kind: audio, source: microphone, participantIdentity: p-bb849527, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 1, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "Page leave detected, disconnecting {room: phase2a-denied-1-mtn, roomID: RM_jjjRsPXLDBNp, participant: p-bb849527, participantID: PA_a5MUmjcXnsWy}",
+        "disconnect from room {room: phase2a-denied-1-mtn, roomID: RM_jjjRsPXLDBNp, participant: p-bb849527, participantID: PA_a5MUmjcXnsWy}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": false,
+      "setCameraEnabledFailure": {
+        "name": "otAllowedError",
+        "message": "ermission denied"
+      },
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "maYD8HYUs",
+          "publicationsSize": 1
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-bb849527",
+      "trackPublicationsSize": 1,
+      "roomName": "phase2a-denied-1-mtn",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-denied-1-mtn",
+          "participantId": "p-6c586006",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTEtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtNmM1ODYwMDYiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMS1tdG4iXSwiZXhwIjoxNzg4NTY2MjA5LCJuYmYiOjE3ODg1NjU5MDksImlhdCI6MTc4ODU2NTkwOSwianRpIjoiZTNhZmEyMTktOWM1MC00ZjdmLWE5MTUtYzQzZWEwYmY0NjU4IiwibmFtZSI6Ikd1ZXN0In0.mU_j9cU6a6p6It9bYDzdMev45VuayYbkcVwlr9DiZQ8",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTEtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYmI4NDk1MjciLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMS1tdG4iXSwiZXhwIjoxNzg4NTY2MjEzLCJuYmYiOjE3ODg1NjU5MTMsImlhdCI6MTc4ODU2NTkxMywianRpIjoiZmI1MWY3YzMtNTUxMS00YmVmLWI2OGQtZjE5ZDJmM2ZhY2U2IiwibmFtZSI6InVzZXItcC02YzU4In0.3ZzCM5O-FWTxa-NcbbbJy8OpEAP_TsCc3VtUlCvQm_A",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 1,
+      "localParticipantIdentity": "p-bb849527",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-denied-1-mtn",
+      "rawRoomState": {
+        "roomName": "phase2a-denied-1-mtn",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-bb849527",
+        "trackPublicationsSize": 1,
+        "trackPublications": [
+          {
+            "sid": "TR_AMEZEmaYD8HYUs",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "Camera access denied — grant permission and reload."
+    },
+    {
+      "runId": 2,
+      "mode": "denied",
+      "roomId": "phase2a-denied-2-mtn",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia denied shim called {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-denied-2-mtn, participantId: p-8ff393a6, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia denied shim called {\"video\":{},\"audio\":{}}",
+        "Preview failed: NotAllowedError: Permission denied",
+        "[Token] fetched {roomId: phase2a-denied-2-mtn, participantId: p-ac0125f7, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-denied-2-mtn, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESkxEfiwgAAAAAAAAK7Vzbbhw3EoWC3SAQIGDjpzwS2OfWsHjpC415kGQ7GyA2hMh2FnnaVjdn1PH0BWyONMoH7A_sD-XTFuwZqVtDUrEtLxAs-CBAOizWYdVUVQ_7ADr89puDZ1-TY0KO4btv__XVrwdfPfvLNwd_OyD_-f3g8K_tYiHVs3__fnA9x0eH7TxCMQbKUgoUkoSwNIaMIYJ-eIN-OGcISHKMj_ExHB328-joUM8xwkeH-VxudJ13Ub5atTdRXW1kadC6r8qol3Xe6KoQCP38-sLAS9WuO3H67s2LH18ijAARRBFDHMVHh_U8X5dVizL07sX57O2PF7Of3p7PLk7en79CAIBiijKEUYqAIgCMgMRHh8V8dz48nG44kdJdnXfC7Gm7dT9jKcZ4RiZLMUVKlo6FDH2fEDIz-ATF6Pzs9bt9NDXoyT4KFJ29sUDASMuV7K7aRkbyWjZ6Sz61IbFlc2eyqPU2nrpqOl3Vcg74-bqXVXOZN-VCFnO4N4tNdmAGAFvnhYnKlaSiixaXg1eltJpiJj17UGYh2EJSCwHbkUmFhZHYYQdIq7zpu1bpqCjGUhOA1qoRldQL0eUqr3uhdBddlUputOh7VURDIUUreS1Xk30EXWndidns5ubm-EZeKl0ct2o5k5tOqqqWje5no6dZftlHvWzKyCR84oZO3ZhTDE6qclaqfKGjq3ZVSxWpush1NEZwU5UyKopIbrRs-qpt-gjDxCt7NKhS9qKuhs7qpV53Ii90l_f90GpVKbYfqSyu22Z1a36vChmtFypfitPb01_vkO6mFIvqn5hf01_UL6-Ld3B6wt9-SL5_19VDAVXNUqpOVY0W_VUeER6js5fi5UvBsEhTwVORnYiEi-xUMCJ4LJJTAcPqKybIC0G5SKjIqGBngjMBRJy9FGQwI1SkTJy8EEkmgAvySqSnAvjd0dpOm6QIrariw0rel0K93tz_rvrqt3Flo4QqrlWktJ7nq1UYIGGAhAHyuQMEwgAJAyQMkDBAPneAkDBAzAC5rkrpHiBZjLIEZSnKMgQYI8CAKEc0RjRBNEWACQJMEWCGACcIsMEyBMAQAEcAMQJIEM0Qw4gBYgQxihhDjCMWI5YgliIA85MhIGY8AWIZ4hhxQJwgIOaHIiAMcfro5Mpi9P48nWX44YTIEqT0xoZT9P48s-HMaW2Cd5mbhLjsKXea09htnbitU89ZCPoHiZljgXo2MN8Gd27Mx-jZ4EkP-BiAezbEvg3uI9HMbc-w05yBx5y4zanHnLnNOTp5Dzbs_nRZ4rb2fLrgyz14ck-wZwNx1yYbUsktnLtTycFj7k6laVjzLcHGPcVJGFqvuoUsbAaKFiu5WcgiwnRcHZ7XWYLyTs-zeERS1Kl2Ua1kVJXziWW2tUzHrwQYT03JZAEGW5gQUT61Hb8w0HgwpXxEkqklHfF0a5lMeAgaHrNR3t_WtdTqdvsuSpZzeN7lxQepq99yM9qjui2lAXeet9uqcs4IxrCYuKS7o0_DYZ9Ggz-CJtnRsAmWfoFo5EOabEcz-dTgS0TzkAb4lgYm0UD89GjKh0mDXdJgrFaaPT2YhywMb8ssGxF4ciQL9pCDDBxsbANGnxzHPgfbcowNxDi6M97M-Z2DOX6uK6kmnc62LcnGlmSJcydYO7ctyiYtCk8v6pjtlcGuqGFS1AQ_OX_7NGQ3xMgkvuw-D3NIRx_mzyEX0WKVL01GN1uai58u3t7v5tvKYmNlcfD6Ix_hb1tFHCZn3k0vMk4vbm6bXV6p6KZqyvbGTGU8PiH-4IKW2Xcj80VwH7IvX5l9ZzPPCxuzL4CU25B9DGofgzrugJg4MMfFEDMHZlOYIW1jjljB4Q_swMyYtDFHaDYFs7PJ7GQyO35mh8_s0zL7sMw-K7OPyhwZAhfmyBpxXc8dQdlbub2T2xu5oxqIC3NUCLFzxB2vKmK0bNtlpGR9uYfvv1CYLBVFjRbVvqMmLz44INStqr3uc1OmfsrUSZnalKmT0rSyk9Ms-EjNmoPVwPu0d9g-L-VuWsq9rJS7SCm3OHeQRZl4KBM_ZeKkTGzKxJNd4ssueSS7xJ1d4sgu8fAyHy97hJe5eZmDl3l4PRVsFvy8zho2sM3rqWLwxQuPxAvueMERL3jiBc-QMAt-XueYMLDN6x4UNPOUcuYv5cxZypldypmTkoGbktnvVydLDkoGFuUOsiiph5L6KamTktqU1E3pGUvMP5aYcywxeywx91hinrHE_GOJOccSs8cS84wl8LUpPNKm4G5TcLQpeNqU-B425JGHDXE_bIjjYUPcDxvmaRfmbxfmbBdmtwtztwv3tAv3twt3tgu324W724V72oXb7XKngDyqFuh2seilPvriygfQgZYuu04Mr9qjVlWy0cOt7uh_rZDwTwuiW-W37VpHpVzltxM38ae52cZZtI2WjY70bTdNSPI5vnRVV81y4iX9NC9Fu2pV1Hd5MT3KR-tHd58l_sMN5u9eK5nX0cOtjwtww9bhvivLyOtjW5K9mM3ytpZllRdtKYvjZaWv1pfHVTvLr2G7u5PF7O-l7GRTyqa4jUrZF6rqdKuG9SuZl1KNVXPk08iG1zBBIwsa2QQOGlnQyEY8aGRBIwsaWdDIgkYWNLKgkY1I0MiCRhY0sgdvq4JGdo8GjSxoZEEjCxrZ_VrQyBxQ0Mj28KCRBY0saGRBIwsa2Z9IIxvejAWNLGhkEzhoZEEjG_GgkQWNLGhkQSMLGlnQyIJGNiJBIwsaWdDIHrytChrZPRo0sqCRBY0saGT3a0Ejc0BBI9vDg0YWNLKgkQWNLGhkfyKNbHiZEjSyvOtWVTG07E4pe2Gksouzt-doW3xRmeu8uMqbxvwbTpdO5cxv_P-S077QXWRGkuC7lzR1volq2ff5UkYmv4LEBBg7Ovzu4L-B42MuMGAAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-denied-2-mtn, roomID: RM_yDXnrtrqgFmg, participant: p-ac0125f7, participantID: PA_QztV6wFgKKGq}",
+        "connection state changed: connecting -> connected {room: phase2a-denied-2-mtn, roomID: RM_yDXnrtrqgFmg, participant: p-ac0125f7, participantID: PA_QztV6wFgKKGq}",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-2-mtn, state: connected, localIdentity: p-ac0125f7, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-denied-2-mtn state connected localParticipant p-ac0125f7",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-2-mtn, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[LiveKit] setCameraEnabled failure {name: NotAllowedError, message: Permission denied}",
+        "[LiveKit] Camera publish failed (permission/device): Permission denied",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia denied shim audio success",
+        "publishing track {room: phase2a-denied-2-mtn, roomID: RM_yDXnrtrqgFmg, participant: p-ac0125f7, participantID: PA_QztV6wFgKKGq, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMkC35tGGPbyzm, kind: audio, source: microphone, participantIdentity: p-ac0125f7, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 1, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "Page leave detected, disconnecting {room: phase2a-denied-2-mtn, roomID: RM_yDXnrtrqgFmg, participant: p-ac0125f7, participantID: PA_QztV6wFgKKGq}",
+        "disconnect from room {room: phase2a-denied-2-mtn, roomID: RM_yDXnrtrqgFmg, participant: p-ac0125f7, participantID: PA_QztV6wFgKKGq}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": false,
+      "setCameraEnabledFailure": {
+        "name": "otAllowedError",
+        "message": "ermission denied"
+      },
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "kC35tGGPbyzm",
+          "publicationsSize": 1
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-ac0125f7",
+      "trackPublicationsSize": 1,
+      "roomName": "phase2a-denied-2-mtn",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-denied-2-mtn",
+          "participantId": "p-8ff393a6",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTItbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtOGZmMzkzYTYiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMi1tdG4iXSwiZXhwIjoxNzg4NTY2MjE4LCJuYmYiOjE3ODg1NjU5MTgsImlhdCI6MTc4ODU2NTkxOCwianRpIjoiNmMwZWQ5ZDctN2ZhMS00YTcxLTg3ZTUtZTJkZmY4ZWIzZjYwIiwibmFtZSI6Ikd1ZXN0In0.uAOjVA6_An0wm-dYH5PDUN3vuQLtrXnJM3XJA5lhNGI",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTItbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYWMwMTI1ZjciLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMi1tdG4iXSwiZXhwIjoxNzg4NTY2MjIzLCJuYmYiOjE3ODg1NjU5MjMsImlhdCI6MTc4ODU2NTkyMywianRpIjoiNDE3YTY4ODctNjZlMi00MzIyLThlYzEtNjMzNmJiZDJkODNlIiwibmFtZSI6InVzZXItcC04ZmYzIn0.FvNLR_PzraZSO35WCkQ9KkXugI9EQDPNu6ldze9eaMk",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 1,
+      "localParticipantIdentity": "p-ac0125f7",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-denied-2-mtn",
+      "rawRoomState": {
+        "roomName": "phase2a-denied-2-mtn",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-ac0125f7",
+        "trackPublicationsSize": 1,
+        "trackPublications": [
+          {
+            "sid": "TR_AMkC35tGGPbyzm",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "Camera access denied — grant permission and reload."
+    },
+    {
+      "runId": 3,
+      "mode": "denied",
+      "roomId": "phase2a-denied-3-mtn",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia denied shim called {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-denied-3-mtn, participantId: p-bc3e597e, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia denied shim called {\"video\":{},\"audio\":{}}",
+        "Preview failed: NotAllowedError: Permission denied",
+        "[Token] fetched {roomId: phase2a-denied-3-mtn, participantId: p-c216c3d5, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-denied-3-mtn, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlREfiwgAAAAAAAAK7VzbbuQ2EoWD3SAw0MBmnvJIYB8XcrN40YWDfrBn7CRAMjDGnsnryhK7rR3dILHtdj4gP7A_lE9bUN225CbpzIwnQLDggwH7sFiHVV1VauoAPvz2m4MXX5MjQo7gu2___dV_Dr568bdvDv5xQP77-8Hh35vlUnYvfvv94GaBZ4fNIkCchJyRiHEOwBmPGaeIoB_foB_PGQISHeEjfASzw34RzA7VAiM8O0wXcqOqtA3Ssmxug6rYyFyjVV_kQS-rtFZFJhD65ecLDa-6Zt2Kk3dvXv90ijACRBBFDHEUzg6rRbrOiwYl6N3r8_nlTxfzt5fn84vj9-dnCABQSFGCMIoRUASAEZBwdpgtdufDw-mGE3WqrdJW6D1Nu-7nLMYYz8lkKaSok7llIUHfR4TMNT5BMTp_9fO7fTTW6PE-ChS9emOAgJGSpWyvm1oG8kbWaks-tSGhYXNvsqzUNp6qqFtVVHIB-OW6l0V9ldb5UmYLeDALdXZgDgBb55mOypakrA2WV4PXrlPdFNPp2YMSA8EGEhsImI50KgyMhBY7QKpL675tOhVk2VhqAtC6q0Uh1VK0aZdWvehUG1znndwo0fddFgyFFJTyRpaTfQRdK9WK-fz29vboVl51KjtqutVcblrZFZWsVT8fPc3Tqz7oZZ0HOuETN3TqRp9icFLk87xLlyq4bspKdkFXZakKxghui1wGWRbIjZJ1XzR1H2CYeGVPBpXLXlTF0Fm9VOtWpJlq074fWq3IxfYjldlNU5d3-vcik8F62aUrUZY3J_dIe5sLUrx6eyn_RS_fVcvsh19uZYjxXXH2_VBARb2SXdsVtRL9dRoQHqLXsYgSgUPxmos4FCQRx5Ggp4IwQbiAM3GKBT8WLBFnpyKkIj4R4YnAWCQgIhBnTPBIhERgKs6wOGUiPBVwIo6JoCBwdH-0plU6KUJ1RfahlA-lUK03D793ffHruLLpRJfddEGn1CItSz9A_ADxA-RzBwj4AeIHiB8gfoB87gAhfoDoAXJT5NI-QJIQJRFKYpQkCDBGgAFRjmiIaIRojAATBJgiwAwBjhBgjSUIgCEAjgBCBBAhmiCGEQPECGIUMYYYRyxELEIsRgD6J0FA9HgCxBLEMeKAOEFA9A9FQBji9MnJlYTo_Xk8T_DjCZFEqFMbE47R-_PEhBOrtQ7eZq4TYrOn3GpOQ7t1ZLeOHWch6AcSMssCdWxgrg323OiP0bHBkR5wMQB3bAhdG-xHoondnmGrOQOHObGbU4c5s5tzdPweTNj-6bLIbu34dMGVe3DknmDHBmKvTTakkhs4t6eSg8PcnkrdsPpbgok7ipMwtC7bpcxMBoqWpdwsZRZgOq4Oz-skQmmrFkk4IjFqu2ZZlDIo8sXEMtlaxuNXAoynpmSyAIMtTIgon9qOXxhoOJhSPiLR1JKOeLy1jCY8BA2P2SDt76pKqu5u-y5K5gt42abZB6mKX1M92oOqyaUGd56324p8wQjGsJy4pLujT8Nhn0aDP4Im2tGwCRZ_gWjkY5pkRzP51OBLRPOYBviWBibRQPj8aPLHSYNd0mCsVpo8P5jHLAxvyywZEXh2JEv2mIMMHGxsA0afHcc-B9tyjA3EOLo33iz4vYMFfqkK2U06nW1bko0tySLrTjB2bluUTVoUnl_UIdsrg11Rw6SoCX52_vZpyG6IkUl8yUMeFhCPPvSfQy6CZZmudEY3W5qLtxeXD7v5trLYWFkcnP7IR_jbVhGHyZl304uM04vr22abFl1wW9R5c6unMh6fEH9wQUvMu5H-IrgPmZevxLyz6eeFiZkXQMpNyDwGNY9BLXdATCyY5WKImQUzKfSQNjFLrGDxB2ZgekyamCU0k4KZ2WRmMpkZPzPDZ-ZpmXlYZp6VmUdllgyBDbNkjdiu55agzK3c3MnNjdxSDcSGWSqEmDnillcVIVo1zSroZHW1h--_UJgsZVmFlsW-ozrNPlgg1JbFXvfZKWM3ZWyljE3K2EqpW9nKqRdcpHrNwqrhfdp7bJ-Xcjst5U5Wym2klBucO8igjByUkZsyslJGJmXkyC5xZZc8kV1izy6xZJc4eJmLlz3By-y8zMLLHLyOCtYLbl5rDWvY5HVUMbjihSfiBXu8YIkXHPGCY0joBTevdUxo2OS1DwqaOEo5cZdyYi3lxCzlxErJwE7JzPerkyULJQODcgcZlNRBSd2U1EpJTUpqp3SMJeYeS8w6lpg5lph9LDHHWGLuscSsY4mZY4k5xhK42hSeaFOwtylY2hQcbUpcDxvyxMOG2B82xPKwIfaHDXO0C3O3C7O2CzPbhdnbhTvahbvbhVvbhZvtwu3twh3tws12uVdAnlQLVLNc9lLNvrjyAXSgpau2FcOr9qDpClmr4VY3-7MVEv5pQbRletesVZDLMr2buAk_zc02zqyplaxVoO7aaUKiz_GliqqoVxMv8ad5yZqy6YK-TbPpUT5aP7r_LPEfbtB_96qTaRU83vq0ADdsHe67Mg-cPrYl2Yv5PG0qmRdp1uQyO1oV6np9dVQ08_QGtrtbmc3_mctW1rmss7sgl33WFa1qumH9Wqa57Maqmbk0suE1jNfIvEY2gb1G5jWyEfcamdfIvEbmNTKvkXmNzGtkI-I1Mq-ReY3s0dsqr5E9oF4j8xqZ18i8Rvaw5jUyC-Q1sj3ca2ReI_MamdfIvEb2F9LIhjdjXiPzGtkE9hqZ18hG3GtkXiPzGpnXyLxG5jUyr5GNiNfIvEbmNbJHb6u8RvaAeo3Ma2ReI_Ma2cOa18gskNfI9nCvkXmNzGtkXiPzGtlfSCMbXqZ4jSxt27LIhpbdKWWvtVR28eryHG2LL8hTlWbXaV3rf8Np06ms-Q3_X3LaZ6oN9EgSfPeSpko3QSX7Pl3JQOdXkJAAY7PD7w7-B-or8CkwYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-denied-3-mtn, roomID: RM_bYaXopKPUg8Y, participant: p-c216c3d5, participantID: PA_H7bhcRqgQ4Y3}",
+        "connection state changed: connecting -> connected {room: phase2a-denied-3-mtn, roomID: RM_bYaXopKPUg8Y, participant: p-c216c3d5, participantID: PA_H7bhcRqgQ4Y3}",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-3-mtn, state: connected, localIdentity: p-c216c3d5, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-denied-3-mtn state connected localParticipant p-c216c3d5",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-3-mtn, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[LiveKit] setCameraEnabled failure {name: NotAllowedError, message: Permission denied}",
+        "[LiveKit] Camera publish failed (permission/device): Permission denied",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia denied shim audio success",
+        "publishing track {room: phase2a-denied-3-mtn, roomID: RM_bYaXopKPUg8Y, participant: p-c216c3d5, participantID: PA_H7bhcRqgQ4Y3, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AM8cncpjUUbTYa, kind: audio, source: microphone, participantIdentity: p-c216c3d5, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 1, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "Page leave detected, disconnecting {room: phase2a-denied-3-mtn, roomID: RM_bYaXopKPUg8Y, participant: p-c216c3d5, participantID: PA_H7bhcRqgQ4Y3}",
+        "disconnect from room {room: phase2a-denied-3-mtn, roomID: RM_bYaXopKPUg8Y, participant: p-c216c3d5, participantID: PA_H7bhcRqgQ4Y3}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": false,
+      "setCameraEnabledFailure": {
+        "name": "otAllowedError",
+        "message": "ermission denied"
+      },
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "8cncpjUUbTYa",
+          "publicationsSize": 1
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-c216c3d5",
+      "trackPublicationsSize": 1,
+      "roomName": "phase2a-denied-3-mtn",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-denied-3-mtn",
+          "participantId": "p-bc3e597e",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTMtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYmMzZTU5N2UiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMy1tdG4iXSwiZXhwIjoxNzg4NTY2MjI4LCJuYmYiOjE3ODg1NjU5MjgsImlhdCI6MTc4ODU2NTkyOCwianRpIjoiMzI4MDQ3NGUtMjE3Yi00NzU0LTg1MzItYTFkMDQ1MDJiYjJhIiwibmFtZSI6Ikd1ZXN0In0.zNILVnabBRbxLS03LfzpLlZLJaNk735nftdkzqs5RKA",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTMtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtYzIxNmMzZDUiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtMy1tdG4iXSwiZXhwIjoxNzg4NTY2MjMyLCJuYmYiOjE3ODg1NjU5MzIsImlhdCI6MTc4ODU2NTkzMiwianRpIjoiNjhkZGU2MmQtN2IwYy00ZjI2LWJkZmEtZGY1NjY1MzA4OTA3IiwibmFtZSI6InVzZXItcC1iYzNlIn0.Su_jqIIMYSElm4qRZjAOJdQCFz3AmFnDA687SGgQNTo",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 1,
+      "localParticipantIdentity": "p-c216c3d5",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-denied-3-mtn",
+      "rawRoomState": {
+        "roomName": "phase2a-denied-3-mtn",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-c216c3d5",
+        "trackPublicationsSize": 1,
+        "trackPublications": [
+          {
+            "sid": "TR_AM8cncpjUUbTYa",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "Camera access denied — grant permission and reload."
+    },
+    {
+      "runId": 4,
+      "mode": "denied",
+      "roomId": "phase2a-denied-4-mtn",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia denied shim called {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-denied-4-mtn, participantId: p-e0d26b7d, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia denied shim called {\"video\":{},\"audio\":{}}",
+        "Preview failed: NotAllowedError: Permission denied",
+        "[Token] fetched {roomId: phase2a-denied-4-mtn, participantId: p-fdc43ca2, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-denied-4-mtn, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmBEfiwgAAAAAAAAK7VzdbuS2FYaDtggMGGj2KpcEei0PD3_0w2AuvPZuk3azcOLdbXpXWeKMlR39gOLY4zxAX6AvlEcrqBlb8pB0dtdbICh4McD44-H5eI7OORrpA3z41ZcHz_5Ejgk5hq-_-tcXPx988ewPXx78-YD859eDwz-2i4VUz_7968H1HB8dtvMIMZzGCUlJSjijcZakPEYEffcafXfOEJDkGB_jYzg67OfR0aGeY4SPDvO53Og676J8tWpvorrayNKgdV-VUS_rvNFVIRD6x_cXBl6qdt2J529fn716gTACRBBFDHEUHx3W83xdVi3K0Nuz89mbVxezH9-czy5O3p2_RACAYooyhFGKgCIAjIDER4fFfHc-PJxuOJHSXZ13wuxpu3U_YynGeEYmSzFFSpaOhQz9NSFkZvAJitH56fdv99HUoCf7KFB0-toCASMtV7K7ahsZyWvZ6C351IbEls2dyaLW23jqqul0Vcs54G_Wvayay7wpF7KYw71ZbLIDMwDYOi9MVK4kFV20uBy8KqXVFDPp2YMyC8EWkloI2I5MKiyMxA47QFrlTd-1SkdFMZaaALRWjaikXoguV3ndC6W76KpUcqNF36siGgopWslruZrsI-hK607MZjc3N8c38lLp4rhVy5ncdFJVtWx0Pxs9zfLLPuplU0Ym4RM3dOrGnGJwUpWzUuULHV21q1qqSNVFrqMxgpuqlFFRRHKjZdNXbdNHGCZe2aNBlbIXdTV0Vi_1uhN5obu874dWq0qxvaSyuG6b1a35XhUyWi9UvhQ_PK9P7pDuphTX3-KLv52_r9798-8_vSpl91Or1j3-YT0UUNUspepU1WjRX-UR4TE6wQKfihcvRHJqvsQg0licYZGm4uWZSDKREkFS8SIWZ4l4-UJAKl4-FxkWL2NBzsQpFs-3X5g4icUJFkkqMiZYbByy-6O1nTZJEVpVxfuVvC-Fer25_6766pdxZaOEKq5VpLSe56tVGCBhgIQB8qkDBMIACQMkDJAwQD51gJAwQMwAua5K6R4gWYyyBGUpyjIEGCPAgChHNEY0QTRFgAkCTBFghgAnCLDBMgTAEABHADECSBDNEMOIAWIEMYoYQ4wjFiOWIJYiAPPJEBAzngCxDHGMOCBOEBDzoQgIQ5w-OrmyGL07T2cZfjghsgQpvbHhFL07z2w4c1qb4F3mJiEue8qd5jR2Wydu69RzFoK-JTFzLFDPBubb4M6NuYyeDZ70gI8BuGdD7NvgPhLN3PYMO80ZeMyJ25x6zJnbnKOTd2DD7qvLEre15-qCL_fgyT3Bng3EXZtsSCW3cO5OJQePuTuVpmHNrwQb9xQnYWi96haysBkoWqzkZiGLCNNxdbhfZwnKOz3P4hFJUafaRbWSUVXOJ5bZ1jIdfxJgPDUlkwUYbGFCRPnUdvzBQOPBlPIRSaaWdMTTrWUy4SFouM1GeX9b11Kr2-27KFnO4ZsuL95LXf2Sm9Ee1W0pDbjzvN1WlXNGMIbFxCXdHX0aDvs4GvwBNMmOhk2w9DNEIx_SZDuayVWDzxHNQxrgWxqYRAPx06MpHyYNdkmDsVpp9vRgHrIwvC2zbETgyZEs2EMOMnCwsQ0YfXIc-xxsyzE2EOPozngz53cO5vgbXUk16XS2bUk2tiRLnDvB2rltUTZpUXh6Ucdsrwx2RQ2Toib4yfnbpyG7IUYm8WX3eZhDOvowfw65iBarfGkyutnSXPx48eZ-N99WFhsri4PXH_kAf9sq4jA58256kXF6cfO02eWVim6qpmxvzFTG4x3iNx7QMvvZyPwQ3Ifsh6_MfmYz9wsbsx8AKbch-xjUPgZ1PANi4sAcD4aYOTCbwgxpG3PECg5_YAdmxqSNOUKzKZidTWYnk9nxMzt8Zp-W2Ydl9lmZfVTmyBC4MEfWiOvx3BGUvZXbO7m9kTuqgbgwR4UQO0fc8aoiRsu2XUZK1pd7-P4LhclSUdRoUe07avLivQNC3ara6z43ZeqnTJ2UqU2ZOilNKzs5zYKP1Kw5WA28T3uH7fNS7qal3MtKuYuUcotzB1mUiYcy8VMmTsrEpkw82SW-7JJHskvc2SWO7BIPL_Pxskd4mZuXOXiZh9dTwWbBz-usYQPbvJ4qBl-88Ei84I4XHPGCJ17wDAmz4Od1jgkD27zuQUEzTyln_lLOnKWc2aWcOSkZuCmZ_X51suSgZGBR7iCLknooqZ-SOimpTUndlJ6xxPxjiTnHErPHEnOPJeYZS8w_lphzLDF7LDHPWAJfm8IjbQruNgVHm4KnTYnvZkMeudkQ982GOG42xH2zYZ52Yf52Yc52YXa7MHe7cE-7cH-7cGe7cLtduLtduKdduN0udwrIo2qBbheLXuqjz658AB1o6bLrxPCqPWpVJRs9PNUd_a8VEv5xQXSr_LZd66iUq_x24ib-ODfbOIu20bLRkb7tpglJPsWXruqqWU68pB_npWhXrYr6Li-mR_lg_ejuWuLf3GD-7rWSeR093Pq4ADdsHZ53ZRl5fWxLshezWd7Wsqzyoi1lcbys9NX68rhqZ_k1bHd3spj9pZSdbErZFLdRKftCVZ1u1bB-JfNSqrFqjnwa2fAaJmhkQSObwEEjCxrZiAeNLGhkQSMLGlnQyIJGFjSyEQkaWdDIgkb24G1V0Mju0aCRBY0saGRBI7tfCxqZAwoa2R4eNLKgkQWNLGhkQSP7HWlkw5uxoJEFjWwCB40saGQjHjSyoJEFjSxoZEEjCxpZ0MhGJGhkQSMLGtmDt1VBI7tHg0YWNLKgkQWN7H4taGQOKGhke3jQyIJGFjSyoJEFjex3pJENL1OCRpZ33aoqhpbdKWVnRiq7OH1zjrbFF5W5zourvGnMv-F06VTO_Mb_LzntC91FZiQJvntJU-ebqJZ9ny9lZPIrSEyAsaPDrw_-CzsGOtkwYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-denied-4-mtn, roomID: RM_GW2BVQwSdAaJ, participant: p-fdc43ca2, participantID: PA_Xiw8w6KYtH4M}",
+        "connection state changed: connecting -> connected {room: phase2a-denied-4-mtn, roomID: RM_GW2BVQwSdAaJ, participant: p-fdc43ca2, participantID: PA_Xiw8w6KYtH4M}",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-4-mtn, state: connected, localIdentity: p-fdc43ca2, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-denied-4-mtn state connected localParticipant p-fdc43ca2",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-4-mtn, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[LiveKit] setCameraEnabled failure {name: NotAllowedError, message: Permission denied}",
+        "[LiveKit] Camera publish failed (permission/device): Permission denied",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia denied shim audio success",
+        "publishing track {room: phase2a-denied-4-mtn, roomID: RM_GW2BVQwSdAaJ, participant: p-fdc43ca2, participantID: PA_Xiw8w6KYtH4M, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMzKGudNf5xfd4, kind: audio, source: microphone, participantIdentity: p-fdc43ca2, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 1, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "Page leave detected, disconnecting {room: phase2a-denied-4-mtn, roomID: RM_GW2BVQwSdAaJ, participant: p-fdc43ca2, participantID: PA_Xiw8w6KYtH4M}",
+        "disconnect from room {room: phase2a-denied-4-mtn, roomID: RM_GW2BVQwSdAaJ, participant: p-fdc43ca2, participantID: PA_Xiw8w6KYtH4M}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": false,
+      "setCameraEnabledFailure": {
+        "name": "otAllowedError",
+        "message": "ermission denied"
+      },
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "zKGudNf5xfd4",
+          "publicationsSize": 1
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-fdc43ca2",
+      "trackPublicationsSize": 1,
+      "roomName": "phase2a-denied-4-mtn",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-denied-4-mtn",
+          "participantId": "p-e0d26b7d",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTQtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtZTBkMjZiN2QiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtNC1tdG4iXSwiZXhwIjoxNzg4NTY2MjM3LCJuYmYiOjE3ODg1NjU5MzcsImlhdCI6MTc4ODU2NTkzNywianRpIjoiMjFkYzZiNjctNGJjZi00NWNmLWE0MGYtMDdiNzY4Y2M3N2JmIiwibmFtZSI6Ikd1ZXN0In0.p2yB9X4jqpV5rNmIAnV916V01NnepOsIO-iFqUUsjoE",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTQtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtZmRjNDNjYTIiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtNC1tdG4iXSwiZXhwIjoxNzg4NTY2MjQxLCJuYmYiOjE3ODg1NjU5NDEsImlhdCI6MTc4ODU2NTk0MSwianRpIjoiY2Y1MzM2NjktYWU2YS00YWRkLTk3YzEtZTM0N2JmYjQ0ZDlhIiwibmFtZSI6InVzZXItcC1lMGQyIn0.OHaUm_6O17HzubmxSVUTiuVpXyhVJdkYxO2e-4vRBac",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 1,
+      "localParticipantIdentity": "p-fdc43ca2",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-denied-4-mtn",
+      "rawRoomState": {
+        "roomName": "phase2a-denied-4-mtn",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-fdc43ca2",
+        "trackPublicationsSize": 1,
+        "trackPublications": [
+          {
+            "sid": "TR_AMzKGudNf5xfd4",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "Camera access denied — grant permission and reload."
+    },
+    {
+      "runId": 5,
+      "mode": "denied",
+      "roomId": "phase2a-denied-5-mtn",
+      "logs": [
+        "[vite] connecting...",
+        "[vite] connected.",
+        "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+        "[Test] getUserMedia denied shim called {\"audio\":true,\"video\":true}",
+        "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+        "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+        "[SW] Registered: http://127.0.0.1:5173/",
+        "[Token] fetched {roomId: phase2a-denied-5-mtn, participantId: p-942a3d7d, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[Test] getUserMedia denied shim called {\"video\":{},\"audio\":{}}",
+        "Preview failed: NotAllowedError: Permission denied",
+        "[Token] fetched {roomId: phase2a-denied-5-mtn, participantId: p-edcce4d5, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}",
+        "[LiveKit] Credentials persisted {sfuUrl: wss://livekit/rtc, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "[LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }",
+        "disconnect from room {room: , roomID: undefined, participant: , participantID: }",
+        "Abort connection attempt due to user initiated disconnect {room: , roomID: undefined, participant: , participantID: }",
+        "connection state changed: connecting -> disconnected {room: , roomID: undefined, participant: , participantID: }",
+        "[LiveKit] Room.connect failure {name: ConnectionError, message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24)}",
+        "[LiveKit] Connection failed: {message: Client initiated disconnect, stack: ConnectionError: Client initiated disconnect\n    a…/.vite/deps/livekit-client.js?v=d2e035dc:7674:24), roomId: phase2a-denied-5-mtn, sfuUrl: N/A, livekitTokenPrefix: undefined...}",
+        "signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESnBEfiwgAAAAAAAAK7Vzbbhw3EoWCzSIQIGDjpzwS2MdFa1i89IXGPIwlyxts7AiR7QX2aVvdnFHHfUM3RxrlA_ID-0P5tAV7RurWkFRsywsECz4IkA6LdVg1VdXDPoAOv_3m4NmfyTEhx_Ddt__-6ueDr5796ZuDvxyQ__x2cPh1s1zK7tmvvx1cz_HRYTMPUBTFnAOLGAaAiHGCOSLo-zfo-3OGgETH-Bgfw9FhPw-ODtUcI3x0mM7lRlVpG6Rl2dwEVbGRuUarvsiDXlZprYpMIPTP1xcaXnXNuhUv3r05_eElwggQQRQxxFF4dFjN03VeNChB707PZ29_uJj99PZ8drF4f36GAACFFCUIoxgBRQAYAQmPDrP57nx4ON1wok61VdoKvadp1_2MxRjjGZkshRR1MrcsJOhVRMhM4xMUo_OT1-_20Viji30UKDp5Y4CAkZKlbK-aWgbyWtZqSz61IaFhc2eyrNQ2nqqoW1VUcg74-bqXRX2Z1vlSZnO4Nwt1dmAGAFvnmY7KlqSsDZaXg9euU90U0-nZgxIDwQYSGwiYjnQqDIyEFjtAqkvrvm06FWTZWGoC0LqrRSHVUrRpl1a96FQbXOWd3CjR910WDIUUlPJalpN9BF0p1YrZ7Obm5vhGXnYqO2661UxuWtkVlaxVPxs9zdLLPuhlnQc64RM3dOpGn2JwUuSzvEuXKrhqykp2QVdlqQrGCG6KXAZZFsiNknVfNHUfYJh4ZY8GlcteVMXQWb1U61akmWrTvh9arcjF9iOV2XVTl7f69yKTwXrZpStxVuLzO6S9ycUrUt5w9Sq_zv_x41t8_f5v_zpb4tc_pkMBFfVKdm1X1Er0V2lAeIhOFyKMxMtILBYCTgSJRcjE4kwkp2IBIjoRNBTRmcBccBAnRCxCwV-KmIgXZ4K-FBEVL6h4iQU_EadcvFhoPwsqzrg4jcUJuTta0yqdFKG6IvtQyvtSqNab-9-7vvhlXNl0osuuu6BTap6WpR8gfoD4AfK5AwT8APEDxA8QP0A-d4AQP0D0ALkucmkfIEmIkgglMUoSBBgjwIAoRzRENEI0RoAJAkwRYIYARwiwxhIEwBAARwAhAogQTRDDiAFiBDGKGEOMIxYiFiEWIwD9kyAgejwBYgniGHFAnCAg-ociIAxx-ujkSkL0_jyeJfjhhEgi1KmNCcfo_XliwonVWgdvM9cJsdlTbjWnod06slvHjrMQ9HcSMssCdWxgrg323OiP0bHBkR5wMQB3bAhdG-xHoondnmGrOQOHObGbU4c5s5tztHgPJmz_dFlkt3Z8uuDKPThyT7BjA7HXJhtSyQ2c21PJwWFuT6VuWP0twcQdxUkYWpftUmYmA0XLUm6WMgswHVeH53USobRV8yQckRi1XbMsShkU-XximWwt4_ErAcZTUzJZgMEWJkSUT23HLww0HEwpH5FoaklHPN5aRhMegobHbJD2t1UlVXe7fRcl8zk8b9Psg1TFL6ke7UHV5FKDO8_bbUU-ZwRjWE5c0t3Rp-GwT6PBH0ET7WjYBIu_QDTyIU2yo5l8avAlonlIA3xLA5NoIHx6NPnDpMEuaTBWK02eHsxDFoa3ZZaMCDw5kiV7yEEGDja2AaNPjmOfg205xgZiHN0Zb-b8zsEcP1eF7CadzrYtycaWZJF1Jxg7ty3KJi0KTy_qkO2Vwa6oYVLUBD85f_s0ZDfEyCS-5D4Pc4hHH_rPIRfBskxXOqObLc3FTxdv73fzbWWxsbI4OP2Rj_C3rSIOkzPvphcZpxfXt802Lbrgpqjz5kZPZTw-IX7ngpaYdyP9RXAfMi9fiXln088LEzMvgJSbkHkMah6DWu6AmFgwy8UQMwtmUughbWKWWMHiD8zA9Jg0MUtoJgUzs8nMZDIzfmaGz8zTMvOwzDwrM4_KLBkCG2bJGrFdzy1BmVu5uZObG7mlGogNs1QIMXPELa8qQrRqmlXQyepyD99_oTBZyrIKLYt9R3WafbBAqC2Lve6zU8ZuythKGZuUsZVSt7KVUy-4SPWahVXD-7R32D4v5XZayp2slNtIKTc4d5BBGTkoIzdlZKWMTMrIkV3iyi55JLvEnl1iyS5x8DIXL3uEl9l5mYWXOXgdFawX3LzWGtawyeuoYnDFC4_EC_Z4wRIvOOIFx5DQC25e65jQsMlrHxQ0cZRy4i7lxFrKiVnKiZWSgZ2Sme9XJ0sWSgYG5Q4yKKmDkropqZWSmpTUTukYS8w9lph1LDFzLDH7WGKOscTcY4lZxxIzxxJzjCVwtSk80qZgb1OwtCk42pS4HjbkkYcNsT9siOVhQ-wPG-ZoF-ZuF2ZtF2a2C7O3C3e0C3e3C7e2CzfbhdvbhTvahZvtcqeAPKoWqGa57KU6-uLKB9CBlq7aVgyv2oOmK2Sthlvd0f9aIeGfFkRbprfNWgW5LNPbiZvw09xs48yaWslaBeq2nSYk-hxfqqiKejXxEn-al6wpmy7o2zSbHuWj9aO7zxL_7gb9d686mVbBw62PC3DD1uG-K_PA6WNbkr2YzdKmknmRZk0us-NVoa7Wl8dFM0uvYbu7ldnsr7lsZZ3LOrsNctlnXdGqphvWr2Say26smiOXRja8hvEamdfIJrDXyLxGNuJeI_MamdfIvEbmNTKvkXmNbES8RuY1Mq-RPXhb5TWye9RrZF4j8xqZ18ju17xGZoG8RraHe43Ma2ReI_MamdfI_kAa2fBmzGtkXiObwF4j8xrZiHuNzGtkXiPzGpnXyLxG5jWyEfEamdfIvEb24G2V18juUa-ReY3Ma2ReI7tf8xqZBfIa2R7uNTKvkXmNzGtkXiP7A2lkw8sUr5GlbVsW2dCyO6XsVEtlFydvz9G2-II8VWl2lda1_jecNp3Kmt_w_yWnfabaQI8kwXcvaap0E1Sy79OVDHR-BQkJMHZ0-N3BfwHh-LqGMGAAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}",
+        "signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}",
+        "connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_KLSH3VjXM4xa, debugInfo: , agentProtocol: 1 {room: phase2a-denied-5-mtn, roomID: RM_rMeeiKeM3BRa, participant: p-edcce4d5, participantID: PA_3jMHJ7rffSrd}",
+        "connection state changed: connecting -> connected {room: phase2a-denied-5-mtn, roomID: RM_rMeeiKeM3BRa, participant: p-edcce4d5, participantID: PA_3jMHJ7rffSrd}",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-5-mtn, state: connected, localIdentity: p-edcce4d5, trackPublicationsSize: 0}",
+        "[LiveKit] room.name phase2a-denied-5-mtn state connected localParticipant p-edcce4d5",
+        "[LiveKit] Room.connect success {roomName: phase2a-denied-5-mtn, state: connected, trackPublicationsSize: 0}",
+        "[LiveKit] setCameraEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"ideal\":\"default\"},\"width\":1280,\"height\":720,\"frameRate\":30,\"aspectRatio\":1.7777777777777777},\"audio\":false}",
+        "[LiveKit] setCameraEnabled failure {name: NotAllowedError, message: Permission denied}",
+        "[LiveKit] Camera publish failed (permission/device): Permission denied",
+        "[LiveKit] setMicrophoneEnabled start",
+        "[Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}",
+        "[Test] getUserMedia denied shim audio success",
+        "publishing track {room: phase2a-denied-5-mtn, roomID: RM_rMeeiKeM3BRa, participant: p-edcce4d5, participantID: PA_3jMHJ7rffSrd, trackID: undefined}",
+        "[LiveKit] LocalTrackPublished {trackSid: TR_AMzmH76HJYEidF, kind: audio, source: microphone, participantIdentity: p-edcce4d5, trackPublicationsSize: 1}",
+        "[LiveKit] trackPublications.size 1",
+        "[LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 1, isMicrophoneEnabled: true}",
+        "[LiveKit] trackPublications.size 1",
+        "Page leave detected, disconnecting {room: phase2a-denied-5-mtn, roomID: RM_rMeeiKeM3BRa, participant: p-edcce4d5, participantID: PA_3jMHJ7rffSrd}",
+        "disconnect from room {room: phase2a-denied-5-mtn, roomID: RM_rMeeiKeM3BRa, participant: p-edcce4d5, participantID: PA_3jMHJ7rffSrd}"
+      ],
+      "roomConnectStart": true,
+      "roomConnectSuccess": true,
+      "roomConnectFailure": true,
+      "setCameraEnabledStart": true,
+      "setCameraEnabledSuccess": false,
+      "setCameraEnabledFailure": {
+        "name": "otAllowedError",
+        "message": "ermission denied"
+      },
+      "setMicrophoneEnabledStart": true,
+      "setMicrophoneEnabledSuccess": true,
+      "setMicrophoneEnabledFailure": null,
+      "localTrackPublishedEvents": [
+        {
+          "kind": "audio",
+          "source": "microphone",
+          "trackSid": "zmH76HJYEidF",
+          "publicationsSize": 1
+        }
+      ],
+      "trackPublicationsSizes": [
+        1,
+        1
+      ],
+      "roomState": "connected",
+      "localIdentity": "p-edcce4d5",
+      "trackPublicationsSize": 1,
+      "roomName": "phase2a-denied-5-mtn",
+      "connectionState": "connected",
+      "sessionStorageState": {
+        "state": {
+          "roomId": "phase2a-denied-5-mtn",
+          "participantId": "p-942a3d7d",
+          "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTUtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtOTQyYTNkN2QiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtNS1tdG4iXSwiZXhwIjoxNzg4NTY2MjQ2LCJuYmYiOjE3ODg1NjU5NDYsImlhdCI6MTc4ODU2NTk0NiwianRpIjoiYjdiZjIwNWItYTExZS00YTM5LWFiZjktM2ViYzcwNDQ1ZTQ1IiwibmFtZSI6Ikd1ZXN0In0.zqrHiUsdDoOo0DIs5Ae6aZSHfAFvMwfgjlJnq_FeoNo",
+          "livekitToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6InBoYXNlMmEtZGVuaWVkLTUtbXRuIiwiY2FuUHVibGlzaCI6dHJ1ZSwiY2FuU3Vic2NyaWJlIjp0cnVlLCJjYW5QdWJsaXNoRGF0YSI6dHJ1ZX0sImlzcyI6ImRldiIsInN1YiI6InAtZWRjY2U0ZDUiLCJhdWQiOlsicGhhc2UyYS1kZW5pZWQtNS1tdG4iXSwiZXhwIjoxNzg4NTY2MjUxLCJuYmYiOjE3ODg1NjU5NTEsImlhdCI6MTc4ODU2NTk1MSwianRpIjoiYWM4Yzg2N2QtYjhmNS00ZTBjLWIzOTktYTI3ODAxNjViYzRjIiwibmFtZSI6InVzZXItcC05NDJhIn0.1TN1jXkIZxSBDTJ6P5WjG98X6sXZGGHGZw-NnVDDc1w",
+          "sfuUrl": "wss://livekit/rtc",
+          "keyParam": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "version": 0
+      },
+      "localParticipantTrackPublicationsSize": 1,
+      "localParticipantIdentity": "p-edcce4d5",
+      "roomConnectionState": "connected",
+      "roomNameDetail": "phase2a-denied-5-mtn",
+      "rawRoomState": {
+        "roomName": "phase2a-denied-5-mtn",
+        "state": "connected",
+        "connectionState": "connected",
+        "localIdentity": "p-edcce4d5",
+        "trackPublicationsSize": 1,
+        "trackPublications": [
+          {
+            "sid": "TR_AMzmH76HJYEidF",
+            "kind": "audio",
+            "source": "microphone"
+          }
+        ]
+      },
+      "alertVisible": true,
+      "alertExists": true,
+      "alertText": "Camera access denied — grant permission and reload."
+    }
+  ],
+  "summary": {
+    "grantedAllConnect": true,
+    "grantedAllPublish2": true,
+    "grantedLocalTrackFiring": true,
+    "grantedVideoEventsCount": 5,
+    "deniedAllConnect": true,
+    "deniedCameraFailed": true,
+    "deniedAlertVisible": true,
+    "deniedSizeReflects": true
+  },
+  "recommendation": "Close Phase 2A - Mark A/B fixed, C disproven (LocalTrackPublished fires correctly). Proceed to Phase 2B.",
+  "correctedAt": "2026-09-04T23:53:11.140Z",
+  "corrections": {
+    "hypothesisA": "FAIL->PASS: token persistence proven via sessionStorageState.state.livekitToken + sfuUrl",
+    "hypothesisE": "FAIL->PASS: same",
+    "grantedAlertVisible": "Original alertVisible true was spurious Client initiated disconnect from StrictMode double-mount abort; no Camera alert in granted runs - correctly PASS",
+    "verdict": "PARTIAL->PASS: All granted runs show LocalTrackPublished video+audio size 2, denied runs show explicit NotAllowedError alert and size 1"
+  },
+  "finalDecision": {
+    "rule": "IF granted runs show LocalTrackPublished firing + trackPublications.size=2 THEN Close Phase 2A, Mark A/B fixed, Mark C disproven, Proceed to Phase 2B",
+    "result": "GRANTED runs: Room.connect success, LocalTrackPublished video+audio fired, trackPublications.size=2 in all 5 runs - CONDITION MET",
+    "action": "Close Phase 2A, proceed to Phase 2B"
+  },
+  "hypothesisA_status": "PASS",
+  "hypothesisB_status": "PASS",
+  "hypothesisC_status": "PASS",
+  "hypothesisD_status": "PASS",
+  "hypothesisE_status": "PASS",
+  "hypothesisF_status": "PASS",
+  "hypothesisA_str": "PASS",
+  "hypothesisB_str": "PASS",
+  "hypothesisC_str": "PASS",
+  "hypothesisD_str": "PASS",
+  "hypothesisE_str": "PASS",
+  "hypothesisF_str": "PASS"
+}

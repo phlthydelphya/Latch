@@ -54,6 +54,45 @@ RECOMMENDATIONS:
 - next steps or media concerns
 ```
 
+## BOOTSTRAP MODE
+
+When delegated:
+
+- Room.connect
+- LiveKit bootstrap
+- first room
+- livekit_room_total
+
+The agent may only answer:
+
+1. Does Room.connect execute?
+2. Does media publish?
+3. Does media subscribe?
+
+All other concerns are deferred:
+
+- SFrame
+- HPKE transport
+- Key rotation
+- Reconnect
+- Simulcast tuning
+- Blind-forward analysis
+- Dynacast optimization
+
+until media flow is proven.
+
+Required output:
+
+```
+SUCCESS: connection evidence
+```
+
+or
+
+```
+FAILURE: stack trace + blocking artifact
+```
+
 ## M0-P0 Specifics
 - Criterion 4: SFrame ciphertext proof (Wireshark, no plaintext NALs, SFU opaque)
 - Criterion 5: Screen share `getDisplayMedia` on all 4 browsers

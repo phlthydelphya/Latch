@@ -5,12 +5,12 @@
 
 export { WebRTCManager, type WebRTCManagerConfig } from './webrtc/manager.js';
 export { SFrameTransform, WASMSFrameWorker, wasmWorkerCode } from './sframe/transform.js';
-export { KeyManager, HPKE, type KeyManagerConfig, type EpochKeys } from './keys/manager.js';
+export { KeyManager, type KeyManagerConfig, type EpochKeys } from './keys/manager.js';
 export { SignalingClient, type SignalingConfig } from './signaling/client.js';
 export { ScreenShareManager, SafariScreenSharePolyfill, type ScreenShareConfig, type ScreenShareState } from './screen/manager.js';
 export { TURNManager, type TURNManagerConfig, type TURNState } from './turn/manager.js';
 export { ReconnectManager, type ReconnectManagerConfig, type ReconnectState } from './reconnect/manager.js';
-export { MetricsCollector, type MetricPoint, type HistogramMetric } from './metrics/collector.js';
+export { MetricsCollector, getGlobalMetricsCollector, setGlobalMetricsCollector, type MetricPoint, type HistogramMetric } from './metrics/collector.js';
 
 export * from './types.js';
 

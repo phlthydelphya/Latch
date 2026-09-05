@@ -16,17 +16,6 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     headless: true,
-    // Explicit loopback overrides for P0 compliance
-    launchOptions: {
-      args: [
-        '--use-fake-ui-for-media-stream',
-        '--use-fake-device-for-media-stream',
-        '--autoplay-policy=no-user-gesture-required',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process',
-        '--host-resolver-rules=MAP localhost 127.0.0.1, MAP 127.0.0.1 127.0.0.1',
-      ],
-    },
   },
   projects: [
     {
@@ -47,7 +36,21 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          firefoxUserPrefs: {
+            'media.navigator.streams.fake': true,
+            'media.navigator.permission.disabled': true,
+            'media.peerconnection.ice.loopback': true,
+            'media.peerconnection.ice.link_local': true,
+            'media.peerconnection.ice.obfuscate_host_addresses': false,
+            'media.peerconnection.ice.default_address_only': false,
+            'media.peerconnection.ice.no_host': false,
+            'media.peerconnection.ice.tcp': true,
+          },
+        },
+      },
     },
     {
       name: 'webkit',
@@ -55,7 +58,19 @@ export default defineConfig({
     },
     {
       name: 'msedge',
-      use: { ...devices['Desktop Chrome'], channel: 'msedge' },
+      use: { 
+        ...devices['Desktop Chrome'], 
+        channel: 'msedge',
+        launchOptions: {
+          args: [
+            '--use-fake-ui-for-media-stream',
+            '--use-fake-device-for-media-stream',
+            '--autoplay-policy=no-user-gesture-required',
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process',
+          ],
+        },
+      },
     },
     {
       name: 'Mobile Chrome',

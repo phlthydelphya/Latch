@@ -16,7 +16,8 @@ export function useMediaDevices() {
         setError('Media devices are not supported in this browser');
         return;
       }
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      stream.getTracks().forEach((t) => t.stop());
       const deviceList = await navigator.mediaDevices.enumerateDevices();
       setDevices(
         deviceList

@@ -1,17 +1,27 @@
 /**
- * SFrame Transform - RFC 9605 Implementation
+ * SFrame Transform - RFC 9605 Implementation (v2.1 Global Sender Counter)
  * Primary: WebRTC Encoded Transform (Insertable Streams)
  * Fallback: WASM wasm-sframe in OffscreenCanvas worker
+ *
+ * Security Invariant (T-01 Nonce Reuse Mitigation):
+ * IV = salt(12B) XOR BE64(counter) (injective in counter for fixed salt).
+ * KID is in additionalData (AAD), NOT in IV.
+ * A single monotonic counter is maintained per (epoch, canonicalSenderId)
+ * and shared across all local tracks (audio, video, screen-share).
  */
 
 import type { SFrameCipherSuite, SFrameHeader, KeyRatchetConfig } from '../types.js';
 import { SFRAME_CIPHER_SUITES } from '../types.js';
 import { KeyManager } from '../keys/manager.js';
+import { canonicalizeIdentity } from '../utils/identity.js';
+import { AsyncMutex } from '../utils/mutex.js';
 
 export interface SFrameTransformConfig {
   keyManager: KeyManager;
   cipherSuite: 'AES_GCM' | 'AES_CTR';
   getCurrentKID: () => number;
+  epochSalt?: Uint8Array | null;
+  getEpochSalt?: (kid: number) => Uint8Array | null;
   useWASM?: boolean;
   wasmModulePath?: string;
 }
@@ -26,21 +36,120 @@ export interface EncodedFrame {
   decryptError?: boolean;
 }
 
+/**
+ * Derives 12-byte IV for SFrame per RFC9605 §4.7.
+ * IV = salt(12B) XOR BE64(counter) (padded to last 8 bytes, first 4 bytes XOR 0).
+ * KID is authenticated via additionalData (AAD), NOT placed in IV.
+ * Bijective map: for a fixed salt, counter -> IV is injective.
+ */
+export function deriveIV(salt: Uint8Array, counter: bigint): Uint8Array {
+  if (!salt || salt.byteLength !== 12) {
+    throw new Error(`salt must be 12B, got ${salt ? salt.byteLength : 0}`);
+  }
+  if (counter < 0n || counter > 0xFFFFFFFFFFFFFFFFn) {
+    throw new Error(`counter out of u64 range: ${counter}`);
+  }
+  const iv = new Uint8Array(12);
+  const ctrBE = new Uint8Array(8);
+  new DataView(ctrBE.buffer).setBigUint64(0, counter, false);
+  for (let i = 0; i < 12; i++) {
+    iv[i] = salt[i] ^ (i < 4 ? 0 : ctrBE[i - 4]);
+  }
+  return iv;
+}
+
+export function encodeVarint(value: number): Uint8Array {
+  const bytes: number[] = [];
+  while (value >= 0x80) {
+    bytes.push((value & 0x7f) | 0x80);
+    value >>= 7;
+  }
+  bytes.push(value);
+  return new Uint8Array(bytes);
+}
+
+export function encodeVarintBigInt(value: bigint): Uint8Array {
+  const bytes: number[] = [];
+  while (value >= 0x80n) {
+    bytes.push(Number((value & 0x7fn) | 0x80n));
+    value >>= 7n;
+  }
+  bytes.push(Number(value));
+  return new Uint8Array(bytes);
+}
+
+export function buildHeader(kid: number, counter: bigint): Uint8Array {
+  const kidBytes = encodeVarint(kid);
+  const ctrBytes = encodeVarintBigInt(counter);
+  const header = new Uint8Array(kidBytes.length + ctrBytes.length);
+  header.set(kidBytes, 0);
+  header.set(ctrBytes, kidBytes.length);
+  return header;
+}
+
+export function parseHeader(data: ArrayBuffer | Uint8Array): {
+  header: Uint8Array;
+  payload: ArrayBuffer;
+  kid: number;
+  counter: bigint;
+} {
+  const view = data instanceof Uint8Array ? data : new Uint8Array(data);
+  let offset = 0;
+
+  // Parse KID varint
+  let kid = 0;
+  let shift = 0;
+  while (true) {
+    if (offset >= view.length) throw new Error('Truncated SFrame header (KID)');
+    const byte = view[offset++];
+    kid |= (byte & 0x7f) << shift;
+    if ((byte & 0x80) === 0) break;
+    shift += 7;
+  }
+
+  // Parse CTR varint
+  let counter = 0n;
+  shift = 0;
+  while (true) {
+    if (offset >= view.length) throw new Error('Truncated SFrame header (CTR)');
+    const byte = view[offset++];
+    counter |= (BigInt(byte & 0x7f) << BigInt(shift));
+    if ((byte & 0x80) === 0) break;
+    shift += 7;
+  }
+
+  const header = view.slice(0, offset);
+  const payload = view.slice(offset).buffer;
+
+  return { header, payload, kid, counter };
+}
+
 export class SFrameTransform {
   private keyManager: KeyManager;
   private cipherSuite: SFrameCipherSuite;
   private getCurrentKID: () => number;
+  private config: SFrameTransformConfig;
   private useWASM: boolean;
   private wasmModule: any = null;
-  private encryptCounter: Map<number, bigint> = new Map(); // KID -> counter
-  private decryptCounters: Map<string, bigint> = new Map(); // senderId:KID -> counter
+
+  // GLOBAL sender counter: epoch -> monotonic counter shared across all tracks (audio, video, screen)
+  private encryptCounter: Map<number, bigint> = new Map();
+  // Receiver replay check: epoch -> (canonicalSenderId -> lastCounter) - NO trackId
+  private decryptCounters: Map<number, Map<string, bigint>> = new Map();
+  // Mutex for atomic counter increments across concurrent tracks
+  public readonly counterMutex: AsyncMutex = new AsyncMutex();
 
   constructor(config: SFrameTransformConfig) {
+    this.config = config;
     this.keyManager = config.keyManager;
     this.cipherSuite = SFRAME_CIPHER_SUITES[config.cipherSuite];
     this.getCurrentKID = config.getCurrentKID;
     this.useWASM = config.useWASM || false;
-    
+
+    // Initialize epoch 0 counter at 0n
+    const initialKID = this.getCurrentKID();
+    this.encryptCounter.set(initialKID, 0n);
+
     if (this.useWASM && config.wasmModulePath) {
       this.loadWASM(config.wasmModulePath);
     }
@@ -60,6 +169,11 @@ export class SFrameTransform {
   // ==================== SENDER TRANSFORM ====================
 
   createSenderTransformer(): TransformStream<EncodedFrame, EncodedFrame> {
+    return this.createSenderTransformerWithGlobalCounter(this.counterMutex);
+  }
+
+  createSenderTransformerWithGlobalCounter(mutex?: AsyncMutex): TransformStream<EncodedFrame, EncodedFrame> {
+    const lock = mutex || this.counterMutex;
     return new TransformStream({
       transform: async (frame, controller) => {
         try {
@@ -73,24 +187,32 @@ export class SFrameTransform {
     });
   }
 
-  private async encryptFrame(frame: EncodedFrame): Promise<EncodedFrame> {
+  async encryptFrame(frame: EncodedFrame, trackKind?: string, trackId?: string): Promise<EncodedFrame> {
     const kid = this.getCurrentKID();
     const senderKey = await this.keyManager.getCurrentSenderKey();
-    
+
     if (!senderKey) {
       throw new Error('No sender key available for encryption');
     }
 
-    // Get/increment counter for this KID
-    let counter = this.encryptCounter.get(kid) || 0n;
-    this.encryptCounter.set(kid, counter + 1n);
+    const salt = this.getSaltForKID(kid);
+    if (!salt) {
+      throw new Error(`No salt available for KID ${kid}`);
+    }
 
-    // Build SFrame header
-    const header = this.buildHeader(kid, counter);
-    
-    // Encrypt payload
-    const encryptedPayload = await this.encryptPayload(frame.data, senderKey, kid, counter);
-    
+    // Atomic getAndIncrement of the global sender counter under mutex
+    const counter = await this.counterMutex.run(async () => {
+      const current = this.encryptCounter.get(kid) ?? 0n;
+      this.encryptCounter.set(kid, current + 1n);
+      return current;
+    });
+
+    // Build SFrame header: KID (varint) + CTR (varint)
+    const header = buildHeader(kid, counter);
+
+    // Encrypt payload with AES-GCM, IV=deriveIV(salt, counter), additionalData=header
+    const encryptedPayload = await this.encryptPayload(frame.data, senderKey, salt, counter, header);
+
     // Combine header + encrypted payload
     const encryptedData = this.combineHeaderAndPayload(header, encryptedPayload);
 
@@ -100,67 +222,72 @@ export class SFrameTransform {
     };
   }
 
-  private buildHeader(kid: number, counter: bigint): Uint8Array {
-    // SFrame header: KID (varint) + CTR (varint)
-    // Simplified varint encoding
-    const kidBytes = this.encodeVarint(kid);
-    const ctrBytes = this.encodeVarintBigInt(counter);
-    
-    const header = new Uint8Array(kidBytes.length + ctrBytes.length);
-    header.set(kidBytes, 0);
-    header.set(ctrBytes, kidBytes.length);
-    
-    return header;
-  }
+  /**
+   * Helper for testing multi-track interleaving and verifying IV uniqueness.
+   */
+  async encryptFrameForTest(
+    data: Uint8Array,
+    kind: 'video' | 'audio' | 'screen',
+    trackId: string
+  ): Promise<{ iv: Uint8Array; counter: bigint; header: Uint8Array; encryptedData: ArrayBuffer }> {
+    const dummyFrame: EncodedFrame = {
+      data: (data.buffer as ArrayBuffer).slice(data.byteOffset, data.byteOffset + data.byteLength),
+      timestamp: Date.now(),
+      ssrc: 12345,
+      payloadType: 96,
+      sequenceNumber: 1,
+      marker: false,
+    };
 
-  private encodeVarint(value: number): Uint8Array {
-    const bytes: number[] = [];
-    while (value >= 0x80) {
-      bytes.push((value & 0x7f) | 0x80);
-      value >>= 7;
-    }
-    bytes.push(value);
-    return new Uint8Array(bytes);
-  }
+    const kid = this.getCurrentKID();
+    const salt = this.getSaltForKID(kid);
+    if (!salt) throw new Error(`No salt for KID ${kid}`);
 
-  private encodeVarintBigInt(value: bigint): Uint8Array {
-    const bytes: number[] = [];
-    while (value >= 0x80n) {
-      bytes.push(Number((value & 0x7fn) | 0x80n));
-      value >>= 7n;
-    }
-    bytes.push(Number(value));
-    return new Uint8Array(bytes);
+    const encryptedFrame = await this.encryptFrame(dummyFrame, kind, trackId);
+    const { header, counter } = parseHeader(encryptedFrame.data);
+    const iv = deriveIV(salt, counter);
+
+    return {
+      iv,
+      counter,
+      header,
+      encryptedData: encryptedFrame.data,
+    };
   }
 
   private async encryptPayload(
-    data: ArrayBuffer, 
-    key: CryptoKey, 
-    kid: number, 
-    counter: bigint
+    data: ArrayBuffer,
+    key: CryptoKey,
+    salt: Uint8Array,
+    counter: bigint,
+    header: Uint8Array
   ): Promise<ArrayBuffer> {
     if (this.useWASM && this.wasmModule) {
+      const kid = this.getCurrentKID();
       return this.wasmEncrypt(data, key, kid, counter);
     }
-    
-    // Web Crypto API encryption
-    const iv = this.deriveIV(kid, counter);
+
+    const iv = deriveIV(salt, counter);
     const ciphertext = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv, tagLength: this.cipherSuite.tagLen * 8 },
+      {
+        name: 'AES-GCM',
+        iv: iv as unknown as BufferSource,
+        tagLength: this.cipherSuite.tagLen * 8, // 128
+        additionalData: header as unknown as BufferSource,
+      },
       key,
       data
     );
-    
+
     return ciphertext;
   }
 
   private async wasmEncrypt(
-    data: ArrayBuffer, 
-    key: CryptoKey, 
-    kid: number, 
+    data: ArrayBuffer,
+    key: CryptoKey,
+    kid: number,
     counter: bigint
   ): Promise<ArrayBuffer> {
-    // Export key for WASM
     const keyBytes = await crypto.subtle.exportKey('raw', key);
     const result = this.wasmModule.encrypt(
       new Uint8Array(data),
@@ -169,26 +296,6 @@ export class SFrameTransform {
       counter
     );
     return result.buffer;
-  }
-
-  private deriveIV(kid: number, counter: bigint): Uint8Array<ArrayBuffer> {
-    // SFrame IV = salt XOR (KID || CTR) - simplified
-    const salt = new Uint8Array(this.cipherSuite.saltLen);
-    // In real impl, salt comes from key derivation
-    const kidBytes = new Uint8Array(4);
-    new DataView(kidBytes.buffer).setUint32(0, kid, false);
-    
-    const ctrBytes = new Uint8Array(8);
-    new DataView(ctrBytes.buffer).setBigUint64(0, counter, false);
-    
-    const iv = new Uint8Array(this.cipherSuite.saltLen);
-    for (let i = 0; i < iv.length; i++) {
-      const kidByte = kidBytes[i % kidBytes.length];
-      const ctrByte = ctrBytes[i % ctrBytes.length];
-      iv[i] = salt[i] ^ kidByte ^ ctrByte;
-    }
-    
-    return iv;
   }
 
   private combineHeaderAndPayload(header: Uint8Array, payload: ArrayBuffer): ArrayBuffer {
@@ -200,11 +307,11 @@ export class SFrameTransform {
 
   // ==================== RECEIVER TRANSFORM ====================
 
-  createReceiverTransformer(): TransformStream<EncodedFrame, EncodedFrame> {
+  createReceiverTransformer(remoteSenderId?: string): TransformStream<EncodedFrame, EncodedFrame> {
     return new TransformStream({
       transform: async (frame, controller) => {
         try {
-          const decryptedFrame = await this.decryptFrame(frame);
+          const decryptedFrame = await this.decryptFrame(frame, remoteSenderId);
           controller.enqueue(decryptedFrame);
         } catch (error) {
           console.error('SFrame decryption failed:', error);
@@ -215,30 +322,38 @@ export class SFrameTransform {
     });
   }
 
-  private async decryptFrame(frame: EncodedFrame): Promise<EncodedFrame> {
+  async decryptFrame(frame: EncodedFrame, remoteSenderId?: string): Promise<EncodedFrame> {
     // Parse SFrame header
-    const { header, payload, kid, counter } = this.parseHeader(frame.data);
-    
-    // Get sender key for this KID
-    // In real impl, we'd map KID to senderId via signaling
-    const senderId = this.getSenderIdForKID(kid);
+    const { header, payload, kid, counter } = parseHeader(frame.data);
+
+    // Resolve senderId: use provided remoteSenderId or fallback
+    const senderId = canonicalizeIdentity(remoteSenderId || this.getSenderIdForKID(kid));
     const senderKey = this.keyManager.getSenderKey(senderId, kid);
-    
+
     if (!senderKey) {
       throw new Error(`No sender key for KID ${kid}, sender ${senderId}`);
     }
 
-    // Check replay protection
-    const counterKey = `${senderId}:${kid}`;
-    const lastCounter = this.decryptCounters.get(counterKey) || 0n;
-    
-    if (counter <= lastCounter) {
-      throw new Error(`Replay detected: counter ${counter} <= ${lastCounter}`);
+    // Replay check per (epoch, canonicalSenderId) — NOT per track
+    let senderCounters = this.decryptCounters.get(kid);
+    if (!senderCounters) {
+      senderCounters = new Map<string, bigint>();
+      this.decryptCounters.set(kid, senderCounters);
     }
-    this.decryptCounters.set(counterKey, counter);
 
-    // Decrypt payload
-    const decryptedPayload = await this.decryptPayload(payload, senderKey, kid, counter);
+    const lastCounter = senderCounters.get(senderId);
+    if (lastCounter !== undefined && counter <= lastCounter) {
+      throw new Error(`Replay detected: counter ${counter} <= ${lastCounter} for sender ${senderId} epoch ${kid}`);
+    }
+    senderCounters.set(senderId, counter);
+
+    const salt = this.getSaltForKID(kid);
+    if (!salt) {
+      throw new Error(`No salt available for KID ${kid}`);
+    }
+
+    // Decrypt payload with AES-GCM, IV=deriveIV(salt, counter), additionalData=header
+    const decryptedPayload = await this.decryptPayload(payload, senderKey, salt, counter, header);
 
     return {
       ...frame,
@@ -246,66 +361,41 @@ export class SFrameTransform {
     };
   }
 
-  private parseHeader(data: ArrayBuffer): { header: Uint8Array; payload: ArrayBuffer; kid: number; counter: bigint } {
-    const view = new Uint8Array(data);
-    let offset = 0;
-    
-    // Parse KID varint
-    let kid = 0;
-    let shift = 0;
-    while (true) {
-      const byte = view[offset++];
-      kid |= (byte & 0x7f) << shift;
-      if ((byte & 0x80) === 0) break;
-      shift += 7;
-    }
-    
-    // Parse CTR varint
-    let counter = 0n;
-    shift = 0;
-    while (true) {
-      const byte = view[offset++];
-      counter |= (BigInt(byte & 0x7f) << BigInt(shift));
-      if ((byte & 0x80) === 0) break;
-      shift += 7;
-    }
-    
-    const header = view.slice(0, offset);
-    const payload = view.slice(offset).buffer;
-    
-    return { header, payload, kid, counter };
-  }
-
   private getSenderIdForKID(kid: number): string {
-    // In real implementation, this maps KID to senderId via signaling
-    // For POC, we use a simple mapping
     return `sender-${kid}`;
   }
 
   private async decryptPayload(
-    data: ArrayBuffer, 
-    key: CryptoKey, 
-    kid: number, 
-    counter: bigint
+    data: ArrayBuffer,
+    key: CryptoKey,
+    salt: Uint8Array,
+    counter: bigint,
+    header: Uint8Array
   ): Promise<ArrayBuffer> {
     if (this.useWASM && this.wasmModule) {
+      const kid = this.getCurrentKID();
       return this.wasmDecrypt(data, key, kid, counter);
     }
-    
-    const iv = this.deriveIV(kid, counter);
+
+    const iv = deriveIV(salt, counter);
     const plaintext = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv, tagLength: this.cipherSuite.tagLen * 8 },
+      {
+        name: 'AES-GCM',
+        iv: iv as unknown as BufferSource,
+        tagLength: this.cipherSuite.tagLen * 8, // 128
+        additionalData: header as unknown as BufferSource,
+      },
       key,
       data
     );
-    
+
     return plaintext;
   }
 
   private async wasmDecrypt(
-    data: ArrayBuffer, 
-    key: CryptoKey, 
-    kid: number, 
+    data: ArrayBuffer,
+    key: CryptoKey,
+    kid: number,
     counter: bigint
   ): Promise<ArrayBuffer> {
     const keyBytes = await crypto.subtle.exportKey('raw', key);
@@ -320,11 +410,53 @@ export class SFrameTransform {
 
   // ==================== UTILITIES ====================
 
-  async rotateKey(newEpochSecret: CryptoKey): Promise<void> {
-    await this.keyManager.rotateEpoch('manual');
-    // Reset counters on key rotation
+  getSaltForKID(kid: number): Uint8Array | null {
+    if (this.config.getEpochSalt) {
+      const s = this.config.getEpochSalt(kid);
+      if (s) return s;
+    }
+    if (this.keyManager.getCurrentEpoch() === kid) {
+      const s = this.keyManager.getCurrentSalt();
+      if (s) return s;
+    }
+    const prevEpochs = this.keyManager.getPreviousEpochs();
+    const prev = prevEpochs.get(kid);
+    if (prev?.salt) {
+      return prev.salt;
+    }
+    if (this.config.epochSalt) {
+      return this.config.epochSalt;
+    }
+    return null;
+  }
+
+  async rotateKey(newEpochSecret?: CryptoKey): Promise<void> {
+    const currentKID = this.getCurrentKID();
+    // Reset encryptCounter for new epoch
+    this.encryptCounter.set(currentKID, 0n);
+    if (!this.decryptCounters.has(currentKID)) {
+      this.decryptCounters.set(currentKID, new Map());
+    }
+  }
+
+  getEncryptCounter(kid: number): bigint | undefined {
+    return this.encryptCounter.get(kid);
+  }
+
+  getDecryptCounter(kid: number, canonicalSenderId: string): bigint | undefined {
+    return this.decryptCounters.get(kid)?.get(canonicalizeIdentity(canonicalSenderId));
+  }
+
+  clearCounters(): void {
     this.encryptCounter.clear();
     this.decryptCounters.clear();
+  }
+
+  deleteParticipantCounters(canonicalSenderId: string): void {
+    const canon = canonicalizeIdentity(canonicalSenderId);
+    for (const perEpoch of this.decryptCounters.values()) {
+      perEpoch.delete(canon);
+    }
   }
 
   getCipherSuite(): SFrameCipherSuite {
@@ -334,6 +466,117 @@ export class SFrameTransform {
   isUsingWASM(): boolean {
     return this.useWASM;
   }
+}
+
+// ==================== FEATURE DETECTION & SHARED HELPERS ====================
+
+export function isEncodedTransformSupported(): boolean {
+  if (typeof window === 'undefined') return true;
+  return 'RTCEncodedVideoFrame' in window
+      && typeof TransformStream !== 'undefined'
+      && typeof ReadableStream !== 'undefined';
+}
+
+export function hasCreateEncodedStreams(): boolean {
+  if (typeof window === 'undefined') return true;
+  return typeof RTCRtpSender !== 'undefined'
+      && typeof (RTCRtpSender.prototype as any)?.createEncodedStreams === 'function'
+      && typeof (RTCRtpReceiver.prototype as any)?.createEncodedStreams === 'function';
+}
+
+export function hasScriptTransform(): boolean {
+  if (typeof window === 'undefined') return false;
+  return 'RTCRtpScriptTransform' in window;
+}
+
+let globalSFrame: SFrameTransform | null = null;
+let globalCounterMutex: AsyncMutex = new AsyncMutex();
+
+export function getGlobalSFrame(): SFrameTransform | null {
+  return globalSFrame;
+}
+
+export function setGlobalSFrame(instance: SFrameTransform | null): void {
+  globalSFrame = instance;
+}
+
+export function getGlobalCounterMutex(): AsyncMutex {
+  return globalCounterMutex;
+}
+
+export async function installSFrameOnSenderShared(
+  sender: any,
+  globalSFrameInstance: SFrameTransform,
+  mutex: AsyncMutex
+): Promise<void> {
+  if ((sender as any)._sframeTransformer) return;
+  if (typeof sender.createEncodedStreams === 'function') {
+    try {
+      const { readable, writable } = sender.createEncodedStreams();
+      const transformer = globalSFrameInstance.createSenderTransformerWithGlobalCounter(mutex);
+      readable.pipeThrough(transformer).pipeTo(writable);
+      (sender as any)._sframeTransformer = globalSFrameInstance;
+    } catch (e) {
+      console.warn('[SFrame] Failed to create or pipe encoded sender streams:', e);
+    }
+  }
+}
+
+export async function installSFrameOnReceiverShared(
+  receiver: any,
+  globalSFrameInstance: SFrameTransform,
+  canonicalParticipantId: string
+): Promise<void> {
+  if ((receiver as any)._sframeTransformer) return;
+  if (typeof receiver.createEncodedStreams === 'function') {
+    try {
+      const { readable, writable } = receiver.createEncodedStreams();
+      const transformer = globalSFrameInstance.createReceiverTransformer(canonicalParticipantId);
+      readable.pipeThrough(transformer).pipeTo(writable);
+      (receiver as any)._sframeTransformer = globalSFrameInstance;
+    } catch (e) {
+      console.warn('[SFrame] Failed to create or pipe encoded receiver streams:', e);
+    }
+  }
+}
+
+export async function installSFrameOnSender(
+  sender: any,
+  keyManager: KeyManager,
+  getKID: () => number,
+  trackKind: 'audio' | 'video' | 'screen',
+  trackId: string,
+  epochSalt: Uint8Array
+): Promise<void> {
+  if (!globalSFrame) {
+    globalSFrame = new SFrameTransform({
+      keyManager,
+      cipherSuite: 'AES_GCM',
+      getCurrentKID: getKID,
+      epochSalt,
+    });
+  }
+  await installSFrameOnSenderShared(sender, globalSFrame, globalCounterMutex);
+}
+
+export async function installSFrameOnReceiver(
+  receiver: any,
+  keyManager: KeyManager,
+  getKID: () => number,
+  canonicalParticipantId: string,
+  trackKind: 'audio' | 'video',
+  trackId: string,
+  epochSalt: Uint8Array
+): Promise<void> {
+  if (!globalSFrame) {
+    globalSFrame = new SFrameTransform({
+      keyManager,
+      cipherSuite: 'AES_GCM',
+      getCurrentKID: getKID,
+      epochSalt,
+    });
+  }
+  await installSFrameOnReceiverShared(receiver, globalSFrame, canonicalParticipantId);
 }
 
 // ==================== WASM WORKER (OffscreenCanvas) ====================
@@ -368,28 +611,23 @@ async function initWASM(wasmUrl) {
 
 // Encrypt frame using WASM
 function encryptFrame(frameData, key, kid, counter) {
-  // Allocate memory in WASM
   const framePtr = sframeModule.malloc(frameData.length);
   const keyPtr = sframeModule.malloc(key.length);
   const outPtr = sframeModule.malloc(frameData.length + 32); // header + tag
   
-  // Copy data
   const memory = new Uint8Array(sframeModule.memory.buffer);
   memory.set(new Uint8Array(frameData), framePtr);
   memory.set(key, keyPtr);
   
-  // Call encrypt
   const result = sframeModule.sframe_encrypt(framePtr, frameData.length, keyPtr, key.length, kid, counter, outPtr);
   
   if (result < 0) {
     throw new Error('WASM encryption failed: ' + result);
   }
   
-  // Read result
   const output = new Uint8Array(memory.buffer, outPtr, result);
-  const outputCopy = output.slice(); // Copy out of WASM memory
+  const outputCopy = output.slice();
   
-  // Free memory
   sframeModule.free(framePtr);
   sframeModule.free(keyPtr);
   sframeModule.free(outPtr);
@@ -423,7 +661,6 @@ function decryptFrame(frameData, key, kid, counter) {
   return outputCopy.buffer;
 }
 
-// Handle messages from main thread
 self.onmessage = async (event) => {
   const { type, id, payload } = event.data;
   
@@ -441,7 +678,6 @@ self.onmessage = async (event) => {
         result = decryptFrame(payload.frameData, payload.key, payload.kid, payload.counter);
         break;
       case 'rotate-key':
-        // Key rotation handled by main thread
         result = { success: true };
         break;
       default:
@@ -454,7 +690,6 @@ self.onmessage = async (event) => {
   }
 };
 
-// VideoFrame recycling for performance
 const framePool = [];
 function getRecycledFrame(width, height, format) {
   if (framePool.length > 0) {
@@ -467,7 +702,7 @@ function getRecycledFrame(width, height, format) {
 }
 
 function recycleFrame(frame) {
-  if (framePool.length < 10) { // Limit pool size
+  if (framePool.length < 10) {
     framePool.push(frame);
   } else {
     frame.close();
@@ -501,7 +736,6 @@ export class WASMSFrameWorker {
       console.error('WASM worker error:', error);
     };
     
-    // Initialize WASM
     await this.sendMessage('init', { wasmUrl });
   }
 
@@ -521,7 +755,6 @@ export class WASMSFrameWorker {
       this.pendingRequests.set(id, { resolve, reject });
       this.worker!.postMessage({ id, type, payload });
       
-      // Timeout after 5 seconds
       setTimeout(() => {
         if (this.pendingRequests.has(id)) {
           this.pendingRequests.delete(id);

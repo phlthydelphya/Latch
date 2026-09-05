@@ -1,0 +1,540 @@
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/joshu/meet-secure-core/poc/meet-webrtc-core[39m
+
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mgenerates one HPKE keypair per participant and publishes base64 public key
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mTestIVUniquenessAcrossTracks (T-01 Nonce Reuse Mitigation)[2m > [22maudio, video, and screen-share frames from same sender/epoch never reuse IV
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mTestIVUniquenessAcrossTracks (T-01 Nonce Reuse Mitigation)[2m > [22mparallel concurrent encrypts across multiple tracks never collide counters or IVs
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mrecipient decrypt succeeds ΓÇö HPKE uses sender enc, not self pubkey
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mrecipient decrypt succeeds ΓÇö Alice encrypts to Bob, Bob decrypts successfully via processCommit
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mnon-recipient decrypt fails ΓÇö Carol cannot decrypt Alice->Bob ciphertext
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestDeriveSaltUniqueness: derives 12-byte salts with 100% uniqueness and determinism
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestCanonicalize: ensures lowercase, whitespace-trimmed canonical identities across lookups
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mTestIVUniquenessAcrossTracks (T-01 Nonce Reuse Mitigation)[2m > [22msame counter value on different senders does not collide keys and fails cross-decrypt
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mTestIVUniquenessAcrossTracks (T-01 Nonce Reuse Mitigation)[2m > [22mcounter resets to 0 on epoch rotation, but IV is not reused because salt changes
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mTestIVUniquenessAcrossTracks (T-01 Nonce Reuse Mitigation)[2m > [22mdecrypt replay protection is per (epoch,sender) not per track
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22mTestDeriveIVDeterministic: calling deriveIV twice with same parameters yields identical 12-byte IV
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mnon-recipient decrypt fails ΓÇö ciphertext not addressed to them
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22msignaling payload contains ciphertext only ΓÇö no epoch secret plaintext
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mgrep finds no plaintext epoch transport ΓÇö source contains no oldSecret||newSecret plaintext
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mpacket capture shows no epoch material disclosure ΓÇö ciphertext entropy and no plaintext NAL
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mEC key not truncated ΓÇö public key full length (32 or 65)
+ [32mΓ£ô[39m tests/s02-hpke.test.ts[2m > [22mS-02 HPKE per-recipient commit[2m > [22mHPKE decrypt uses sender enc, not self public key ΓÇö cross-check with direct HPKE
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestRotateDerivesSelf: re-derives senderKey for self and peers on epoch rotation
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestPreviousEpochsEviction: caps previous epochs at 3 and zeroes secrets upon TTL eviction
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mRFC9180 sender->recipient interoperability ΓÇö @hpke/core CipherSuite roundtrip with KeyManager keys
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mciphertexts differ per recipient ΓÇö same payload encrypted to Bob vs Carol produces different ciphertexts
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22msuite configuration uses DhkemP256HkdfSha256, HkdfSha256, Aes128Gcm explicitly
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mno plaintext epoch material traverses signaling ΓÇö createCommit contains only ciphertext, no sendCommit
+ [32mΓ£ô[39m tests/s03-rfc9180-hpke.test.ts[2m > [22mS-03 RFC9180 HPKE remediation[2m > [22mexisting S-02 tests compatibility ΓÇö all S-02 assertion properties preserved
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22mTestSaltUniquenessPerEpoch: consecutive deriveSalt from distinct epoch secrets never collide
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22mTestPreviousEpochsRetainsSalt: previous epoch salt is retained and usable after rotation
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22mTestZeroizeClearsSalt: evicted epoch zeroes salt material
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22mTestAdditionalDataHeader: tampering with KID or CTR in header causes AEAD authentication to fail
+ [32mΓ£ô[39m tests/sframe-global-counter.test.ts[2m > [22mWP-2: SFrame Transform & Global Counter[2m > [22mSupporting Unit Tests[2m > [22misEncodedTransformSupported: checks browser API capabilities
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestWelcomeAADMismatch: verifies roomId and epoch binding in Welcome prevents cross-room replays
+ [32mΓ£ô[39m tests/wp1-key-manager.test.ts[2m > [22mWP-1: KeyManager Corrections[2m > [22mTestRotationMutex: enforces single-flight serialization on AsyncMutex
+ [32mΓ£ô[39m tests/app.test.tsx[2m > [22mAppStore[2m > [22mmanages room state
+ [32mΓ£ô[39m tests/app.test.tsx[2m > [22mAppStore[2m > [22mmanages participants
+ [32mΓ£ô[39m tests/app.test.tsx[2m > [22mAppStore[2m > [22mmanages local participant
+ [32mΓ£ô[39m tests/app.test.tsx[2m > [22mAppStore[2m > [22mmanages connection state
+ [32mΓ£ô[39m tests/app.test.tsx[2m > [22mAppStore[2m > [22mmanages shield mode and errors
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mKeyManager AAD verification: processWelcome validates roomId and epoch binding
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mMetricsCollector: tracks webrtc_welcome_retry_total and webrtc_rotation_contention_total
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-1: RoomOptions configures blind SFU forwarding (adaptiveStream: false, dynacast: false)[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: resolves immediately on 1st attempt when ACK received[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-2 & I-4: Pre-connect invariants establish KeyManager, global SFrame singleton, 12B salt & 0n counter[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-1: RoomOptions configures blind SFU forwarding (adaptiveStream: false, dynacast: false)
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: resolves immediately on 1st attempt when ACK received[22m[39m
+[LiveKit] Data received from bob topic: hpke-pubkey
+[LiveKit] Data received from bob topic: sframe-welcome-request
+[SFrame] Registered HPKE public key for bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: resolves immediately on 1st attempt when ACK received[22m[39m
+[SFrame] welcome sent attempt=1 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: resolves immediately on 1st attempt when ACK received[22m[39m
+[LiveKit] Data received from bob topic: sframe-welcome-ack
+[SFrame] welcome ack received from=bob epoch=0 rttMs=11
+[SFrame] welcome delivered and acknowledged by bob on attempt 1
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-3: Flushes pending HPKE public key on RoomEvent.Connected with reliable publishData[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-2 & I-4: Pre-connect invariants establish KeyManager, global SFrame singleton, 12B salt & 0n counter
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-5 & I-6: LocalTrackPublished and TrackSubscribed install SFrame transforms sharing global counter[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-3: Flushes pending HPKE public key on RoomEvent.Connected with reliable publishData
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mLeader publishWelcomeWithRetry: resolves immediately on 1st attempt when ACK received
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-5 & I-6: LocalTrackPublished and TrackSubscribed install SFrame transforms sharing global counter[22m[39m
+[LiveKit] LocalTrackPublished {
+  trackSid: [32m'TR_video_1'[39m,
+  kind: [32m'video'[39m,
+  source: [32m'camera'[39m,
+  participantIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] trackPublications.size [33m0[39m
+[SFrame] sender transform active { kid: [33m0[39m, media: [32m'video'[39m, trackId: [32m'TR_video_1'[39m, globalCounter: [32m'0'[39m }
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[LiveKit] Data received from bob topic: hpke-pubkey
+[LiveKit] Data received from bob topic: sframe-welcome-request
+[SFrame] Registered HPKE public key for bob
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-5 & I-6: LocalTrackPublished and TrackSubscribed install SFrame transforms sharing global counter[22m[39m
+[SFrame] receiver transform active { sender: [32m'bob'[39m, kid: [33m0[39m, lastCounter: [32m'-1'[39m }
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[SFrame] welcome sent attempt=1 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-5 & I-6: LocalTrackPublished and TrackSubscribed install SFrame transforms sharing global counter
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome[22m[39m
+[LiveKit] Data received from Bob topic: hpke-pubkey
+[LiveKit] Data received from Bob topic: sframe-welcome-request
+[SFrame] Registered HPKE public key for bob
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome[22m[39m
+[SFrame] welcome sent attempt=1 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome[22m[39m
+<empty line>
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-8: Audio and Video mute toggle preserves SFrame transform & counter without reset[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-9: Screen share uses shared SFrame transform and global counter domain[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-8: Audio and Video mute toggle preserves SFrame transform & counter without reset
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-9: Screen share uses shared SFrame transform and global counter domain[22m[39m
+[SFrame] welcome sent attempt=2 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-9: Screen share uses shared SFrame transform and global counter domain[22m[39m
+[SFrame] Screen share transform installed { kid: [33m0[39m, trackId: [32m'TR_screen_1'[39m, globalCounter: [32m'0'[39m }
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-10: Leader election and debounced join rekey under rotationMutex[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-9: Screen share uses shared SFrame transform and global counter domain
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-10: Leader election and debounced join rekey under rotationMutex[22m[39m
+[LiveKit] Data received from carol topic: hpke-pubkey
+[SFrame] Registered HPKE public key for carol
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[SFrame] Leader rotated epoch for join to [33m1[39m
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[SFrame] publishWelcomeWithRetry already active for bob
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-10: Leader election and debounced join rekey under rotationMutex[22m[39m
+[SFrame] Leader rotated epoch for join to [33m1[39m
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-10: Leader election and debounced join rekey under rotationMutex[22m[39m
+[SFrame] welcome sent attempt=1 joiner=carol epoch=1
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-10: Leader election and debounced join rekey under rotationMutex[22m[39m
+<empty line>
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-11: ParticipantDisconnected triggers leaver counter deletion and leave rekey[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-10: Leader election and debounced join rekey under rotationMutex[33m 717[2mms[22m[39m
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-11: ParticipantDisconnected triggers leaver counter deletion and leave rekey[22m[39m
+[SFrame] Leader rotated epoch for leave to [33m1[39m
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-11: ParticipantDisconnected triggers leaver counter deletion and leave rekey[22m[39m
+[SFrame] welcome sent attempt=2 joiner=carol epoch=1
+
+[90mstdout[2m | tests/wp3-use-webrtc.test.ts[2m > [22m[2mWP-3: useWebRTC SFrame E2EE Integration[2m > [22m[2mI-13: Teardown clears counters, resets global singleton, and disconnects room[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mtrue[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-11: ParticipantDisconnected triggers leaver counter deletion and leave rekey
+ [32mΓ£ô[39m tests/wp3-use-webrtc.test.ts[2m > [22mWP-3: useWebRTC SFrame E2EE Integration[2m > [22mI-13: Teardown clears counters, resets global singleton, and disconnects room
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+<empty line>
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[SFrame] welcome sent attempt=2 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[22m[39m
+[LiveKit] Data received from bob topic: sframe-welcome-ack
+[SFrame] welcome ack received from=bob epoch=0 rttMs=32
+[SFrame] welcome delivered and acknowledged by bob on attempt 2
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mLeader publishWelcomeWithRetry: retries on dropped welcome and resolves on attempt 2[33m 1976[2mms[22m[39m
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[LiveKit] Data received from bob topic: hpke-pubkey
+[LiveKit] Data received from bob topic: sframe-welcome-request
+[SFrame] Registered HPKE public key for bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] welcome sent attempt=1 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] Leader rotated epoch for join to [33m1[39m
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] publishWelcomeWithRetry already active for bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+<empty line>
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] welcome sent attempt=2 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+<empty line>
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] welcome sent attempt=3 joiner=bob epoch=0
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[22m[39m
+[SFrame] Fallback /sync posted for bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mLeader publishWelcomeWithRetry: exhausts 3 retries and falls back to POST /sync[33m 5272[2mms[22m[39m
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[22m[39m
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'bob'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[22m[39m
+[SFrame] welcome request sent attempt=1 backoffMs=500
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[22m[39m
+[SFrame] welcome request sent attempt=2 backoffMs=1000
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[22m[39m
+[SFrame] welcome request sent attempt=3 backoffMs=2000
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner cancels welcome timer & publishes sframe-welcome-ack upon receiving valid Welcome[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mJoiner sframe-welcome-request: emits with exponential backoff (500ms -> 1000ms -> 2000ms)[33m 3865[2mms[22m[39m
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner cancels welcome timer & publishes sframe-welcome-ack upon receiving valid Welcome[22m[39m
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'bob'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner cancels welcome timer & publishes sframe-welcome-ack upon receiving valid Welcome[22m[39m
+[LiveKit] Data received from alice topic: sframe-welcome
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner cancels welcome timer & publishes sframe-welcome-ack upon receiving valid Welcome[22m[39m
+[SFrame] Adopted epoch via Welcome: [33m0[39m
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner rejects invalid Welcome without cancelling backoff or ACKing[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mJoiner cancels welcome timer & publishes sframe-welcome-ack upon receiving valid Welcome[33m 776[2mms[22m[39m
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner rejects invalid Welcome without cancelling backoff or ACKing[22m[39m
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'bob'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant bob
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner rejects invalid Welcome without cancelling backoff or ACKing[22m[39m
+[LiveKit] Data received from alice topic: sframe-welcome
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mJoiner rejects invalid Welcome without cancelling backoff or ACKing[22m[39m
+[SFrame] welcome request sent attempt=1 backoffMs=500
+
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mTeardown: cleans up welcome timers and pending ACKs cleanly[22m[39m
+[LiveKit] Room.connect start { sfuUrl: [32m'ws://127.0.0.1:7880'[39m, tokenPrefix: [32m'mock-jwt-token...'[39m }
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'alice'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant alice
+[SFrame] Published hpke-pubkey on Connected
+[LiveKit] Room.connect success { roomName: [32m'test-room'[39m, state: [32m'connected'[39m, trackPublicationsSize: [33m0[39m }
+[LiveKit] setCameraEnabled start
+[LiveKit] setCameraEnabled success { trackPublicationsSize: [33m0[39m, isCameraEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+[LiveKit] setMicrophoneEnabled start
+[LiveKit] setMicrophoneEnabled success { trackPublicationsSize: [33m0[39m, isMicrophoneEnabled: [33mfalse[39m }
+[LiveKit] trackPublications.size [33m0[39m
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mJoiner rejects invalid Welcome without cancelling backoff or ACKing[33m 731[2mms[22m[39m
+[90mstdout[2m | tests/wp4-welcome-reliability.test.ts[2m > [22m[2mWP-4: Welcome Reliability[2m > [22m[2mTeardown: cleans up welcome timers and pending ACKs cleanly[22m[39m
+[LiveKit] Room.connect success {
+  roomName: [32m'test-room'[39m,
+  state: [32m'connected'[39m,
+  localIdentity: [32m'bob'[39m,
+  trackPublicationsSize: [33m0[39m
+}
+[LiveKit] room.name test-room state connected localParticipant bob
+
+ [32mΓ£ô[39m tests/wp4-welcome-reliability.test.ts[2m > [22mWP-4: Welcome Reliability[2m > [22mTeardown: cleans up welcome timers and pending ACKs cleanly[33m 731[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m56 passed[39m[22m[90m (56)[39m
+[2m   Start at [22m 22:34:34
+[2m   Duration [22m 16.09s[2m (transform 605ms, setup 256ms, collect 1.76s, tests 15.54s, environment 4.65s, prepare 1.89s)[22m
+

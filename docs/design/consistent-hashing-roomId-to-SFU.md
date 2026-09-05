@@ -106,16 +106,17 @@ See `architecture-brief.md` §7 table. For hash specifically:
 - **Manager crash:** signal caches last assignment 30s (`sfu:assign:{roomId}`) → stale but safe (single SFU fallback). K8s restarts manager <10s.
 - **Redis crash:** signal keeps in-memory assign cache 10s, then retries Sentinel (K8s) or Compose restart. Presence lost but deterministic re-hash repopulates.
 
-## Test Vectors
+## Test Vectors — Single Source of Truth D-037 (salt=p0-salt-2026, code truth `services/meet-sfu-manager/main.go:243`)
 
 ```
-salt = "p0-salt-2026"
-nodes = [livekit-0, livekit-1, livekit-2]
-roomId=abc123 → livekit-2
-roomId=room-20p-test → livekit-0
-Add livekit-3 → abc123 stays on livekit-2 (75% case), new rooms may go to 3
-Load: livekit-2 load 0.9 → abc123 flips to livekit-0 (weighted)
-Single node: nodes=[livekit-0] → any roomId → livekit-0
+salt = "p0-salt-2026"  // SFU_HASH_SALT per infra/compose.yaml:97 and services/meet-sfu-manager/main.go:80
+nodes = [sfu-0, sfu-1, sfu-2]
+roomId=abc123 → sfu-1          // sfu-* namespace: xxhash(abc123|sfu-1|p0-salt-2026)=16796581398864227772 max → sfu-1 (go test PASS)
+roomId=room-20p-test → sfu-0
+Add sfu-3 → abc123 stays on sfu-1 (75% case), new rooms may go to 3
+Load: sfu-1 load 0.9 → abc123 flips to sfu-0 (weighted divisor 10 vs 2)
+Single node: nodes=[livekit:7880] (auto sfu-0) → any roomId → sfu-0 // degenerate P0 Compose
+Namespace note: nodes=[livekit-0,livekit-1,livekit-2] same salt + abc123 → livekit-2 (11503489511354447937 / 761910975009738206 / 12358600011866411036 max=livekit-2) — both vectors correct for their ID prefix; formula unchanged h=xxhash(roomId|nodeID|salt)/(1+load*10)
 ```
 
 Unit test `TestAssignSFU_Deterministic` + integration `docker compose up --scale meet-signal=2` → join 50 rooms → all route deterministically.

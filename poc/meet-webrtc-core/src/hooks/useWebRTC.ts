@@ -1,182 +1,873 @@
+/**
+ * WebRTC / LiveKit connection hook with SFrame E2EE integration.
+ * Implements insertion points I-1 through I-13 per M0-P0 / phase2b-sframe-design-v2.1.
+ */
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { Room, RoomEvent, ConnectionState } from 'livekit-client';
+import { Room, RoomEvent, ConnectionState, Track } from 'livekit-client';
 import { fetchToken, resolveSfuUrl } from '../auth/token';
 import { useAppStore } from '../store/appStore';
+import { KeyManager } from '../keys/manager';
+import { canonicalizeIdentity } from '../utils/identity';
+import {
+  SFrameTransform,
+  installSFrameOnSenderShared,
+  installSFrameOnReceiverShared,
+  getGlobalCounterMutex,
+  hasCreateEncodedStreams,
+  hasScriptTransform,
+  setGlobalSFrame,
+  getGlobalSFrame,
+} from '../sframe/transform';
+import { getGlobalMetricsCollector } from '../metrics/collector';
 
 export function useWebRTC() {
-  const { roomId, participantId, jwt, livekitToken, sfuUrl, keyParam, setConnected, setReconnecting, setError, setShieldMode, addParticipant, removeParticipant, setLocalParticipant } = useAppStore();
+  const { roomId, setError } = useAppStore();
   const roomRef = useRef<Room | null>(null);
+  const isConnectingRef = useRef(false);
+  const activeRoomIdRef = useRef<string | null>(null);
+
+  const keyManagerRef = useRef<KeyManager | null>(null);
+  const sframeRef = useRef<SFrameTransform | null>(null);
+
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [stats, setStats] = useState<RTCStatsReport | null>(null);
 
-  const initialize = useCallback(async () => {
+  useEffect(() => {
     if (!roomId) return;
+    const targetRoomId = roomId;
+    if (activeRoomIdRef.current === targetRoomId && roomRef.current && roomRef.current.state !== ConnectionState.Disconnected) {
+      return;
+    }
 
-    try {
-      // Fetch token if not already in store (authoritative source for sfuUrl + livekitToken)
-      let token = livekitToken;
-      let resolvedSfuUrl = sfuUrl ? resolveSfuUrl(sfuUrl) : '';
+    let isCancelled = false;
+    let statsInterval: ReturnType<typeof setInterval> | null = null;
+    let joinDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let welcomeRequestTimer: ReturnType<typeof setTimeout> | null = null;
 
-      if (!token || !resolvedSfuUrl) {
-        const name = `user-${participantId?.slice(0, 6) || 'anon'}`;
-        const fetched = await fetchToken(roomId, name);
-        token = fetched.livekitToken;
-        resolvedSfuUrl = resolveSfuUrl(fetched.sfuUrl);
-      }
+    interface PendingWelcomeAck {
+      resolve: () => void;
+      reject: (err: Error) => void;
+      epoch: number;
+      timestamp: number;
+    }
+    const pendingWelcomeAcks = new Map<string, PendingWelcomeAck>();
+    const activeWelcomeRetries = new Set<string>();
 
-      if (!token || !resolvedSfuUrl) {
-        throw new Error('Missing livekitToken or sfuUrl after token fetch');
-      }
+    async function initialize() {
+      if (isConnectingRef.current) return;
+      isConnectingRef.current = true;
+      activeRoomIdRef.current = targetRoomId;
 
-      const room = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-      });
-      roomRef.current = room;
+      try {
+        const store = useAppStore.getState();
+        let token = store.livekitToken;
+        let resolvedSfuUrl = store.sfuUrl ? resolveSfuUrl(store.sfuUrl) : '';
 
-      // Expose room for Playwright/test verification
-      (window as any).__LIVEKIT_ROOM__ = room;
-
-      // Event handlers
-      room.on(RoomEvent.Connected, () => {
-        console.log('[LiveKit] room.name', room.name, 'state', room.state, 'localParticipant', room.localParticipant?.identity);
-        setConnected(true);
-        setShieldMode(true);
-        
-        // Set local participant in store
-        if (room.localParticipant) {
-          setLocalParticipant({
-            id: room.localParticipant.identity,
-            name: `You (${room.localParticipant.identity.slice(0, 6)})`,
-            audioEnabled: room.localParticipant.isMicrophoneEnabled,
-            videoEnabled: room.localParticipant.isCameraEnabled,
-            screenSharing: room.localParticipant.isScreenShareEnabled,
-            isLocal: true,
-            isSpeaking: false,
-          });
-        }
-      });
-
-      room.on(RoomEvent.Disconnected, (reason) => {
-        setConnected(false);
-        setShieldMode(false);
-        if (reason) {
-          setError(`Disconnected: ${reason}`);
-        }
-      });
-
-      room.on(RoomEvent.Reconnecting, () => setReconnecting(true));
-      room.on(RoomEvent.Reconnected, () => setReconnecting(false));
-
-      room.on(RoomEvent.ParticipantConnected, (participant) => {
-        addParticipant({
-          id: participant.identity,
-          name: `Participant ${participant.identity.slice(0, 6)}`,
-          audioEnabled: participant.isMicrophoneEnabled,
-          videoEnabled: participant.isCameraEnabled,
-          screenSharing: participant.isScreenShareEnabled,
-          isLocal: false,
-          isSpeaking: false,
-        });
-      });
-
-      room.on(RoomEvent.ParticipantDisconnected, (participant) => {
-        removeParticipant(participant.identity);
-      });
-
-      room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-        const stream = new MediaStream();
-        // Track.mediaStreamTrack is the underlying MediaStreamTrack (LiveKit wraps native tracks)
-        const mst = (track as any).mediaStreamTrack as MediaStreamTrack | undefined;
-        if (mst) {
-          stream.addTrack(mst);
-        }
-        setRemoteStreams((prev) => {
-          const next = new Map(prev);
-          next.set(publication.trackSid, stream);
-          return next;
-        });
-      });
-
-      room.on(RoomEvent.TrackUnsubscribed, (_track, publication) => {
-        setRemoteStreams((prev) => {
-          const next = new Map(prev);
-          next.delete(publication.trackSid);
-          return next;
-        });
-      });
-
-      room.on(RoomEvent.LocalTrackPublished, (_publication, participant) => {
-        // Local track published - we can get the stream from the participant
-        if (participant === room.localParticipant) {
-          const stream = new MediaStream();
-          room.localParticipant?.trackPublications.forEach((pub) => {
-            const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
-            if (mst) {
-              stream.addTrack(mst);
-            }
-          });
-          if (stream.getTracks().length > 0) {
-            setLocalStream(stream);
+        if (!token || !resolvedSfuUrl) {
+          const name = `user-${store.participantId?.slice(0, 6) || 'anon'}`;
+          const fetched = await fetchToken(targetRoomId, name);
+          if (isCancelled) return;
+          token = fetched.livekitToken;
+          resolvedSfuUrl = resolveSfuUrl(fetched.sfuUrl);
+          // Persist credentials for session reloads / evidence
+          if (token && fetched.sfuUrl) {
+            store.setCredentials(token, fetched.sfuUrl);
+            console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
           }
         }
-      });
 
-      room.on(RoomEvent.DataReceived, (payload, participant) => {
-        // Handle data messages if needed
-        console.log('[LiveKit] Data received from', participant?.identity);
-      });
+        if (isCancelled) return;
 
-      // Connect to LiveKit room
-      await room.connect(resolvedSfuUrl, token);
-
-      // Stats polling — LiveKit Room has no getConnectionStats; poll via getStats on publisher if available
-      const statsInterval = setInterval(async () => {
-        if (roomRef.current) {
-          try {
-            // Use WebRTC peer connection stats if exposed via engine, otherwise skip
-            const pc = (roomRef.current as any).engine?.publisher?.pc as RTCPeerConnection | undefined;
-            if (pc) {
-              const s = await pc.getStats();
-              setStats(s);
-            }
-          } catch {}
+        if (!token || !resolvedSfuUrl) {
+          throw new Error('Missing livekitToken or sfuUrl after token fetch');
         }
-      }, 2000);
 
-      return () => clearInterval(statsInterval);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      // BLOCK CONDITION: Return exception + stack + JWT payload + sfuUrl + file/line
-      console.error('[LiveKit] Connection failed:', {
-        message: error.message,
-        stack: error.stack,
-        roomId,
-        sfuUrl: sfuUrl ? resolveSfuUrl(sfuUrl) : 'N/A',
-        livekitTokenPrefix: livekitToken?.slice(0, 20) + '...' || 'N/A',
-        file: 'useWebRTC.ts',
-        line: 'initialize callback',
-      });
-      setError(`LiveKit connection failed: ${error.message}`);
-      throw error;
+        const sframeEnabled = import.meta.env.VITE_SFRAME_ENABLED !== 'false';
+
+        // I-1: RoomOptions — adaptiveStream and dynacast disabled for blind SFU forwarding
+        const room = new Room({
+          adaptiveStream: !sframeEnabled,
+          dynacast: !sframeEnabled,
+          publishDefaults: {
+            simulcast: true,
+            videoEncoding: { maxBitrate: 1800000 },
+          },
+        });
+        roomRef.current = room;
+
+        // Expose room for Playwright/test verification
+        (window as any).__LIVEKIT_ROOM__ = room;
+
+        // I-2: Pre-connect KeyManager & Global SFrameTransform setup
+        const keyManager = new KeyManager({
+          cipherSuite: 'AES_GCM',
+          keyRotationIntervalMs: 300000,
+        });
+        keyManagerRef.current = keyManager;
+
+        const canonicalSelf = canonicalizeIdentity(store.participantId || 'anon');
+        await keyManager.initialize(canonicalSelf);
+
+        const getCurrentKID = () => keyManager.getCurrentEpoch();
+        const epochSalt = keyManager.getCurrentSalt()!;
+
+        const sframe = new SFrameTransform({
+          keyManager,
+          cipherSuite: 'AES_GCM',
+          getCurrentKID,
+          epochSalt,
+        });
+        sframeRef.current = sframe;
+        setGlobalSFrame(sframe);
+
+        // Deferred publish queue for HPKE public key
+        const pendingPublishQueue: Array<{ topic: string; payload: Uint8Array; reliable: boolean }> = [];
+        const pubkeyB64 = await keyManager.exportHPKEPublicKey();
+        pendingPublishQueue.push({
+          topic: 'hpke-pubkey',
+          payload: new TextEncoder().encode(pubkeyB64),
+          reliable: true,
+        });
+
+        // Helper: Leader election via deterministic sorted identities
+        function getSortedIdentities(): string[] {
+          const ids = [canonicalSelf];
+          if (roomRef.current) {
+            for (const p of roomRef.current.remoteParticipants.values()) {
+              ids.push(canonicalizeIdentity(p.identity));
+            }
+          }
+          return ids.sort();
+        }
+
+        function isLeader(): boolean {
+          const sorted = getSortedIdentities();
+          return sorted[0] === canonicalSelf;
+        }
+
+        // WP-4: Welcome ACK Tracking & Joiner Backoff State
+        let welcomeRequestAttempt = 0;
+        let hasReceivedWelcome = false;
+
+        function scheduleWelcomeRequest(delayMs: number = 500) {
+          if (hasReceivedWelcome || isLeader()) return;
+          if (welcomeRequestTimer) clearTimeout(welcomeRequestTimer);
+
+          welcomeRequestTimer = setTimeout(async () => {
+            if (hasReceivedWelcome || isLeader()) return;
+            welcomeRequestAttempt++;
+            console.log(`[SFrame] welcome request sent attempt=${welcomeRequestAttempt} backoffMs=${delayMs}`);
+
+            if (room.localParticipant) {
+              try {
+                await room.localParticipant.publishData(
+                  new TextEncoder().encode(
+                    JSON.stringify({
+                      type: 'sframe-welcome-request',
+                      attempt: welcomeRequestAttempt,
+                    })
+                  ),
+                  { reliable: true, topic: 'sframe-welcome-request' }
+                );
+              } catch (err) {
+                console.warn('[SFrame] Failed to publish sframe-welcome-request:', err);
+              }
+            }
+
+            // Exponential backoff: 500ms -> 1000ms -> 2000ms -> 4000ms ... capped at 30s
+            const nextDelay = Math.min(delayMs * 2, 30000);
+            scheduleWelcomeRequest(nextDelay);
+          }, delayMs);
+        }
+
+        // I-3: Flush pending publish queue on Connected
+        async function flushPendingPublishQueue(targetRoom: Room) {
+          while (pendingPublishQueue.length > 0) {
+            const item = pendingPublishQueue.shift();
+            if (!item) break;
+            const delays = [100, 300, 900];
+            for (let attempt = 0; attempt <= delays.length; attempt++) {
+              try {
+                if (targetRoom.localParticipant) {
+                  await targetRoom.localParticipant.publishData(Uint8Array.from(item.payload), {
+                    reliable: item.reliable,
+                    topic: item.topic,
+                  });
+                  console.log(`[SFrame] Published ${item.topic} on Connected`);
+                  break;
+                }
+              } catch (err) {
+                if (attempt < delays.length) {
+                  await new Promise((r) => setTimeout(r, delays[attempt]));
+                }
+              }
+            }
+          }
+        }
+
+        // Event handlers
+        room.on(RoomEvent.Connected, async () => {
+          console.log('[LiveKit] Room.connect success', {
+            roomName: room.name,
+            state: room.state,
+            localIdentity: room.localParticipant?.identity,
+            trackPublicationsSize: room.localParticipant?.trackPublications.size ?? 0,
+          });
+          console.log('[LiveKit] room.name', room.name, 'state', room.state, 'localParticipant', room.localParticipant?.identity);
+          useAppStore.getState().setConnected(true);
+          useAppStore.getState().setShieldMode(true);
+
+          // Flush HPKE key publish
+          if (sframeEnabled) {
+            await flushPendingPublishQueue(room);
+            // WP-4: If not leader, start welcome-request backoff timer
+            if (!isLeader()) {
+              scheduleWelcomeRequest(500);
+            }
+          }
+
+          // Set local participant in store
+          if (room.localParticipant) {
+            useAppStore.getState().setLocalParticipant({
+              id: room.localParticipant.identity,
+              name: `You (${room.localParticipant.identity.slice(0, 6)})`,
+              audioEnabled: room.localParticipant.isMicrophoneEnabled,
+              videoEnabled: room.localParticipant.isCameraEnabled,
+              screenSharing: room.localParticipant.isScreenShareEnabled,
+              isLocal: true,
+              isSpeaking: false,
+            });
+          }
+
+          // Populate existing remote participants in store
+          if (room.remoteParticipants && room.remoteParticipants.size > 0) {
+            for (const participant of room.remoteParticipants.values()) {
+              useAppStore.getState().addParticipant({
+                id: participant.identity,
+                name: `Participant ${participant.identity.slice(0, 6)}`,
+                audioEnabled: participant.isMicrophoneEnabled,
+                videoEnabled: participant.isCameraEnabled,
+                screenSharing: participant.isScreenShareEnabled,
+                isLocal: false,
+                isSpeaking: false,
+              });
+            }
+          }
+        });
+
+        room.on(RoomEvent.Disconnected, (reason) => {
+          useAppStore.getState().setConnected(false);
+          useAppStore.getState().setShieldMode(false);
+          if (reason) {
+            useAppStore.getState().setError(`Disconnected: ${reason}`);
+          }
+        });
+
+        room.on(RoomEvent.Reconnecting, () => useAppStore.getState().setReconnecting(true));
+        room.on(RoomEvent.Reconnected, () => useAppStore.getState().setReconnecting(false));
+
+        // I-10: ParticipantConnected & Join Rekey
+        room.on(RoomEvent.ParticipantConnected, (participant) => {
+          useAppStore.getState().addParticipant({
+            id: participant.identity,
+            name: `Participant ${participant.identity.slice(0, 6)}`,
+            audioEnabled: participant.isMicrophoneEnabled,
+            videoEnabled: participant.isCameraEnabled,
+            screenSharing: participant.isScreenShareEnabled,
+            isLocal: false,
+            isSpeaking: false,
+          });
+
+          // Check if self is leader and trigger join rotation after debounce
+          const canonJoiner = canonicalizeIdentity(participant.identity);
+          scheduleJoinRotation(canonJoiner);
+        });
+
+        // I-11: ParticipantDisconnected & Leave Rekey
+        room.on(RoomEvent.ParticipantDisconnected, async (participant) => {
+          const canonLeaver = canonicalizeIdentity(participant.identity);
+          useAppStore.getState().removeParticipant(participant.identity);
+
+          if (sframeEnabled && keyManagerRef.current) {
+            keyManagerRef.current.removeParticipantHPKEPublicKey(canonLeaver);
+            await keyManagerRef.current.removeParticipant(canonLeaver);
+            sframeRef.current?.deleteParticipantCounters(canonLeaver);
+
+            const remaining = getSortedIdentities().filter((id) => id !== canonLeaver);
+            if (remaining.length > 1 && remaining[0] === canonicalSelf) {
+              try {
+                if (keyManagerRef.current.rotationMutex.isLocked()) {
+                  getGlobalMetricsCollector().recordRotationContention('leave');
+                }
+                await keyManagerRef.current.rotationMutex.run(async () => {
+                  const { commits, newEpoch } = await keyManagerRef.current!.rotateEpoch('leave', canonLeaver);
+                  await sframeRef.current?.rotateKey();
+                  console.log('[SFrame] Leader rotated epoch for leave to', newEpoch);
+
+                  for (const [peerId, commitBytes] of commits) {
+                    if (room.localParticipant) {
+                      await room.localParticipant.publishData(
+                        new TextEncoder().encode(JSON.stringify({
+                          type: 'sframe-commit',
+                          epoch: newEpoch,
+                          commit: Array.from(commitBytes),
+                        })),
+                        { reliable: true, topic: 'sframe-commit', destinationIdentities: [peerId] }
+                      );
+                    }
+                  }
+                });
+              } catch (err) {
+                console.error('[SFrame] Leave rotation failed:', err);
+              }
+            }
+          }
+        });
+
+        // I-6: TrackSubscribed
+        room.on(RoomEvent.TrackSubscribed, async (track, publication, participant) => {
+          if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform()) && participant) {
+            const receiver = (track as any).receiver;
+            if (receiver) {
+              const canonicalParticipant = canonicalizeIdentity(participant.identity);
+              await installSFrameOnReceiverShared(receiver, sframe, canonicalParticipant);
+              console.log('[SFrame] receiver transform active', {
+                sender: canonicalParticipant.slice(0, 8),
+                kid: keyManager.getCurrentEpoch(),
+                lastCounter: sframe.getDecryptCounter(keyManager.getCurrentEpoch(), canonicalParticipant)?.toString() ?? '-1',
+              });
+            }
+          }
+
+          const stream = new MediaStream();
+          const mst = (track as any).mediaStreamTrack as MediaStreamTrack | undefined;
+          if (mst) {
+            stream.addTrack(mst);
+          }
+          setRemoteStreams((prev) => {
+            const next = new Map(prev);
+            next.set(publication.trackSid, stream);
+            return next;
+          });
+        });
+
+        room.on(RoomEvent.TrackUnsubscribed, (_track, publication) => {
+          setRemoteStreams((prev) => {
+            const next = new Map(prev);
+            next.delete(publication.trackSid);
+            return next;
+          });
+        });
+
+        // I-5: LocalTrackPublished
+        room.on(RoomEvent.LocalTrackPublished, async (publication, participant) => {
+          console.log('[LiveKit] LocalTrackPublished', {
+            trackSid: (publication as any)?.trackSid,
+            kind: (publication as any)?.kind,
+            source: (publication as any)?.source,
+            participantIdentity: (participant as any)?.identity,
+            trackPublicationsSize: (participant as any)?.trackPublications?.size ?? room.localParticipant?.trackPublications.size ?? 0,
+          });
+          console.log('[LiveKit] trackPublications.size', room.localParticipant?.trackPublications.size ?? 0);
+
+          if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
+            const sender = (publication.track as any)?.sender;
+            if (sender) {
+              await installSFrameOnSenderShared(sender, sframe, getGlobalCounterMutex());
+              console.log('[SFrame] sender transform active', {
+                kid: keyManager.getCurrentEpoch(),
+                media: publication.kind,
+                trackId: publication.trackSid,
+                globalCounter: sframe.getEncryptCounter(keyManager.getCurrentEpoch())?.toString(),
+              });
+            }
+          }
+
+          // Local track published - get stream from participant
+          if (participant === room.localParticipant) {
+            const stream = new MediaStream();
+            room.localParticipant?.trackPublications.forEach((pub) => {
+              const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+              if (mst) {
+                stream.addTrack(mst);
+              }
+            });
+            if (stream.getTracks().length > 0) {
+              setLocalStream(stream);
+            }
+          }
+        });
+
+        // I-7: DataReceived topic dispatcher
+        room.on(RoomEvent.DataReceived, async (payload: Uint8Array, participant?: any, _kind?: any, topic?: string) => {
+          console.log('[LiveKit] Data received from', participant?.identity, 'topic:', topic);
+          let resolvedTopic = topic;
+          let parsedData: any = null;
+          if (payload.byteLength > 0) {
+            try {
+              parsedData = JSON.parse(new TextDecoder().decode(payload));
+              if (!resolvedTopic && parsedData.type) resolvedTopic = parsedData.type;
+            } catch {}
+          }
+
+          const canonTopic = resolvedTopic?.trim().toLowerCase();
+          switch (canonTopic) {
+            case 'hpke-pubkey':
+              await handleHPKEPubkey(payload, participant, parsedData);
+              break;
+            case 'sframe-commit':
+              await handleCommit(payload, participant, parsedData);
+              break;
+            case 'sframe-welcome':
+              await handleWelcome(payload, participant, parsedData);
+              break;
+            case 'sframe-welcome-ack':
+              handleWelcomeAck(participant, parsedData);
+              break;
+            case 'sframe-welcome-request':
+              await handleWelcomeRequest(participant);
+              break;
+            case 'sframe-rotated-ack':
+              console.log('[SFrame] Rotation ACK received from', participant?.identity);
+              break;
+            default:
+              console.debug('[LiveKit] unknown DataReceived topic', topic);
+          }
+        });
+
+        // Signal handlers for SFrame
+        async function handleHPKEPubkey(payload: Uint8Array, participant?: any, parsedJson?: any) {
+          try {
+            const b64 = parsedJson?.hpkePublicKey || (typeof parsedJson === 'string' ? parsedJson : new TextDecoder().decode(payload));
+            const identity = participant?.identity;
+            if (!identity || !b64) return;
+            const canonId = canonicalizeIdentity(identity);
+            const key = await keyManager.importHPKEPublicKey(b64);
+            keyManager.setParticipantHPKEPublicKey(canonId, key);
+            await keyManager.addParticipant(canonId);
+            console.log('[SFrame] Registered HPKE public key for', canonId);
+
+            scheduleJoinRotation(canonId);
+          } catch (err) {
+            console.error('[SFrame] Failed to import HPKE public key:', err);
+          }
+        }
+
+        async function handleCommit(payload: Uint8Array, _participant?: any, parsedJson?: any) {
+          try {
+            let commitBytes: Uint8Array | null = null;
+            if (parsedJson) {
+              if (parsedJson.commit) {
+                commitBytes = new Uint8Array(parsedJson.commit);
+              } else if (parsedJson.commits && parsedJson.commits[canonicalSelf]) {
+                commitBytes = new Uint8Array(parsedJson.commits[canonicalSelf]);
+              }
+            } else {
+              commitBytes = payload;
+            }
+
+            if (!commitBytes) return;
+            const newKey = await keyManager.processCommit(commitBytes);
+            await sframe.rotateKey(newKey);
+            console.log('[SFrame] Adopted new epoch via commit:', keyManager.getCurrentEpoch());
+
+            if (room.localParticipant) {
+              await room.localParticipant.publishData(
+                new TextEncoder().encode(JSON.stringify({ type: 'sframe-rotated-ack', epoch: keyManager.getCurrentEpoch() })),
+                { reliable: true, topic: 'sframe-rotated-ack' }
+              );
+            }
+          } catch (err) {
+            console.error('[SFrame] Failed to process commit:', err);
+          }
+        }
+
+        async function publishWelcomeWithRetry(
+          targetParticipantId: string,
+          welcomeBytes: Uint8Array,
+          epoch: number
+        ): Promise<void> {
+          const canonJoinerId = canonicalizeIdentity(targetParticipantId);
+          if (activeWelcomeRetries.has(canonJoinerId)) {
+            console.log(`[SFrame] publishWelcomeWithRetry already active for ${canonJoinerId}`);
+            return;
+          }
+          activeWelcomeRetries.add(canonJoinerId);
+
+          try {
+            const delays = [100, 300, 900];
+            const maxAttempts = 3;
+            const ackTimeoutMs = 1500;
+            const metrics = getGlobalMetricsCollector();
+
+            const payload = new TextEncoder().encode(
+              JSON.stringify({
+                type: 'sframe-welcome',
+                epoch,
+                welcome: Array.from(welcomeBytes),
+              })
+            );
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              try {
+                if (!room.localParticipant) break;
+
+                const ackPromise = new Promise<void>((resolve, reject) => {
+                  pendingWelcomeAcks.set(canonJoinerId, {
+                    resolve,
+                    reject,
+                    epoch,
+                    timestamp: performance.now(),
+                  });
+                });
+
+                await room.localParticipant.publishData(Uint8Array.from(payload), {
+                  reliable: true,
+                  topic: 'sframe-welcome',
+                  destinationIdentities: [canonJoinerId],
+                });
+
+                console.log(`[SFrame] welcome sent attempt=${attempt} joiner=${canonJoinerId.slice(0, 8)} epoch=${epoch}`);
+
+                let timeoutHandle: any;
+                const timeoutPromise = new Promise<never>((_, reject) => {
+                  timeoutHandle = setTimeout(() => {
+                    reject(new Error('Welcome ACK timeout'));
+                  }, ackTimeoutMs);
+                });
+
+                try {
+                  await Promise.race([ackPromise, timeoutPromise]);
+                  clearTimeout(timeoutHandle);
+                  pendingWelcomeAcks.delete(canonJoinerId);
+                  console.log(`[SFrame] welcome delivered and acknowledged by ${canonJoinerId.slice(0, 8)} on attempt ${attempt}`);
+                  return;
+                } catch (ackErr) {
+                  clearTimeout(timeoutHandle);
+                  pendingWelcomeAcks.delete(canonJoinerId);
+                  metrics.recordWelcomeRetry(attempt, false);
+                  console.warn(`[SFrame] welcome retry attempt=${attempt} joiner=${canonJoinerId.slice(0, 8)} epoch=${epoch}`);
+
+                  if (attempt < maxAttempts) {
+                    await new Promise((r) => setTimeout(r, delays[attempt - 1]));
+                  }
+                }
+              } catch (sendErr) {
+                pendingWelcomeAcks.delete(canonJoinerId);
+                metrics.recordWelcomeRetry(attempt, false);
+                console.warn(`[SFrame] publishData failed for welcome attempt=${attempt}:`, sendErr);
+                if (attempt < maxAttempts) {
+                  await new Promise((r) => setTimeout(r, delays[attempt - 1]));
+                }
+              }
+            }
+
+            // Retries exhausted -> fallback POST /sync
+            metrics.recordWelcomeRetry(maxAttempts + 1, true);
+            console.warn(`[SFrame] welcome retries exhausted for ${canonJoinerId.slice(0, 8)}, attempting fallback POST /sync`);
+            try {
+              const b64Welcome = btoa(String.fromCharCode(...welcomeBytes));
+              await fetch('/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'welcome',
+                  roomId: targetRoomId,
+                  joinerId: canonJoinerId,
+                  welcome: b64Welcome,
+                  epoch,
+                }),
+              });
+              console.log(`[SFrame] Fallback /sync posted for ${canonJoinerId.slice(0, 8)}`);
+            } catch (fallbackErr) {
+              console.error('[SFrame] Fallback /sync failed:', fallbackErr);
+            }
+          } finally {
+            activeWelcomeRetries.delete(canonJoinerId);
+          }
+        }
+
+        function handleWelcomeAck(participant?: any, parsedJson?: any) {
+          const identity = participant?.identity;
+          if (!identity) return;
+          const canonId = canonicalizeIdentity(identity);
+          const pending = pendingWelcomeAcks.get(canonId);
+          if (pending) {
+            const epoch = parsedJson?.epoch ?? pending.epoch;
+            if (epoch === pending.epoch) {
+              const rtt = Math.round(performance.now() - pending.timestamp);
+              console.log(`[SFrame] welcome ack received from=${canonId.slice(0, 8)} epoch=${epoch} rttMs=${rtt}`);
+              pending.resolve();
+              pendingWelcomeAcks.delete(canonId);
+            }
+          } else {
+            console.log(`[SFrame] Welcome ACK received from ${canonId} (no pending waiter)`);
+          }
+        }
+
+        async function handleWelcome(payload: Uint8Array, _participant?: any, parsedJson?: any) {
+          try {
+            let welcomeBytes: Uint8Array | null = null;
+            let epochNum: number | undefined = undefined;
+            if (parsedJson) {
+              epochNum = parsedJson.epoch;
+              if (parsedJson.welcome) {
+                welcomeBytes = new Uint8Array(parsedJson.welcome);
+              }
+            } else {
+              welcomeBytes = payload;
+            }
+
+            if (!welcomeBytes) return;
+            const newKey = await keyManager.processWelcome(welcomeBytes, targetRoomId, epochNum);
+            await sframe.rotateKey(newKey);
+            console.log('[SFrame] Adopted epoch via Welcome:', keyManager.getCurrentEpoch());
+
+            hasReceivedWelcome = true;
+            if (welcomeRequestTimer) {
+              clearTimeout(welcomeRequestTimer);
+              welcomeRequestTimer = null;
+            }
+
+            if (room.localParticipant) {
+              const sorted = getSortedIdentities();
+              const leaderId = sorted[0];
+              await room.localParticipant.publishData(
+                new TextEncoder().encode(JSON.stringify({ type: 'sframe-welcome-ack', epoch: keyManager.getCurrentEpoch() })),
+                {
+                  reliable: true,
+                  topic: 'sframe-welcome-ack',
+                  destinationIdentities: leaderId ? [leaderId] : undefined,
+                }
+              );
+            }
+          } catch (err) {
+            console.error('[SFrame] Failed to process Welcome:', err);
+          }
+        }
+
+        async function handleWelcomeRequest(participant?: any) {
+          try {
+            if (!participant?.identity) return;
+            const canonId = canonicalizeIdentity(participant.identity);
+            const peerPub = keyManager.getParticipantHPKEPublicKey(canonId);
+            if (!peerPub || !isLeader()) return;
+
+            const currentSecret = keyManager.getCurrentEpochSecret();
+            if (!currentSecret || !room.localParticipant) return;
+
+            const currentEpoch = keyManager.getCurrentEpoch();
+            const welcome = await keyManager.createWelcome(
+              currentSecret,
+              peerPub,
+              targetRoomId,
+              currentEpoch
+            );
+
+            await publishWelcomeWithRetry(canonId, welcome, currentEpoch);
+          } catch (err) {
+            console.error('[SFrame] Failed to handle welcome request:', err);
+          }
+        }
+
+        function scheduleJoinRotation(canonJoinerId: string) {
+          if (!isLeader()) return;
+          if (joinDebounceTimer) clearTimeout(joinDebounceTimer);
+          joinDebounceTimer = setTimeout(async () => {
+            try {
+              if (keyManager.rotationMutex.isLocked()) {
+                getGlobalMetricsCollector().recordRotationContention('join');
+              }
+              await keyManager.rotationMutex.run(async () => {
+                if (!isLeader()) return;
+                const peerPub = keyManager.getParticipantHPKEPublicKey(canonJoinerId);
+                if (!peerPub) return;
+
+                const { commits, newEpoch } = await keyManager.rotateEpoch('join');
+                await sframe.rotateKey();
+                console.log('[SFrame] Leader rotated epoch for join to', newEpoch);
+
+                const currentSecret = keyManager.getCurrentEpochSecret();
+                if (currentSecret && room.localParticipant) {
+                  const welcome = await keyManager.createWelcome(
+                    currentSecret,
+                    peerPub,
+                    targetRoomId,
+                    newEpoch
+                  );
+                  await publishWelcomeWithRetry(canonJoinerId, welcome, newEpoch);
+                }
+
+                for (const [peerId, commitBytes] of commits) {
+                  if (peerId === canonJoinerId) continue;
+                  if (room.localParticipant) {
+                    await room.localParticipant.publishData(
+                      new TextEncoder().encode(JSON.stringify({
+                        type: 'sframe-commit',
+                        epoch: newEpoch,
+                        commit: Array.from(commitBytes),
+                      })),
+                      { reliable: true, topic: 'sframe-commit', destinationIdentities: [peerId] }
+                    );
+                  }
+                }
+              });
+            } catch (err) {
+              console.error('[SFrame] Join rotation failed:', err);
+            }
+          }, 500);
+        }
+
+        // I-4: Before connect invariant assertion
+        if (sframeEnabled) {
+          const currentSecret = keyManager.getCurrentEpochSecret();
+          const currentSalt = keyManager.getCurrentSalt();
+          if (!currentSecret || !currentSalt || currentSalt.byteLength !== 12) {
+            throw new Error('SFrame pre-connect assertion failed: invalid secret or salt');
+          }
+          if (sframe.getEncryptCounter(keyManager.getCurrentEpoch()) !== 0n) {
+            throw new Error('SFrame pre-connect assertion failed: initial counter must be 0n');
+          }
+        }
+
+        // Connect to LiveKit room — instrumented
+        console.log('[LiveKit] Room.connect start', { sfuUrl: resolvedSfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
+        try {
+          await room.connect(resolvedSfuUrl, token);
+          if (isCancelled) {
+            room.disconnect();
+            return;
+          }
+          console.log('[LiveKit] Room.connect success', {
+            roomName: room.name,
+            state: room.state,
+            trackPublicationsSize: room.localParticipant?.trackPublications.size ?? 0,
+          });
+        } catch (err) {
+          if (isCancelled) return;
+          const e = err as Error;
+          console.error('[LiveKit] Room.connect failure', { name: e.name, message: e.message, stack: e.stack });
+          throw err;
+        }
+
+        if (isCancelled) return;
+
+        // Auto-publish camera and microphone after successful connection
+        console.log('[LiveKit] setCameraEnabled start');
+        try {
+          await room.localParticipant.setCameraEnabled(true);
+          console.log('[LiveKit] setCameraEnabled success', {
+            trackPublicationsSize: room.localParticipant.trackPublications.size,
+            isCameraEnabled: room.localParticipant.isCameraEnabled,
+          });
+          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+        } catch (err) {
+          const e = err as Error;
+          console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
+          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            useAppStore.getState().setError('Camera access denied — grant permission and reload.');
+          } else if (e.name === 'NotFoundError') {
+            useAppStore.getState().setError('No camera device found.');
+          } else if (e.name === 'NotReadableError') {
+            useAppStore.getState().setError('Camera already in use by another app.');
+          } else {
+            useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
+          }
+          console.warn('[LiveKit] Camera publish failed (permission/device):', e.message);
+        }
+
+        if (isCancelled) return;
+
+        console.log('[LiveKit] setMicrophoneEnabled start');
+        try {
+          await room.localParticipant.setMicrophoneEnabled(true);
+          console.log('[LiveKit] setMicrophoneEnabled success', {
+            trackPublicationsSize: room.localParticipant.trackPublications.size,
+            isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
+          });
+          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+        } catch (err) {
+          const e = err as Error;
+          console.error('[LiveKit] setMicrophoneEnabled failure', { name: e.name, message: e.message });
+          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            useAppStore.getState().setError('Microphone access denied — grant permission and reload.');
+          } else if (e.name === 'NotFoundError') {
+            useAppStore.getState().setError('No microphone device found.');
+          } else if (e.name === 'NotReadableError') {
+            useAppStore.getState().setError('Microphone already in use by another app.');
+          } else {
+            useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
+          }
+          console.warn('[LiveKit] Microphone publish failed (permission/device):', e.message);
+        }
+
+        if (isCancelled) return;
+
+        // Stats polling
+        statsInterval = setInterval(async () => {
+          if (roomRef.current) {
+            try {
+              const pc = (roomRef.current as any).engine?.publisher?.pc as RTCPeerConnection | undefined;
+              if (pc) {
+                const s = await pc.getStats();
+                setStats(s);
+              }
+            } catch {}
+          }
+        }, 2000);
+      } catch (err) {
+        if (isCancelled) return;
+        const error = err instanceof Error ? err : new Error(String(err));
+        console.error('[LiveKit] Connection failed:', {
+          message: error.message,
+          stack: error.stack,
+          roomId: targetRoomId,
+          sfuUrl: useAppStore.getState().sfuUrl ? resolveSfuUrl(useAppStore.getState().sfuUrl!) : 'N/A',
+          livekitTokenPrefix: useAppStore.getState().livekitToken?.slice(0, 20) + '...' || 'N/A',
+          file: 'useWebRTC.ts',
+          line: 'initialize callback',
+        });
+        useAppStore.getState().setError(`LiveKit connection failed: ${error.message}`);
+      } finally {
+        isConnectingRef.current = false;
+      }
     }
-  }, [roomId, participantId, jwt, livekitToken, sfuUrl, keyParam, setConnected, setReconnecting, setError, setShieldMode, addParticipant, removeParticipant, setLocalParticipant]);
 
-  useEffect(() => {
-    let cleanup: (() => void) | void;
-    initialize().then((c) => { cleanup = c; }).catch(() => {});
+    initialize();
+
+    // I-13: Teardown & cleanup
     return () => {
-      if (typeof cleanup === 'function') cleanup();
+      isCancelled = true;
+      isConnectingRef.current = false;
+      activeRoomIdRef.current = null;
+      if (joinDebounceTimer) clearTimeout(joinDebounceTimer);
+      if (welcomeRequestTimer) clearTimeout(welcomeRequestTimer);
+      for (const pending of pendingWelcomeAcks.values()) {
+        pending.reject(new Error('Teardown: unmounting or room change'));
+      }
+      pendingWelcomeAcks.clear();
+      activeWelcomeRetries.clear();
+      if (statsInterval) clearInterval(statsInterval);
+      if (keyManagerRef.current) {
+        keyManagerRef.current.destroy();
+        keyManagerRef.current = null;
+      }
+      if (sframeRef.current) {
+        sframeRef.current.clearCounters();
+        sframeRef.current = null;
+      }
+      setGlobalSFrame(null);
       if (roomRef.current) {
         roomRef.current.disconnect();
         roomRef.current = null;
       }
       (window as any).__LIVEKIT_ROOM__ = null;
     };
-  }, [initialize]);
+  }, [roomId]);
 
+  // I-8: Audio & Video toggling preserves SFrame transform & counter
   const toggleAudio = useCallback(async () => {
     if (roomRef.current?.localParticipant) {
       const enabled = !roomRef.current.localParticipant.isMicrophoneEnabled;
@@ -191,10 +882,23 @@ export function useWebRTC() {
     }
   }, []);
 
+  // I-9: Screen Share with shared SFrame transform
   const startScreenShare = useCallback(async () => {
     if (roomRef.current?.localParticipant) {
       try {
         await roomRef.current.localParticipant.setScreenShareEnabled(true);
+        if (sframeRef.current && keyManagerRef.current) {
+          const screenPub = roomRef.current.localParticipant.getTrackPublication(Track.Source.ScreenShare);
+          const sender = (screenPub?.track as any)?.sender;
+          if (sender) {
+            await installSFrameOnSenderShared(sender, sframeRef.current, getGlobalCounterMutex());
+            console.log('[SFrame] Screen share transform installed', {
+              kid: keyManagerRef.current.getCurrentEpoch(),
+              trackId: screenPub!.trackSid,
+              globalCounter: sframeRef.current.getEncryptCounter(keyManagerRef.current.getCurrentEpoch())?.toString(),
+            });
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Screen share failed');
       }
@@ -208,6 +912,17 @@ export function useWebRTC() {
   }, []);
 
   const leave = useCallback(async () => {
+    isConnectingRef.current = false;
+    activeRoomIdRef.current = null;
+    if (keyManagerRef.current) {
+      keyManagerRef.current.destroy();
+      keyManagerRef.current = null;
+    }
+    if (sframeRef.current) {
+      sframeRef.current.clearCounters();
+      sframeRef.current = null;
+    }
+    setGlobalSFrame(null);
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;

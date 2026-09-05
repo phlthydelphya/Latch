@@ -104,7 +104,7 @@ export class SignalingClient extends EventEmitter {
         return;
       }
 
-      // Emit typed events
+      // Emit typed events — commit is handled via DataChannel, not signaling
       switch (message.type) {
         case 'offer':
           this.emit('offer', message.payload as RTCSessionDescriptionInit);
@@ -118,6 +118,9 @@ export class SignalingClient extends EventEmitter {
         case 'join':
           this.emit('join', message.payload);
           break;
+        case 'hpke-pubkey':
+          this.emit('hpke-pubkey', message.payload);
+          break;
         case 'leave':
           this.emit('leave', message.payload);
           break;
@@ -126,9 +129,6 @@ export class SignalingClient extends EventEmitter {
           break;
         case 'speaking':
           this.emit('speaking', message.payload);
-          break;
-        case 'commit':
-          this.emit('commit', message.payload);
           break;
         case 'welcome':
           this.emit('welcome', message.payload);
@@ -251,13 +251,13 @@ export class SignalingClient extends EventEmitter {
     });
   }
 
-  sendCommit(commit: Uint8Array, epoch: number, senderId: string): void {
+  /** Publish our HPKE public key to peers during join (requirement 2). */
+  publishHPKEPublicKey(hpkePublicKeyB64: string): void {
     this.send({
-      type: 'commit',
+      type: 'hpke-pubkey' as any,
       payload: {
-        epoch,
-        commit: Array.from(commit),
-        senderId,
+        participantId: this.config.participantId,
+        hpkePublicKey: hpkePublicKeyB64,
       },
       roomId: this.config.roomId,
       participantId: this.config.participantId,
@@ -265,6 +265,7 @@ export class SignalingClient extends EventEmitter {
     });
   }
 
+  /** Welcome is HPKE-encrypted to the joiner's public key — ciphertext only, no epoch secret plaintext. */
   sendWelcome(welcome: Uint8Array, epoch: number): void {
     this.send({
       type: 'welcome',

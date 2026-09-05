@@ -52,6 +52,38 @@ RECOMMENDATIONS:
 - next steps or UX concerns
 ```
 
+## BOOTSTRAP RULE
+
+When delegated a task containing any of:
+
+- bootstrap
+- Room.connect
+- livekit_room_total
+- proof-of-concept
+- first room
+
+Focus only on:
+
+1. token retrieval
+2. Room creation
+3. Room.connect
+4. track publish
+5. track subscribe
+
+Ignore:
+
+- Last-N
+- Accessibility
+- Lighthouse
+- Bundle budgets
+- Screen share
+- Store redesign
+- UI parity
+
+until connection is proven.
+
+The success artifact is: `livekit_room_total > 0`
+
 ## M0-P0 Specifics
 - PWA installable with Workbox service worker
 - Grid Last-N=9 with mute/cam/leave controls

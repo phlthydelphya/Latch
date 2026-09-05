@@ -15,8 +15,10 @@ export interface Participant {
 export interface MeetingState {
   roomId: string | null;
   participantId: string | null;
-  jwt: string | null;
-  keyParam: string | null; // #k= from URL
+  jwt: string | null;           // Legacy mesh token
+  livekitToken: string | null;  // LiveKit access token
+  sfuUrl: string | null;        // LiveKit SFU WebSocket URL (wss://host/rtc)
+  keyParam: string | null;      // #k= from URL
   participants: Map<string, Participant>;
   localParticipant: Participant | null;
   isConnected: boolean;
@@ -29,6 +31,9 @@ export interface MeetingState {
 
 export interface AppActions {
   setRoom: (roomId: string, participantId: string, jwt: string, keyParam?: string) => void;
+  setLivekitToken: (token: string | null) => void;
+  setSfuUrl: (url: string | null) => void;
+  setCredentials: (livekitToken: string, sfuUrl: string) => void;
   clearRoom: () => void;
   addParticipant: (participant: Participant) => void;
   removeParticipant: (participantId: string) => void;
@@ -49,6 +54,8 @@ const initialState: MeetingState = {
   roomId: null,
   participantId: null,
   jwt: null,
+  livekitToken: null,
+  sfuUrl: null,
   keyParam: null,
   participants: new Map(),
   localParticipant: null,
@@ -79,6 +86,10 @@ export const useAppStore = create<MeetingState & AppActions>()(
           shieldMode: true, // E2EE always on for P0
           error: null,
         }),
+
+      setLivekitToken: (livekitToken) => set({ livekitToken }),
+      setSfuUrl: (sfuUrl) => set({ sfuUrl }),
+      setCredentials: (livekitToken, sfuUrl) => set({ livekitToken, sfuUrl }),
       
       clearRoom: () => set(initialState),
       
@@ -157,6 +168,8 @@ export const useAppStore = create<MeetingState & AppActions>()(
         roomId: state.roomId,
         participantId: state.participantId,
         jwt: state.jwt,
+        livekitToken: state.livekitToken,
+        sfuUrl: state.sfuUrl,
         keyParam: state.keyParam,
       }),
     }

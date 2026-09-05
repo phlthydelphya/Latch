@@ -101,6 +101,8 @@ export class WebRTCManager extends EventEmitter {
   // ICE candidate queue for ordering race (M0-P0 fix 2026-09-03)
   private pendingIceCandidates: RTCIceCandidateInit[] = [];
   private remoteDescriptionReady = false;
+  private readonly MAX_ICE_QUEUE = 100;
+  private periodicRotationTimer: number | null = null;
   // Perfect negotiation (RFC 8829) state
   private polite = false;
   private makingOffer = false;
@@ -156,8 +158,9 @@ export class WebRTCManager extends EventEmitter {
     this.signaling.on('answer', this.handleDescription.bind(this));
     this.signaling.on('ice-candidate', this.handleIceCandidate.bind(this));
     this.signaling.on('join', this.handleParticipantJoin.bind(this));
+    this.signaling.on('hpke-pubkey', this.handleHPKEPubKey.bind(this));
     this.signaling.on('leave', this.handleParticipantLeave.bind(this));
-    this.signaling.on('commit', this.handleCommit.bind(this));
+    // Commit now delivered via DataChannel only (S-02)
     this.signaling.on('welcome', this.handleWelcome.bind(this));
     this.signaling.on('session-update', this.handleSessionUpdate.bind(this));
     this.signaling.on('disconnected', this.handleSignalingDisconnected.bind(this));
@@ -208,6 +211,19 @@ export class WebRTCManager extends EventEmitter {
 
     // Connect signaling
     await this.signaling.connect();
+
+    // Publish our HPKE public key to peers during join (requirement 2)
+    // Peers will import it via 'hpke-pubkey' and use it for per-recipient commit encryption
+    try {
+      const hpkePubB64 = await this.keyManager.exportHPKEPublicKey();
+      this.signaling.publishHPKEPublicKey(hpkePubB64);
+    } catch (e) {
+      console.warn('Failed to publish HPKE public key:', e);
+    }
+
+    // Disable KeyManager internal periodic timer — WebRTCManager drives broadcast via DataChannel
+    this.keyManager.stopRotationTimer();
+    this.startPeriodicRotation();
 
     // Initialize SFrame transform
     await this.initializeSFrame();
@@ -464,6 +480,11 @@ export class WebRTCManager extends EventEmitter {
     if (!this.pc || !candidate) return;
     // Queue candidates until remote description ready (fixes “remote description was null”)
     if (!this.pc.remoteDescription || !this.remoteDescriptionReady) {
+      // Enforce MAX_ICE_QUEUE bound to prevent unbounded growth
+      if (this.pendingIceCandidates.length >= this.MAX_ICE_QUEUE) {
+        const dropped = this.pendingIceCandidates.shift();
+        console.warn(`ICE queue full (${this.MAX_ICE_QUEUE}), dropping oldest candidate:`, dropped);
+      }
       this.pendingIceCandidates.push(candidate);
       return;
     }
@@ -499,19 +520,75 @@ export class WebRTCManager extends EventEmitter {
     console.log('Encoded Transform applied to receiver');
   }
 
-  private async handleParticipantJoin(data: { participantId: string; senderKey: string }): Promise<void> {
-    // Derive sender key for new participant
-    const senderKey = await this.keyManager.deriveSenderKey(this.epochSecret!, data.participantId);
-    this.senderKeys.set(data.participantId, senderKey);
+  private async handleParticipantJoin(data: { participantId: string; senderKey?: string; hpkePublicKey?: string }): Promise<void> {
+    // If join payload carries HPKE pubkey (future), register immediately
+    if (data.hpkePublicKey) {
+      try {
+        const peerPub = await this.keyManager.importHPKEPublicKey(data.hpkePublicKey);
+        this.keyManager.setParticipantHPKEPublicKey(data.participantId, peerPub);
+      } catch (e) {
+        console.warn('Failed to import peer HPKE public key on join:', e);
+      }
+    }
+    // Ignore our own join echo
+    if (data.participantId === this.config.participantId) {
+      this.emit('participant-joined', data);
+      return;
+    }
+    // Derive SFrame sender key for new participant = HKDF(epoch, "sframe", sender_id)
+    if (this.epochSecret) {
+      const senderKey = await this.keyManager.deriveSenderKey(this.epochSecret!, data.participantId);
+      this.senderKeys.set(data.participantId, senderKey);
+    }
     this.emit('participant-joined', data);
 
-    // Perfect negotiation tie-breaker: the peer with the lexicographically
-    // smaller participantId is polite and rolls back to accept colliding offers.
-    this.polite = this.config.participantId < data.participantId;
+    // Re-publish our HPKE pubkey so the newcomer (who missed our earlier publish) receives it via relay
+    try {
+      const hpkePubB64 = await this.keyManager.exportHPKEPublicKey();
+      this.signaling.publishHPKEPublicKey(hpkePubB64);
+    } catch {}
 
-    // Both peers negotiate on join so offers are in flight symmetrically and
-    // the RFC 8829 polite/impolite resolution can break the resulting glare.
+    // MLS-style: on join, rotate epoch for existing members (commit via DataChannel) + Welcome to joiner via signaling
+    // Defer rotation to next tick to allow hpke-pubkey exchange to complete
+    setTimeout(() => this.rotateOnJoin(data.participantId), 150);
+
+    // Perfect negotiation tie-breaker
+    this.polite = this.config.participantId < data.participantId;
     await this.negotiate();
+  }
+
+  private async rotateOnJoin(joinerId: string): Promise<void> {
+    // Ensure we have the joiner's HPKE pubkey before rotating — otherwise Welcome would fail
+    let attempts = 0;
+    while (!this.keyManager.getParticipantHPKEPublicKey(joinerId) && attempts < 10) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+    await this.rotateAndBroadcastEpoch('join', undefined, joinerId);
+    // After broadcast, send Welcome containing the NEW epoch secret to the joiner
+    await this.sendWelcomeToJoiner(joinerId);
+  }
+
+  private async handleHPKEPubKey(data: { participantId: string; hpkePublicKey: string }): Promise<void> {
+    if (data.participantId === this.config.participantId) return;
+    try {
+      const peerPub = await this.keyManager.importHPKEPublicKey(data.hpkePublicKey);
+      this.keyManager.setParticipantHPKEPublicKey(data.participantId, peerPub);
+    } catch (e) {
+      console.warn('Failed to import HPKE pubkey:', e);
+    }
+  }
+
+  private async sendWelcomeToJoiner(joinerId: string): Promise<void> {
+    if (!this.epochSecret) return;
+    const targetPub = this.keyManager.getParticipantHPKEPublicKey(joinerId);
+    if (!targetPub) return;
+    try {
+      const welcome = await this.keyManager.createWelcome(this.epochSecret, targetPub);
+      this.signaling.sendWelcome(welcome, this.currentKID);
+    } catch (e) {
+      console.warn('Failed to send Welcome to joiner:', e);
+    }
   }
 
   private async handleParticipantLeave(data: { participantId: string }): Promise<void> {
@@ -521,18 +598,75 @@ export class WebRTCManager extends EventEmitter {
       await this.keyManager.zeroizeKey(key);
       this.senderKeys.delete(data.participantId);
     }
+    // Remove HPKE public key for departed peer
+    this.keyManager.removeParticipantHPKEPublicKey(data.participantId);
     this.emit('participant-left', data);
+
+    // Trigger epoch rotation on leave (p95 ≤500ms) — encrypt per-recipient, deliver via DataChannel
+    await this.rotateAndBroadcastEpoch('leave', data.participantId);
   }
 
-  private async handleCommit(data: { epoch: number; commit: Uint8Array; senderId: string }): Promise<void> {
-    // Process MLS Commit, derive new epoch secret
-    const startTime = performance.now();
-    
+  /** Rotate epoch and broadcast Encrypted commits via DataChannel only (S-02). */
+  private async rotateAndBroadcastEpoch(trigger: 'join' | 'leave' | 'periodic' | 'manual', leavingId?: string, excludeJoinerId?: string): Promise<void> {
+    const start = performance.now();
     try {
-      const newEpochSecret = await this.keyManager.processCommit(this.epochSecret!, data.commit, data.senderId);
+      const { commits, newEpoch } = await this.keyManager.rotateEpoch(trigger, leavingId);
+      // Filter commits if joiner should receive Welcome instead of commit
+      const filtered = new Map<string, Uint8Array>();
+      for (const [pid, ct] of commits) {
+        if (pid === excludeJoinerId) continue;
+        if (leavingId && pid === leavingId) continue;
+        filtered.set(pid, ct);
+      }
+      // Update our own epoch state immediately (initiator)
+      if (this.epochSecret) await this.keyManager.zeroizeKey(this.epochSecret);
+      this.epochSecret = this.keyManager.getCurrentEpochSecret();
+      this.currentKID = newEpoch;
+      // Deliver via RTCDataChannel, not signaling — ciphertext only, no epoch secret plaintext
+      await this.broadcastCommitsViaDataChannel(filtered, newEpoch);
+      const latency = performance.now() - start;
+      this.metrics.recordKeyRotationLatency(latency);
+      this.emit('key-rotated', { epoch: newEpoch, latency });
+    } catch (e) {
+      console.error('Epoch rotation failed:', e);
+      this.emit('key-rotation-failed', e);
+    }
+  }
+
+  private async broadcastCommitsViaDataChannel(commits: Map<string, Uint8Array>, epoch: number): Promise<void> {
+    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
+      console.warn('DataChannel not open, cannot broadcast commits');
+      return;
+    }
+    // Batch all per-recipient ciphertexts into one DataChannel JSON (each ciphertext is already HPKE)
+    const commitsObj: Record<string, number[]> = {};
+    for (const [pid, ct] of commits) commitsObj[pid] = Array.from(ct);
+    const msg = JSON.stringify({
+      type: 'commit',
+      epoch,
+      senderId: this.config.participantId,
+      commits: commitsObj,
+    });
+    this.dataChannel.send(msg);
+  }
+
+  /** Handle a commit received over DataChannel — decrypt only if we are a recipient. */
+  private async handleDataChannelCommit(data: { epoch: number; commits: Record<string, number[]>; senderId: string }): Promise<void> {
+    const myCiphertextArr = data.commits[this.config.participantId];
+    if (!myCiphertextArr) {
+      // Not a recipient (e.g., we left or were not included) — ignore per requirement: non-recipient decrypt fails
+      console.log('No commit for us, ignoring');
+      return;
+    }
+    const startTime = performance.now();
+    try {
+      const ciphertext = new Uint8Array(myCiphertextArr);
+      const newEpochSecret = await this.keyManager.processCommit(ciphertext);
+      // Zeroize old epoch secret after successful rotation
+      if (this.epochSecret) await this.keyManager.zeroizeKey(this.epochSecret);
       this.epochSecret = newEpochSecret;
       
-      // Rotate sender keys for all participants
+      // Re-derive sender keys for remaining participants under new epoch
       for (const [participantId] of this.senderKeys) {
         const newKey = await this.keyManager.deriveSenderKey(newEpochSecret, participantId);
         const oldKey = this.senderKeys.get(participantId);
@@ -545,12 +679,14 @@ export class WebRTCManager extends EventEmitter {
       const latency = performance.now() - startTime;
       this.metrics.recordKeyRotationLatency(latency);
       
-      // Acknowledge key rotation
-      this.dataChannel?.send(JSON.stringify({ type: 'key-rotation-ack', epoch: data.epoch }));
+      // Ack via DataChannel
+      if (this.dataChannel?.readyState === 'open') {
+        this.dataChannel.send(JSON.stringify({ type: 'key-rotation-ack', epoch: data.epoch }));
+      }
       
       this.emit('key-rotated', { epoch: data.epoch, latency });
     } catch (error) {
-      console.error('Key rotation failed:', error);
+      console.error('DataChannel Commit decrypt failed (expected for non-recipient):', error);
       this.emit('key-rotation-failed', error);
     }
   }
@@ -582,13 +718,35 @@ export class WebRTCManager extends EventEmitter {
     }
   }
 
+  private startPeriodicRotation(): void {
+    if (this.periodicRotationTimer) clearInterval(this.periodicRotationTimer as any);
+    const interval = this.config.sframe.keyRotationIntervalMs || 300000;
+    this.periodicRotationTimer = setInterval(() => {
+      if (this.dataChannel?.readyState === 'open' && this.keyManager.getCurrentEpoch() >= 0) {
+        void this.rotateAndBroadcastEpoch('periodic');
+      }
+    }, interval) as unknown as number;
+  }
+
+  private stopPeriodicRotation(): void {
+    if (this.periodicRotationTimer) {
+      clearInterval(this.periodicRotationTimer as any);
+      this.periodicRotationTimer = null;
+    }
+  }
+
   private handleDataChannelMessage(data: string | ArrayBuffer): void {
     try {
-      const message = typeof data === 'string' ? JSON.parse(data) : new TextDecoder().decode(data);
+      const message = typeof data === 'string' ? JSON.parse(data) : new TextDecoder().decode(data instanceof ArrayBuffer ? new Uint8Array(data) : data as any);
       
       switch (message.type) {
+        case 'commit':
+          // Encrypted commit via DataChannel (S-02) — recipient decrypt succeeds, non-recipient fails
+          void this.handleDataChannelCommit({ epoch: message.epoch, commits: message.commits, senderId: message.senderId });
+          break;
         case 'key-rotation':
-          this.handleCommit({ epoch: message.epoch, commit: new Uint8Array(message.commit), senderId: message.senderId });
+          // Legacy alias for commit
+          void this.handleDataChannelCommit({ epoch: message.epoch, commits: message.commits || { }, senderId: message.senderId });
           break;
         case 'key-rotation-ack':
           this.metrics.recordKeyRotationAck(message.epoch);
@@ -676,6 +834,7 @@ export class WebRTCManager extends EventEmitter {
   }
 
   async leave(): Promise<void> {
+    this.stopPeriodicRotation();
     // Zeroize all keys
     for (const [, key] of this.senderKeys) {
       await this.keyManager.zeroizeKey(key);

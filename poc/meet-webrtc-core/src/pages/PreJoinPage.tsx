@@ -13,7 +13,7 @@ function generateKeyParam(): string {
 export function PreJoinPage() {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
-  const { participantId, jwt, keyParam, setRoom, setLocalParticipant, setError } = useAppStore();
+  const { participantId, jwt, livekitToken, sfuUrl, keyParam, setRoom, setCredentials, setLocalParticipant, setError } = useAppStore();
   const { devices, getUserMedia, error: deviceError, loading: deviceLoading } = useMediaDevices();
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,7 +31,7 @@ export function PreJoinPage() {
       navigate('/', { replace: true });
       return;
     }
-    if (participantId && jwt) return;
+    if (participantId && jwt && livekitToken && sfuUrl) return;
 
     let cancelled = false;
     (async () => {
@@ -39,8 +39,13 @@ export function PreJoinPage() {
       const generatedKey = hashKey || generateKeyParam();
       try {
         // Backend issues the signed JWT (services/meet-signal POST /token)
-        const { token, participantId: pid } = await fetchToken(roomId, 'Guest');
-        if (!cancelled) setRoom(roomId, pid, token, generatedKey);
+        const res = await fetchToken(roomId, 'Guest');
+        if (!cancelled) {
+          setRoom(roomId, res.participantId, res.token, generatedKey);
+          if (res.livekitToken && res.sfuUrl) {
+            setCredentials(res.livekitToken, res.sfuUrl);
+          }
+        }
       } catch (err) {
         console.error('Token issuance failed:', err);
         if (!cancelled) setError('Could not join meeting. Signaling service unavailable.');
@@ -48,11 +53,14 @@ export function PreJoinPage() {
     })();
 
     return () => { cancelled = true; };
-  }, [roomId, participantId, jwt, setRoom, setError, navigate]);
+  }, [roomId, participantId, jwt, livekitToken, sfuUrl, setRoom, setCredentials, setError, navigate]);
 
   // Initialize media preview
   useEffect(() => {
     if (!roomId || !participantId || !jwt) return;
+
+    let cancelled = false;
+    let activeStream: MediaStream | null = null;
 
     async function startPreview() {
       try {
@@ -60,19 +68,29 @@ export function PreJoinPage() {
           video: videoEnabled ? { deviceId: selectedVideoDevice || undefined } : false,
           audio: audioEnabled ? { deviceId: selectedAudioDevice || undefined } : false,
         });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        activeStream = stream;
         setPreviewStream(stream);
       } catch (err) {
-        console.error('Preview failed:', err);
-        setError('Camera/microphone access denied. Please grant permissions and refresh.');
+        if (!cancelled) {
+          console.error('Preview failed:', err);
+          setError('Camera/microphone access denied. Please grant permissions and refresh.');
+        }
       }
     }
 
     startPreview();
 
     return () => {
-      previewStream?.getTracks().forEach((t) => t.stop());
+      cancelled = true;
+      if (activeStream) {
+        activeStream.getTracks().forEach((t) => t.stop());
+      }
     };
-  }, [videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, roomId, participantId, jwt, getUserMedia, navigate, setError]);
+  }, [videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, roomId, participantId, jwt, getUserMedia, setError]);
 
   // Attach the preview stream once the <video> element has rendered.
   // (setPreviewStream above re-renders after this effect body runs, so the
@@ -108,6 +126,13 @@ export function PreJoinPage() {
       };
 
       setLocalParticipant(localParticipant);
+
+      // Stop preview tracks so LiveKit can allocate the hardware cleanly
+      if (previewStream) {
+        previewStream.getTracks().forEach((t) => t.stop());
+        setPreviewStream(null);
+      }
+      setError(null);
       
       // Navigate to meeting with key param in hash
       navigate(`/r/${roomId}/join#k=${keyParam}`, { replace: true });

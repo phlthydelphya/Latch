@@ -10,6 +10,10 @@ scrape_configs:
       - targets: ['meet-signal:9091']
     metrics_path: /metrics
     scrape_timeout: 5s
+    metric_relabel_configs:
+      # P-04 D-035: Drop participant_id label to limit cardinality
+      - action: labeldrop
+        regex: 'participant_id'
 
   - job_name: 'livekit-sfu'
     static_configs:
@@ -18,18 +22,30 @@ scrape_configs:
     scrape_timeout: 5s
     # Required per M0-P0 §3 #3: livekit_rooms_active, sfu_load
     # Dashboard: Grafana rooms_active panel
+    metric_relabel_configs:
+      # P-04 D-035: Drop participant_id label to limit cardinality
+      - action: labeldrop
+        regex: 'participant_id'
 
   - job_name: 'turn-auth'
     static_configs:
       - targets: ['turn-auth:8080']
     metrics_path: /metrics
     scrape_timeout: 5s
+    metric_relabel_configs:
+      # P-04 D-035: Drop participant_id label to limit cardinality
+      - action: labeldrop
+        regex: 'participant_id'
 
   - job_name: 'coturn'
     static_configs:
       - targets: ['coturn:9100'] # if coturn exporter enabled; else via turn-auth proxy
     metrics_path: /metrics
     scrape_timeout: 5s
+    metric_relabel_configs:
+      # P-04 D-035: Drop participant_id label to limit cardinality
+      - action: labeldrop
+        regex: 'participant_id'
 
   - job_name: 'prometheus-self'
     static_configs:

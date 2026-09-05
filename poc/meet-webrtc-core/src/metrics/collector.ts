@@ -42,6 +42,8 @@ export class MetricsCollector extends EventEmitter {
   private packetsLost = 0;
   private packetsSent = 0;
   private packetsReceived = 0;
+  private welcomeRetryCount = 0;
+  private rotationContentionCount = 0;
   
   // Gauges
   private currentJitter = 0;
@@ -175,6 +177,32 @@ export class MetricsCollector extends EventEmitter {
     this.emit('metric', { name: 'sframe_decrypt_latency_ms', value: latencyMs, labels: {} });
   }
 
+  recordWelcomeRetry(attempt: number, fallback: boolean = false): void {
+    this.welcomeRetryCount++;
+    this.emit('metric', {
+      name: 'webrtc_welcome_retry_total',
+      value: 1,
+      labels: { attempt: String(attempt), fallback: String(fallback) },
+    });
+  }
+
+  recordRotationContention(trigger: string = 'join'): void {
+    this.rotationContentionCount++;
+    this.emit('metric', {
+      name: 'webrtc_rotation_contention_total',
+      value: 1,
+      labels: { trigger },
+    });
+  }
+
+  getWelcomeRetryCount(): number {
+    return this.welcomeRetryCount;
+  }
+
+  getRotationContentionCount(): number {
+    return this.rotationContentionCount;
+  }
+
   // ==================== HISTOGRAM COMPUTATION ====================
 
   private computeHistogram(values: number[]): HistogramData {
@@ -292,6 +320,14 @@ export class MetricsCollector extends EventEmitter {
     lines.push(`# TYPE meet_webrtc_ice_restart_total counter`);
     lines.push(`meet_webrtc_ice_restart_total ${snapshot.iceRestartCount}`);
 
+    lines.push(`# HELP meet_webrtc_welcome_retry_total Total welcome retries`);
+    lines.push(`# TYPE meet_webrtc_welcome_retry_total counter`);
+    lines.push(`meet_webrtc_welcome_retry_total ${this.welcomeRetryCount}`);
+
+    lines.push(`# HELP meet_webrtc_rotation_contention_total Total key rotation contention events`);
+    lines.push(`# TYPE meet_webrtc_rotation_contention_total counter`);
+    lines.push(`meet_webrtc_rotation_contention_total ${this.rotationContentionCount}`);
+
     // Gauges
     lines.push(`# HELP meet_webrtc_current_jitter_ms Current jitter in milliseconds`);
     lines.push(`# TYPE meet_webrtc_current_jitter_ms gauge`);
@@ -367,6 +403,8 @@ export class MetricsCollector extends EventEmitter {
     this.packetsLost = 0;
     this.packetsSent = 0;
     this.packetsReceived = 0;
+    this.welcomeRetryCount = 0;
+    this.rotationContentionCount = 0;
     this.currentJitter = 0;
     this.currentRtt = 0;
     this.currentBitrate = 0;
@@ -376,4 +414,21 @@ export class MetricsCollector extends EventEmitter {
     this.stop();
     this.removeAllListeners();
   }
+}
+
+let globalMetricsCollector: MetricsCollector | null = null;
+
+export function getGlobalMetricsCollector(): MetricsCollector {
+  if (!globalMetricsCollector) {
+    globalMetricsCollector = new MetricsCollector({
+      enabled: true,
+      intervalMs: 2000,
+      histogramBuckets: [50, 100, 200, 300, 400, 500, 750, 1000, 1500, 2000],
+    });
+  }
+  return globalMetricsCollector;
+}
+
+export function setGlobalMetricsCollector(collector: MetricsCollector | null): void {
+  globalMetricsCollector = collector;
 }

@@ -22,6 +22,7 @@ export function MeetingPage() {
 
   const localParticipant = useAppStore((s) => s.localParticipant);
   const isConnected = useAppStore((s) => s.isConnected);
+  const error = useAppStore((s) => s.error);
 
   // Extract key from hash (for E2EE key derivation)
   useEffect(() => {
@@ -65,6 +66,12 @@ export function MeetingPage() {
           </div>
         </div>
       </header>
+
+      {error && (
+        <div role="alert" style={{ padding: '0.75rem', background: 'rgba(255,71,87,0.1)', borderBottom: '1px solid #ff4757', color: '#ff4757', fontSize: '0.875rem', textAlign: 'center' }}>
+          {error}
+        </div>
+      )}
 
       <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <VideoGrid

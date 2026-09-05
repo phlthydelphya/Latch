@@ -120,14 +120,14 @@
 Why rendezvous: O(N) for N≤16 SFUs trivial, no virtual nodes tuning, minimal rehash on churn (only rooms hashing to removed node move), deterministic, easy to unit-test. Equivalent to consistent ring with 1 line.
 
 ```go
-// Go (meet-sfu-manager) — rendezvous HRW
+// Go (meet-sfu-manager) — rendezvous HRW — single source of truth with salt p0-salt-2026 (D-037)
 func AssignSFU(roomID string, nodes []SFUNode) SFUNode {
     var best SFUNode; var bestScore uint64
     for _, n := range nodes {
-        h := xxhash.Sum64String(roomID + "|" + n.ID) // or FNV+secret
-        // weight by load: score = h / (1+load) to shed if >70%
-        weight := uint64(1 + n.Load*10) // load 0..1
-        score := h / weight
+        h := xxhash.Sum64String(roomID + "|" + n.ID + "|" + salt) // salt = SFU_HASH_SALT=p0-salt-2026 per infra/compose.yaml:97
+        // weight by load: score = h / (1+load*10) to shed if >70% — mirrors services/meet-sfu-manager/main.go:243
+        divisor := uint64(1 + n.Load*10) // load 0..1 → divisor 1..11, load 0.7 → 8
+        score := h / divisor
         if score > bestScore { bestScore, best = score, n }
     }
     return best
@@ -144,7 +144,7 @@ func AssignSFU(roomID string, nodes []SFUNode) SFUNode {
 
 **Persistence:** Assignment not stored in PG; derived deterministically + cached in Redis `sfu:assign:{roomId} → nodeId` TTL 5m for observability.
 
-**Test vector:** `roomId=abc123, nodes=[sfu-0,sfu-1,sfu-2] → sfu-2`; add `sfu-3` → 75% rooms unchanged (HRW property).
+**Test vector (salt=p0-salt-2026, code truth D-037):** `roomId=abc123, nodes=[sfu-0,sfu-1,sfu-2] salt=p0-salt-2026 → sfu-1`; add `sfu-3` → 75% rooms unchanged (HRW property). *Namespace note:* `livekit-*` naming variant with same salt yields `livekit-2` (different ID prefix, same formula — both correct; `sfu-*` → `sfu-1`). See `services/meet-sfu-manager/main_test.go:52` and `docs/design/consistent-hashing-roomId-to-SFU.md:114`.
 
 See `docs/c4/p0-context.md` for container diagram and `infra/compose.yaml` for wiring.
 
@@ -251,7 +251,7 @@ See `docs/adr/ADR-004-livekit-vs-mediasoup.md` §4 for benchmark GO/NO-GO flag a
 
 **C4 L1/L2:** Reviewed — LB→signal→Redis, SRTP/SFrame→LiveKit, TURN, OIDC, Compose vs K8s parity — **PASS with 3 minor alignment comments** (keep `LIVEKIT_E2EE_MODE=blind` consistent in env+yaml, Prometheus internal DNS).
 
-**Consistent hash §6:** HRW `xxhash(roomId|nodeID|salt)/(1+load*10)` validated vs `docs/design/consistent-hashing-roomId-to-SFU.md`, salt `p0-salt-2026`, `sfu:assign:{roomId}` TTL 5m, vector `abc123 → sfu-2`, single-node degenerate, K8s-ready via `SFU_NODES` headless DNS — **PASS.**
+**Consistent hash §6:** HRW `xxhash(roomId|nodeID|salt)/(1+load*10)` validated vs `docs/design/consistent-hashing-roomId-to-SFU.md`, salt `p0-salt-2026` (SFU_HASH_SALT per infra/compose.yaml:97), `sfu:assign:{roomId}` TTL 5m, vector `abc123 nodes=[sfu-0,sfu-1,sfu-2] salt=p0-salt-2026 → sfu-1` (livekit-* variant → livekit-2, same formula), single-node degenerate `SFU_NODES=livekit:7880` → sfu-0, K8s-ready via `SFU_NODES` headless DNS — **PASS.** Code truth `services/meet-sfu-manager/main.go:243` + `go test -v -run TestRendezvousHRW` PASS sfu-1 (D-037).
 
 **HA/RTO §7:** <60s table verified — signal <5s, SFU `restart:unless-stopped` ~8s+5s ICE <60s, Redis Sentinel/restart <30s, coturn HPA <20s, PG Patroni <60s — honest single-host limitation documented.
 

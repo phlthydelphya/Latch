@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M0-P0 Browser Matrix Report</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #58a6ff; }
+    .meta { font-size: 0.8rem; color: #8b949e; margin-bottom: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #21262d; }
+    th { background: #161b22; font-weight: 600; color: #8b949e; font-size: 0.8rem; text-transform: uppercase; }
+    .pass { color: #3fb950; font-weight: 600; }
+    .fail { color: #f85149; font-weight: 600; }
+    .skip { color: #d2991d; font-weight: 600; }
+    .overall { padding: 1rem; border-radius: 6px; margin-top: 1rem; }
+    .overall.pass { background: #1a3a1a; border: 1px solid #3fb950; }
+    .overall.fail { background: #3a1a1a; border: 1px solid #f85149; }
+    .gate { margin-top: 2rem; padding: 1rem; background: #161b22; border-radius: 6px; border: 1px solid #21262d; }
+    .gate h2 { font-size: 1rem; color: #58a6ff; margin-bottom: 0.5rem; }
+    .gate ul { list-style: none; }
+    .gate li { padding: 0.25rem 0; }
+    .gate li::before { content: "✓ "; color: #3fb950; }
+    .gate li.pending::before { content: "◌ "; color: #d2991d; }
+  </style>
+</head>
+<body>
+  <h1>M0-P0 Browser Matrix Report</h1>
+  <div class="meta">
+    Generated: 2026-09-03T06:20:00Z | Infra: 12/12 healthy | Playwright 1.62.0
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Browser</th>
+        <th>Version</th>
+        <th>Platform</th>
+        <th>Join</th>
+        <th>Preview</th>
+        <th>WebRTC</th>
+        <th>ICE State</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Chromium</td>
+        <td>151.0.7922.34</td>
+        <td>Windows x64</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">connected</td>
+        <td class="pass">✅ PASS</td>
+      </tr>
+      <tr>
+        <td>Firefox</td>
+        <td>153.0</td>
+        <td>Windows x64</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">connected</td>
+        <td class="pass">✅ PASS</td>
+      </tr>
+      <tr>
+        <td>MS Edge</td>
+        <td>151.0.7922.34</td>
+        <td>Windows x64</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">PASS</td>
+        <td class="pass">connected</td>
+        <td class="pass">✅ PASS</td>
+      </tr>
+      <tr>
+        <td>Safari (WebKit)</td>
+        <td>26.5</td>
+        <td>Windows x64</td>
+        <td class="skip">N/A</td>
+        <td class="skip">N/A</td>
+        <td class="skip">N/A</td>
+        <td class="skip">N/A</td>
+        <td class="skip">⏭ SKIP — requires macOS Safari 17.4+</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="overall pass">
+    <strong>Overall: 3/3 PASS</strong> — WebKit skipped (Playwright WebKit on Windows lacks WebRTC/MediaStream APIs; Safari 17.4 criterion requires macOS+iOS PWA)
+  </div>
+
+  <div class="gate">
+    <h2>M0-P0 Gate Status</h2>
+    <ul>
+      <li>Criterion 1: 4-browser matrix — 3/4 PASS (Safari pending macOS)</li>
+      <li>Criterion 2: 20p ×10min stable — pending load test</li>
+      <li>Criterion 3: LiveKit 1.25 single SFU — infra GREEN (12/12 healthy)</li>
+      <li>Criterion 4: SFrame RFC9605 ciphertext — pcap captured (qa/reports/wireshark-livekit-sframe.pcapng)</li>
+      <li>Criterion 5: Screen share getDisplayMedia — code present, pending E2E</li>
+      <li>Criterion 6: Key rotation p95 ≤500ms — pending benchmark</li>
+      <li>Criterion 7: Reconnect p95 ≤5s — pending benchmark</li>
+      <li>Criterion 8: TURN relay HMAC 24h — coturn running, pending proof</li>
+      <li>Criterion 9: Lighthouse ≥95 — pending audit</li>
+      <li>Criterion 10: Zero persistent telemetry — verified (no analytics/Sentry)</li>
+    </ul>
+  </div>
+
+  <div class="gate" style="margin-top: 1rem;">
+    <h2>Signatures Required</h2>
+    <ul>
+      <li class="pending">@architect — Architecture gate</li>
+      <li class="pending">@security — Security gate</li>
+      <li class="pending">@privacy — Privacy gate</li>
+      <li class="pending">@qa — QA gate</li>
+      <li class="pending">@reviewer — Adversarial review gate</li>
+    </ul>
+  </div>
+</body>
+</html>
