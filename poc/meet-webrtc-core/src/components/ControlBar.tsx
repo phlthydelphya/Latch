@@ -1,6 +1,7 @@
 import { useAppStore } from '../store/appStore';
 import { ShieldBadge } from './ShieldBadge';
 import { ConnectionIndicator } from './ConnectionIndicator';
+import { downloadDiagnosticBundle } from '../utils/diagnostics';
 
 export function ControlBar() {
   const {
@@ -96,6 +97,20 @@ export function ControlBar() {
       </div>
 
       <div className="control-bar__group" style={{ marginLeft: 'auto' }}>
+        <button
+          className="btn btn-secondary"
+          onClick={() => downloadDiagnosticBundle()}
+          aria-label="Download Sanitized Diagnostics"
+          title="Export Privacy-Preserving Diagnostic Bundle"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginRight: '4px', verticalAlign: 'text-bottom' }}>
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Diagnostics
+        </button>
         <button
           className="btn btn-danger"
           onClick={leave}
