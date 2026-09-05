@@ -11,6 +11,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -145,6 +147,23 @@ func (h *hub) peers(roomID string, c *client) []*client {
 	return peers
 }
 
+// stats returns the active room and connection count.
+func (h *hub) stats() (rooms int, clients int) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	rooms = len(h.rooms)
+	for _, m := range h.rooms {
+		clients += len(m)
+	}
+	return
+}
+
+var (
+	metricTokensIssued    int64
+	metricMessagesRelayed int64
+	metricSignalErrors    int64
+)
+
 var (
 	jwtSecret       []byte
 	jwtIssuer       string
@@ -216,7 +235,7 @@ func main() {
 
 	mainServer := &http.Server{Addr: ":" + port, Handler: mux, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 120 * time.Second}
 
-	// Metrics server on 9091 (stub, parity with compose healthcheck).
+	// Metrics server on 9091 (RED metrics: rate, errors, duration/gauges).
 	metricsMux := http.NewServeMux()
 	metricsMux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
@@ -224,6 +243,27 @@ func main() {
 		w.Write([]byte("# HELP meet_signal_info Service info\n"))
 		w.Write([]byte("# TYPE meet_signal_info gauge\n"))
 		w.Write([]byte(`meet_signal_info{service="meet-signal",version="w1-signal"} 1` + "\n"))
+
+		rooms, conns := h.stats()
+		fmt.Fprintf(w, "# HELP meet_signal_rooms_active Active signaling rooms\n")
+		fmt.Fprintf(w, "# TYPE meet_signal_rooms_active gauge\n")
+		fmt.Fprintf(w, "meet_signal_rooms_active %d\n", rooms)
+
+		fmt.Fprintf(w, "# HELP meet_signal_connections_active Active client WebSocket connections\n")
+		fmt.Fprintf(w, "# TYPE meet_signal_connections_active gauge\n")
+		fmt.Fprintf(w, "meet_signal_connections_active %d\n", conns)
+
+		fmt.Fprintf(w, "# HELP meet_signal_messages_total Total signaling frames relayed\n")
+		fmt.Fprintf(w, "# TYPE meet_signal_messages_total counter\n")
+		fmt.Fprintf(w, "meet_signal_messages_total %d\n", atomic.LoadInt64(&metricMessagesRelayed))
+
+		fmt.Fprintf(w, "# HELP meet_signal_tokens_issued_total Total access tokens minted\n")
+		fmt.Fprintf(w, "# TYPE meet_signal_tokens_issued_total counter\n")
+		fmt.Fprintf(w, "meet_signal_tokens_issued_total %d\n", atomic.LoadInt64(&metricTokensIssued))
+
+		fmt.Fprintf(w, "# HELP meet_signal_errors_total Total signaling errors encountered\n")
+		fmt.Fprintf(w, "# TYPE meet_signal_errors_total counter\n")
+		fmt.Fprintf(w, "meet_signal_errors_total %d\n", atomic.LoadInt64(&metricSignalErrors))
 	})
 	metricsServer := &http.Server{Addr: ":" + metricsPort, Handler: metricsMux, ReadTimeout: 5 * time.Second, WriteTimeout: 10 * time.Second}
 
@@ -292,25 +332,30 @@ func handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 
 func handleToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var req TokenRequest
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 	if req.RoomID == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "roomId is required", http.StatusBadRequest)
 		return
 	}
 	if len(req.RoomID) > 64 || len(req.Name) > 64 {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "roomId/name too long", http.StatusBadRequest)
 		return
 	}
 
 	participantID := "p-" + uuid.New().String()[:8]
+	atomic.AddInt64(&metricTokensIssued, 1)
 
 	// Dual-path: LiveKit JWT with VideoGrant if LIVEKIT_API_SECRET is set, else legacy mesh token
 	if liveKitAPISecret != "" {
@@ -524,6 +569,7 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 
 	claims, err := validateJWT(token)
 	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -533,12 +579,14 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 		roomID = claims.RoomID
 	}
 	if roomID != claims.RoomID {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "room mismatch", http.StatusForbidden)
 		return
 	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		return
 	}
 	defer conn.Close()
@@ -583,6 +631,7 @@ func readLoop(h *hub, roomID string, c *client) {
 
 		var msg SignalMessage
 		if err := json.Unmarshal(data, &msg); err != nil {
+			atomic.AddInt64(&metricSignalErrors, 1)
 			continue
 		}
 		// Enforce authenticated identity + room, then relay to peers.
@@ -593,9 +642,11 @@ func readLoop(h *hub, roomID string, c *client) {
 		}
 		out, err := json.Marshal(msg)
 		if err != nil {
+			atomic.AddInt64(&metricSignalErrors, 1)
 			continue
 		}
 
+		atomic.AddInt64(&metricMessagesRelayed, 1)
 		for _, peer := range h.peers(roomID, c) {
 			_ = peer.writeRaw(out)
 		}

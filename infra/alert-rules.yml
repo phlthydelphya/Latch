@@ -1,0 +1,92 @@
+groups:
+  - name: meet_secure_core_alerts
+    rules:
+      - alert: LiveKitSFUDown
+        expr: up{job="livekit-sfu"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          tier: media
+        annotations:
+          summary: "LiveKit SFU instance is down"
+          description: "SFU node at {{ $labels.instance }} has been unreachable for > 30s."
+
+      - alert: LiveKitSFUHighCPULoad
+        expr: livekit_node_cpu_load > 0.70
+        for: 1m
+        labels:
+          severity: warning
+          tier: media
+        annotations:
+          summary: "LiveKit SFU high CPU load (>70%)"
+          description: "SFU load on {{ $labels.instance }} exceeded 70% (current: {{ $value }})."
+
+      - alert: LiveKitHighPacketLoss
+        expr: rate(livekit_packet_loss_total[1m]) > 0.01
+        for: 1m
+        labels:
+          severity: warning
+          tier: media
+        annotations:
+          summary: "WebRTC high packet loss (>1%)"
+          description: "Packet loss rate on {{ $labels.instance }} is above 1%."
+
+      - alert: MeetSignalDown
+        expr: up{job="meet-signal"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          tier: signaling
+        annotations:
+          summary: "Signaling service meet-signal is down"
+          description: "meet-signal at {{ $labels.instance }} is unreachable."
+
+      - alert: MeetSignalHighErrorRate
+        expr: rate(meet_signal_errors_total[1m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          tier: signaling
+        annotations:
+          summary: "meet-signal elevated error rate"
+          description: "meet-signal is recording > 5 errors/sec over 1m."
+
+      - alert: TurnAuthDown
+        expr: up{job="turn-auth"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          tier: network
+        annotations:
+          summary: "turn-auth service is down"
+          description: "turn-auth at {{ $labels.instance }} is unreachable."
+
+      - alert: TurnAuthHighFailures
+        expr: rate(turn_auth_failures_total[1m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          tier: network
+        annotations:
+          summary: "Elevated TURN authentication failures"
+          description: "TURN credential failures > 5/sec over 1m."
+
+      - alert: SFUManagerDown
+        expr: up{job="meet-sfu-manager"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          tier: routing
+        annotations:
+          summary: "meet-sfu-manager service is down"
+          description: "SFU manager at {{ $labels.instance }} is unreachable."
+
+      - alert: SFUManagerNoHealthyNodes
+        expr: meet_sfu_nodes_healthy == 0
+        for: 15s
+        labels:
+          severity: critical
+          tier: routing
+        annotations:
+          summary: "No healthy SFU nodes available for assignment"
+          description: "meet-sfu-manager reports 0 healthy SFU nodes available."

@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,11 +16,18 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
 	"github.com/cespare/xxhash/v2"
 	"github.com/redis/go-redis/v9"
+)
+
+var (
+	metricAssignmentsTotal int64
+	metricCacheHitsTotal   int64
+	metricCacheMissesTotal int64
 )
 
 type healthResponse struct {
@@ -109,9 +117,10 @@ func main() {
 	})
 
 	mux.HandleFunc("/internal/sfu/assign", handleAssign)
+	mux.HandleFunc("/metrics", handleMetrics)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/healthz" && r.URL.Path != "/internal/sfu/assign" {
+		if r.URL.Path != "/healthz" && r.URL.Path != "/internal/sfu/assign" && r.URL.Path != "/metrics" {
 			http.NotFound(w, r)
 		}
 	})
@@ -203,6 +212,8 @@ func handleAssign(w http.ResponseWriter, r *http.Request) {
 		for _, n := range sfuNodes {
 			if n.ID == cached && n.isHealthy() {
 				sfuNodesMu.RUnlock()
+				atomic.AddInt64(&metricAssignmentsTotal, 1)
+				atomic.AddInt64(&metricCacheHitsTotal, 1)
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(assignResponse{NodeID: n.ID, Addr: n.Addr, Load: n.getLoad()})
 				return
@@ -219,11 +230,49 @@ func handleAssign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	atomic.AddInt64(&metricAssignmentsTotal, 1)
+	atomic.AddInt64(&metricCacheMissesTotal, 1)
+
 	// Cache assignment for 5 minutes (300s)
 	_ = redisClient.Set(ctx, cacheKey, node.ID, 300*time.Second).Err()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(assignResponse{NodeID: node.ID, Addr: node.Addr, Load: node.getLoad()})
+}
+
+func handleMetrics(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+	w.WriteHeader(http.StatusOK)
+
+	sfuNodesMu.RLock()
+	healthyCount := 0
+	totalCount := len(sfuNodes)
+	for _, n := range sfuNodes {
+		if n.isHealthy() {
+			healthyCount++
+		}
+	}
+	sfuNodesMu.RUnlock()
+
+	fmt.Fprintf(w, "# HELP meet_sfu_assignments_total Total SFU assignments requested\n")
+	fmt.Fprintf(w, "# TYPE meet_sfu_assignments_total counter\n")
+	fmt.Fprintf(w, "meet_sfu_assignments_total %d\n", atomic.LoadInt64(&metricAssignmentsTotal))
+
+	fmt.Fprintf(w, "# HELP meet_sfu_cache_hits_total Total SFU assignment cache hits\n")
+	fmt.Fprintf(w, "# TYPE meet_sfu_cache_hits_total counter\n")
+	fmt.Fprintf(w, "meet_sfu_cache_hits_total %d\n", atomic.LoadInt64(&metricCacheHitsTotal))
+
+	fmt.Fprintf(w, "# HELP meet_sfu_cache_misses_total Total SFU assignment cache misses (HRW computations)\n")
+	fmt.Fprintf(w, "# TYPE meet_sfu_cache_misses_total counter\n")
+	fmt.Fprintf(w, "meet_sfu_cache_misses_total %d\n", atomic.LoadInt64(&metricCacheMissesTotal))
+
+	fmt.Fprintf(w, "# HELP meet_sfu_nodes_healthy Number of healthy SFU nodes\n")
+	fmt.Fprintf(w, "# TYPE meet_sfu_nodes_healthy gauge\n")
+	fmt.Fprintf(w, "meet_sfu_nodes_healthy %d\n", healthyCount)
+
+	fmt.Fprintf(w, "# HELP meet_sfu_nodes_total Total configured SFU nodes\n")
+	fmt.Fprintf(w, "# TYPE meet_sfu_nodes_total gauge\n")
+	fmt.Fprintf(w, "meet_sfu_nodes_total %d\n", totalCount)
 }
 
 func assignSFU(roomID string) (*SFUNode, bool) {

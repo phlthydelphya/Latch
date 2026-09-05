@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
@@ -43,6 +44,11 @@ type turnCredResponse struct {
 
 // maxBodyBytes limits request body to 1KB for DoS protection
 const maxBodyBytes = 1024
+
+var (
+	allocationsTotal      int64
+	allocationErrorsTotal int64
+)
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -68,20 +74,22 @@ func main() {
 		json.NewEncoder(w).Encode(healthResponse{Status: "ok", Service: "turn-auth"})
 	})
 
-	// Optional /metrics placeholder — Prometheus counter for allocations
-	allocationsTotal := 0
+	// /metrics — Prometheus counters for allocations and failures
 	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 		w.WriteHeader(http.StatusOK)
-		// Minimal Prometheus exposition format
 		io.WriteString(w, "# HELP turn_allocations_total Total TURN credential allocations\n")
 		io.WriteString(w, "# TYPE turn_allocations_total counter\n")
-		io.WriteString(w, "turn_allocations_total "+itoa(allocationsTotal)+"\n")
+		io.WriteString(w, "turn_allocations_total "+strconv.FormatInt(atomic.LoadInt64(&allocationsTotal), 10)+"\n")
+		io.WriteString(w, "# HELP turn_auth_failures_total Total failed TURN credential allocations\n")
+		io.WriteString(w, "# TYPE turn_auth_failures_total counter\n")
+		io.WriteString(w, "turn_auth_failures_total "+strconv.FormatInt(atomic.LoadInt64(&allocationErrorsTotal), 10)+"\n")
 	})
 
 	mux.HandleFunc("/turn/credentials", func(w http.ResponseWriter, r *http.Request) {
 		// Method enforcement
 		if r.Method != http.MethodPost {
+			atomic.AddInt64(&allocationErrorsTotal, 1)
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
@@ -89,6 +97,7 @@ func main() {
 		// Content-Type enforcement
 		ct := r.Header.Get("Content-Type")
 		if ct != "application/json" && ct != "application/json; charset=utf-8" {
+			atomic.AddInt64(&allocationErrorsTotal, 1)
 			http.Error(w, "Content-Type must be application/json", http.StatusBadRequest)
 			return
 		}
@@ -100,6 +109,7 @@ func main() {
 		dec := json.NewDecoder(r.Body)
 		dec.DisallowUnknownFields() // Strict JSON
 		if err := dec.Decode(&req); err != nil {
+			atomic.AddInt64(&allocationErrorsTotal, 1)
 			// Sanitized error — no request body in logs
 			log.Printf("turn/credentials: invalid JSON: %v", err)
 			http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -108,6 +118,7 @@ func main() {
 
 		// Validate required fields
 		if req.RoomID == "" {
+			atomic.AddInt64(&allocationErrorsTotal, 1)
 			http.Error(w, "roomId is required", http.StatusBadRequest)
 			return
 		}
@@ -121,6 +132,7 @@ func main() {
 			// Fallback: random hash (32 bytes -> 43 chars base64url)
 			b := make([]byte, 32)
 			if _, err := rand.Read(b); err != nil {
+				atomic.AddInt64(&allocationErrorsTotal, 1)
 				log.Printf("turn/credentials: rand read failed: %v", err)
 				http.Error(w, "Internal error", http.StatusInternalServerError)
 				return
@@ -164,7 +176,7 @@ func main() {
 
 		// Sanitized allocation log — NEVER log TURN_SECRET, credential raw, or raw IP
 		// ipHash = sha256(ip+salt) style if we had client IP; here we log only userHash prefix
-		allocationsTotal++
+		atomic.AddInt64(&allocationsTotal, 1)
 		log.Printf("turn/credentials: allocation roomId=%s userHash=%s... expiry=%d", req.RoomID, userHash[:8], expiry)
 
 		w.Header().Set("Content-Type", "application/json")
