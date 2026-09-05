@@ -20,7 +20,7 @@ if ('serviceWorker' in navigator) {
 // effects re-runs useWebRTC's initialize(), creating a second RTCPeerConnection
 // and a duplicate signaling session that breaks SDP negotiation (glare).
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     <App />
   </BrowserRouter>
 );

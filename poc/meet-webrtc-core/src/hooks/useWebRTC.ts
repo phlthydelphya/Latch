@@ -21,11 +21,14 @@ import {
 import { getGlobalMetricsCollector } from '../metrics/collector';
 import { PresenceAdapter } from '../presence/presenceAdapter';
 import { usePresenceStore } from '../presence/presenceStore';
+import { LayoutAdapter, SPOTLIGHT_TOPIC } from '../layout/layoutAdapter';
+import { useLayoutStore } from '../layout/layoutStore';
 
 export function useWebRTC() {
   const { roomId, setError } = useAppStore();
   const roomRef = useRef<Room | null>(null);
   const presenceAdapterRef = useRef<PresenceAdapter | null>(null);
+  const layoutAdapterRef = useRef<LayoutAdapter | null>(null);
   const isConnectingRef = useRef(false);
   const activeRoomIdRef = useRef<string | null>(null);
 
@@ -227,6 +230,13 @@ export function useWebRTC() {
             presenceAdapterRef.current = new PresenceAdapter(room);
           } else {
             presenceAdapterRef.current.attach(room);
+          }
+
+          // M2 Phase B: Initialize Layout Adapter for adaptive visual layouts
+          if (!layoutAdapterRef.current) {
+            layoutAdapterRef.current = new LayoutAdapter(room);
+          } else {
+            layoutAdapterRef.current.attach(room);
           }
 
           // Flush HPKE key publish
@@ -943,6 +953,13 @@ export function useWebRTC() {
       presenceAdapterRef.current = null;
     }
     usePresenceStore.getState().resetPresence();
+
+    if (layoutAdapterRef.current) {
+      layoutAdapterRef.current.detach();
+      layoutAdapterRef.current = null;
+    }
+    useLayoutStore.getState().reset();
+
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
@@ -953,6 +970,23 @@ export function useWebRTC() {
   const publishHandRaise = useCallback(async (raised: boolean) => {
     if (presenceAdapterRef.current) {
       await presenceAdapterRef.current.publishHandRaise(raised);
+    }
+  }, []);
+
+  const publishSpotlight = useCallback(async (targetParticipantId: string | null) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const payload = JSON.stringify({
+        type: 'spotlight',
+        participantId: targetParticipantId,
+        timestamp: Date.now(),
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: SPOTLIGHT_TOPIC,
+      });
+      useLayoutStore.getState().setSpotlight(targetParticipantId);
     }
   }, []);
 
@@ -968,5 +1002,6 @@ export function useWebRTC() {
     stopScreenShare,
     leave,
     publishHandRaise,
+    publishSpotlight,
   };
 }

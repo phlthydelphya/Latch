@@ -33,14 +33,29 @@ export function resolveSfuUrl(sfuUrl: string | undefined): string {
 }
 
 export async function fetchToken(roomId: string, name: string): Promise<TokenResponse> {
-  const res = await fetch('/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ roomId, name }),
-  });
+  let res: Response;
+  try {
+    res = await fetch('/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, name }),
+    });
+  } catch (netErr: any) {
+    throw new Error(`Signaling service unreachable: ${netErr?.message || 'Network connection failed'}. Ensure meet-signal is running.`);
+  }
 
   if (!res.ok) {
-    throw new Error(`Failed to issue room token (${res.status})`);
+    let detail = '';
+    try {
+      const errJson = await res.json();
+      detail = errJson?.message || errJson?.error || '';
+    } catch {
+      // not JSON
+    }
+    const message = detail
+      ? `Failed to issue room token (${res.status}): ${detail}`
+      : `Failed to issue room token (${res.status}). Signaling service (meet-signal on port 8080) may be offline.`;
+    throw new Error(message);
   }
 
   const token = await res.json();

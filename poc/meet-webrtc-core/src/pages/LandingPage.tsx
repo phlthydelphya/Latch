@@ -37,12 +37,15 @@ export function LandingPage() {
 
     try {
       // Backend issues the signed JWT (services/meet-signal POST /token)
-      const { token, participantId } = await fetchToken(finalRoomId, finalName);
-      setRoom(finalRoomId, participantId, token, keyParam);
+      const res = await fetchToken(finalRoomId, finalName);
+      setRoom(finalRoomId, res.participantId, res.token, keyParam);
+      if (res.livekitToken && res.sfuUrl) {
+        useAppStore.getState().setCredentials(res.livekitToken, res.sfuUrl);
+      }
       navigate(`/r/${finalRoomId}`, { replace: true });
     } catch (err) {
       console.error('Token issuance failed:', err);
-      setError('Could not join meeting. Signaling service unavailable.');
+      setError(err instanceof Error ? err.message : 'Could not join meeting. Signaling service unavailable.');
       setLoading(false);
     }
   };

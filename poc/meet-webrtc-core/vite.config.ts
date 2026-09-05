@@ -193,12 +193,30 @@ export default defineConfig({
         target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (_err, _req, res) => {
+            if (res && 'writeHead' in res && !res.headersSent) {
+              res.writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  error: 'Signaling service offline',
+                  message: 'meet-signal backend is not running at http://127.0.0.1:8080. Start backend services via Docker Compose or run meet-signal locally.',
+                })
+              );
+            }
+          });
+        },
       },
       '/signal': {
         target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
         changeOrigin: true,
         ws: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            // Suppress unhandled socket error logs when signaling backend is restarting or offline
+          });
+        },
       },
       '/sfu': {
         target: process.env.VITE_SFU_TARGET ?? 'http://127.0.0.1:7880',

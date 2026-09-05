@@ -6,6 +6,8 @@ import { VideoGrid } from '../components/VideoGrid';
 import { ControlBar } from '../components/ControlBar';
 import { RosterDrawer } from '../components/RosterDrawer';
 import { ToastContainer } from '../components/ToastContainer';
+import { LayoutControls } from '../components/layout/LayoutControls';
+import { useLayoutStore } from '../layout/layoutStore';
 import { useAppStore } from '../store/appStore';
 
 export function MeetingPage() {
@@ -25,6 +27,7 @@ export function MeetingPage() {
     stopScreenShare,
     leave: webrtcLeave,
     publishHandRaise,
+    publishSpotlight,
   } = useWebRTC();
 
   const localParticipant = useAppStore((s) => s.localParticipant);
@@ -72,6 +75,8 @@ export function MeetingPage() {
             </p>
           </div>
         </div>
+
+        <LayoutControls onClearSpotlight={() => publishSpotlight(null)} />
       </header>
 
       {error && (
@@ -88,6 +93,8 @@ export function MeetingPage() {
           localVideoEnabled={localParticipant?.videoEnabled ?? true}
           localAudioEnabled={localParticipant?.audioEnabled ?? true}
           screenSharing={localParticipant?.screenSharing ?? false}
+          onPin={(id) => useLayoutStore.getState().pinParticipant(id)}
+          onSpotlight={(id) => publishSpotlight(id || null)}
         />
         
         {!isConnected && (
