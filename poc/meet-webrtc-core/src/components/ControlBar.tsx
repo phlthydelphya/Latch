@@ -4,6 +4,7 @@ import { ConnectionIndicator } from './ConnectionIndicator';
 import { downloadDiagnosticBundle } from '../utils/diagnostics';
 import { HandRaiseButton } from './HandRaiseButton';
 import { usePresenceStore } from '../presence/presenceStore';
+import { useCollaborationStore } from '../collaboration/collaborationStore';
 
 interface ControlBarProps {
   onToggleHand?: (raised: boolean) => Promise<void> | void;
@@ -23,6 +24,12 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
   const isRosterOpen = usePresenceStore((s) => s.isRosterOpen);
   const toggleRoster = usePresenceStore((s) => s.toggleRoster);
   const participantCount = usePresenceStore((s) => s.participants.size);
+
+  const isChatOpen = useCollaborationStore((s) => s.isChatOpen);
+  const toggleChat = useCollaborationStore((s) => s.toggleChat);
+  const unreadCount = useCollaborationStore((s) => s.unreadCount);
+  const isReactionsBarOpen = useCollaborationStore((s) => s.isReactionsBarOpen);
+  const toggleReactionsBar = useCollaborationStore((s) => s.toggleReactionsBar);
 
   const audioEnabled = localParticipant?.audioEnabled ?? true;
   const videoEnabled = localParticipant?.videoEnabled ?? true;
@@ -106,9 +113,57 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
         </button>
 
         <HandRaiseButton onToggleHand={onToggleHand} disabled={!isConnected || isReconnecting} />
+
+        <button
+          className={`media-toggle ${isReactionsBarOpen ? 'active' : ''}`}
+          onClick={() => toggleReactionsBar()}
+          aria-pressed={isReactionsBarOpen}
+          aria-label="Reactions"
+          title="Send Reaction"
+          disabled={!isConnected || isReconnecting}
+          style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <span>😊</span>
+        </button>
       </div>
 
       <div className="control-bar__group" style={{ marginLeft: 'auto' }}>
+        <button
+          className={`btn ${isChatOpen ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => toggleChat()}
+          aria-pressed={isChatOpen}
+          aria-label="Toggle In-Call Chat"
+          title="Toggle In-Call Chat"
+          style={{
+            marginRight: '8px',
+            fontSize: '0.85rem',
+            padding: '6px 10px',
+            backgroundColor: isChatOpen ? 'var(--accent, #00d4aa)' : undefined,
+            color: isChatOpen ? '#000' : undefined,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}
+        >
+          <span>💬</span>
+          <span>Chat</span>
+          {unreadCount > 0 && !isChatOpen && (
+            <span
+              style={{
+                marginLeft: '4px',
+                background: '#ff4757',
+                color: '#fff',
+                borderRadius: '10px',
+                padding: '1px 6px',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
+        </button>
+
         <button
           className={`btn ${isRosterOpen ? 'btn-primary' : 'btn-secondary'}`}
           onClick={toggleRoster}

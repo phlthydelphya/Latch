@@ -9,6 +9,10 @@ import { ToastContainer } from '../components/ToastContainer';
 import { LayoutControls } from '../components/layout/LayoutControls';
 import { useLayoutStore } from '../layout/layoutStore';
 import { useAppStore } from '../store/appStore';
+import { ChatDrawer } from '../components/collaboration/ChatDrawer';
+import { ReactionsBar } from '../components/collaboration/ReactionsBar';
+import { ReactionsOverlay } from '../components/collaboration/ReactionsOverlay';
+import { HostAnnouncementBanner } from '../components/collaboration/HostAnnouncementBanner';
 
 export function MeetingPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -28,6 +32,10 @@ export function MeetingPage() {
     leave: webrtcLeave,
     publishHandRaise,
     publishSpotlight,
+    publishChatMessage,
+    publishReaction,
+    publishAnnouncement,
+    lowerParticipantHand,
   } = useWebRTC();
 
   const localParticipant = useAppStore((s) => s.localParticipant);
@@ -117,8 +125,12 @@ export function MeetingPage() {
         )}
       </main>
 
+      <HostAnnouncementBanner />
+      <ReactionsOverlay />
       <ControlBar onToggleHand={publishHandRaise} />
-      <RosterDrawer />
+      <ReactionsBar onSendReaction={publishReaction} />
+      <ChatDrawer onSendMessage={publishChatMessage} />
+      <RosterDrawer onLowerHand={lowerParticipantHand} />
       <ToastContainer />
     </div>
   );

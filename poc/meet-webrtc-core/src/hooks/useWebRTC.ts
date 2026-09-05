@@ -23,12 +23,23 @@ import { PresenceAdapter } from '../presence/presenceAdapter';
 import { usePresenceStore } from '../presence/presenceStore';
 import { LayoutAdapter, SPOTLIGHT_TOPIC } from '../layout/layoutAdapter';
 import { useLayoutStore } from '../layout/layoutStore';
+import { CollaborationAdapter } from '../collaboration/collaborationAdapter';
+import { useCollaborationStore } from '../collaboration/collaborationStore';
+import {
+  CHAT_TOPIC,
+  REACTION_TOPIC,
+  ANNOUNCEMENT_TOPIC,
+  HAND_ACTION_TOPIC,
+  ReactionEmoji,
+  ReactionEvent,
+} from '../collaboration/types';
 
 export function useWebRTC() {
   const { roomId, setError } = useAppStore();
   const roomRef = useRef<Room | null>(null);
   const presenceAdapterRef = useRef<PresenceAdapter | null>(null);
   const layoutAdapterRef = useRef<LayoutAdapter | null>(null);
+  const collaborationAdapterRef = useRef<CollaborationAdapter | null>(null);
   const isConnectingRef = useRef(false);
   const activeRoomIdRef = useRef<string | null>(null);
 
@@ -237,6 +248,13 @@ export function useWebRTC() {
             layoutAdapterRef.current = new LayoutAdapter(room);
           } else {
             layoutAdapterRef.current.attach(room);
+          }
+
+          // M2 Phase C: Initialize Collaboration Adapter for in-call chat, reactions, announcements, hand queue
+          if (!collaborationAdapterRef.current) {
+            collaborationAdapterRef.current = new CollaborationAdapter(room);
+          } else {
+            collaborationAdapterRef.current.attach(room);
           }
 
           // Flush HPKE key publish
@@ -960,6 +978,12 @@ export function useWebRTC() {
     }
     useLayoutStore.getState().reset();
 
+    if (collaborationAdapterRef.current) {
+      collaborationAdapterRef.current.detach();
+      collaborationAdapterRef.current = null;
+    }
+    useCollaborationStore.getState().reset();
+
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
@@ -990,6 +1014,138 @@ export function useWebRTC() {
     }
   }, []);
 
+  const publishChatMessage = useCallback(async (text: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const msgId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'chat',
+        id: msgId,
+        text,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: CHAT_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        `You (${senderId.slice(0, 6)})`;
+
+      useCollaborationStore.getState().addMessage({
+        id: msgId,
+        senderId,
+        senderName,
+        text,
+        timestamp,
+        isLocal: true,
+      });
+    }
+  }, []);
+
+  const publishReaction = useCallback(async (emoji: ReactionEmoji) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const rxId = `rx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'reaction',
+        id: rxId,
+        emoji,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: REACTION_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        `You (${senderId.slice(0, 6)})`;
+
+      const rx: ReactionEvent = {
+        id: rxId,
+        senderId,
+        senderName,
+        emoji,
+        timestamp,
+        xOffset: Math.floor(15 + Math.random() * 70),
+      };
+      useCollaborationStore.getState().addReaction(rx);
+
+      setTimeout(() => {
+        useCollaborationStore.getState().removeReaction(rxId);
+      }, 3500);
+    }
+  }, []);
+
+  const publishAnnouncement = useCallback(async (message: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const annId = `ann-${Date.now()}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'announcement',
+        id: annId,
+        message,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: ANNOUNCEMENT_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        'You (Host)';
+
+      useCollaborationStore.getState().setAnnouncement({
+        id: annId,
+        message,
+        senderName,
+        timestamp,
+        active: true,
+      });
+    }
+  }, []);
+
+  const lowerParticipantHand = useCallback(async (targetParticipantId?: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const payload = JSON.stringify({
+        type: 'hand-action',
+        action: targetParticipantId ? 'lower-hand' : 'lower-all',
+        targetParticipantId,
+        timestamp: Date.now(),
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: HAND_ACTION_TOPIC,
+      });
+
+      if (targetParticipantId) {
+        usePresenceStore.getState().setHandRaised(targetParticipantId, false);
+      } else {
+        usePresenceStore.getState().lowerAllHands();
+      }
+    }
+  }, []);
+
   return {
     room: roomRef.current,
     localStream,
@@ -1003,5 +1159,9 @@ export function useWebRTC() {
     leave,
     publishHandRaise,
     publishSpotlight,
+    publishChatMessage,
+    publishReaction,
+    publishAnnouncement,
+    lowerParticipantHand,
   };
 }

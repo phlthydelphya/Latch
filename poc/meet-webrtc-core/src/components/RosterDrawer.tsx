@@ -12,12 +12,18 @@ import { usePresenceStore } from '../presence/presenceStore';
 import { ConnectionBadge } from './ConnectionBadge';
 import { SpeakingIndicator } from './SpeakingIndicator';
 
-export const RosterDrawer: React.FC = () => {
+interface RosterDrawerProps {
+  onLowerHand?: (targetParticipantId?: string) => Promise<void> | void;
+}
+
+export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
   const isOpen = usePresenceStore((s) => s.isRosterOpen);
   const setRosterOpen = usePresenceStore((s) => s.setRosterOpen);
   const participantsMap = usePresenceStore((s) => s.participants);
   const raisedHands = usePresenceStore((s) => s.raisedHands);
   const hostId = usePresenceStore((s) => s.hostId);
+  const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const isLocalHost = hostId === localParticipantId || participantsMap.get(localParticipantId || '')?.isHost;
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -112,17 +118,38 @@ export const RosterDrawer: React.FC = () => {
             borderBottom: '1px solid rgba(255, 165, 2, 0.3)',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: '8px',
             fontSize: '0.8rem',
             color: 'var(--warning, #ffa502)',
           }}
         >
-          <span aria-hidden="true">✋</span>
-          <span>
-            {raisedHands.length === 1
-              ? `${participantsMap.get(raisedHands[0].participantId)?.name || 'Someone'} raised hand`
-              : `${raisedHands.length} hands raised in queue`}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span aria-hidden="true">✋</span>
+            <span>
+              {raisedHands.length === 1
+                ? `${participantsMap.get(raisedHands[0].participantId)?.name || 'Someone'} raised hand`
+                : `${raisedHands.length} hands raised in queue`}
+            </span>
+          </div>
+          {isLocalHost && onLowerHand && (
+            <button
+              onClick={() => onLowerHand()}
+              style={{
+                fontSize: '0.7rem',
+                padding: '2px 8px',
+                backgroundColor: 'rgba(255, 165, 2, 0.25)',
+                border: '1px solid rgba(255, 165, 2, 0.5)',
+                borderRadius: '4px',
+                color: 'var(--warning, #ffa502)',
+                cursor: 'pointer',
+                fontWeight: 600,
+              }}
+              title="Lower all hands"
+            >
+              Lower All
+            </button>
+          )}
         </div>
       )}
 
@@ -232,17 +259,36 @@ export const RosterDrawer: React.FC = () => {
                         </span>
                       )}
                       {p.isHandRaised && (
-                        <span
-                          style={{
-                            fontSize: '0.65rem',
-                            backgroundColor: 'rgba(255, 165, 2, 0.2)',
-                            color: 'var(--warning, #ffa502)',
-                            padding: '1px 5px',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          ✋ Raised
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span
+                            style={{
+                              fontSize: '0.65rem',
+                              backgroundColor: 'rgba(255, 165, 2, 0.2)',
+                              color: 'var(--warning, #ffa502)',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            ✋ Raised
+                          </span>
+                          {isLocalHost && onLowerHand && (
+                            <button
+                              onClick={() => onLowerHand(p.id)}
+                              style={{
+                                fontSize: '0.65rem',
+                                backgroundColor: 'rgba(255, 165, 2, 0.25)',
+                                border: '1px solid rgba(255, 165, 2, 0.4)',
+                                borderRadius: '4px',
+                                color: 'var(--warning, #ffa502)',
+                                padding: '1px 5px',
+                                cursor: 'pointer',
+                              }}
+                              title={`Lower ${p.name}'s hand`}
+                            >
+                              Lower
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
