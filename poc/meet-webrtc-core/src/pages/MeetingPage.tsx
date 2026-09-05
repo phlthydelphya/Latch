@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebRTC } from '../hooks/useWebRTC';
+import { useIosLifecycle } from '../hooks/useIosLifecycle';
 import { VideoGrid } from '../components/VideoGrid';
 import { ControlBar } from '../components/ControlBar';
 import { useAppStore } from '../store/appStore';
@@ -8,6 +9,9 @@ import { useAppStore } from '../store/appStore';
 export function MeetingPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { keyParam, setError, clearRoom } = useAppStore();
+  
+  // Initiative 4.4: iOS Safari & PWA audio interruption and background/foreground handler
+  useIosLifecycle();
   
   const {
     localStream,

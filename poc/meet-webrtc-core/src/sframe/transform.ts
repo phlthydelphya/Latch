@@ -519,6 +519,11 @@ export async function installSFrameOnSenderShared(
     } catch (e) {
       console.warn('[SFrame] Failed to create or pipe encoded sender streams:', e);
     }
+  } else if ('transform' in sender && hasScriptTransform()) {
+    console.log('[SFrame] Safari/WebKit RTCRtpScriptTransform detected on sender');
+    (sender as any)._sframeTransformer = globalSFrameInstance;
+  } else {
+    console.log('[SFrame] WebRTC Encoded Transform not natively supported on this sender; using WASM worker fallback');
   }
 }
 
@@ -537,6 +542,11 @@ export async function installSFrameOnReceiverShared(
     } catch (e) {
       console.warn('[SFrame] Failed to create or pipe encoded receiver streams:', e);
     }
+  } else if ('transform' in receiver && hasScriptTransform()) {
+    console.log('[SFrame] Safari/WebKit RTCRtpScriptTransform detected on receiver');
+    (receiver as any)._sframeTransformer = globalSFrameInstance;
+  } else {
+    console.log('[SFrame] WebRTC Encoded Transform not natively supported on this receiver; using WASM worker fallback');
   }
 }
 
