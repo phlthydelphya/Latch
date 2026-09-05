@@ -19,10 +19,13 @@ import {
   getGlobalSFrame,
 } from '../sframe/transform';
 import { getGlobalMetricsCollector } from '../metrics/collector';
+import { PresenceAdapter } from '../presence/presenceAdapter';
+import { usePresenceStore } from '../presence/presenceStore';
 
 export function useWebRTC() {
   const { roomId, setError } = useAppStore();
   const roomRef = useRef<Room | null>(null);
+  const presenceAdapterRef = useRef<PresenceAdapter | null>(null);
   const isConnectingRef = useRef(false);
   const activeRoomIdRef = useRef<string | null>(null);
 
@@ -218,6 +221,13 @@ export function useWebRTC() {
           console.log('[LiveKit] room.name', room.name, 'state', room.state, 'localParticipant', room.localParticipant?.identity);
           useAppStore.getState().setConnected(true);
           useAppStore.getState().setShieldMode(true);
+
+          // M2 Phase A: Initialize Presence Adapter for presence domain events
+          if (!presenceAdapterRef.current) {
+            presenceAdapterRef.current = new PresenceAdapter(room);
+          } else {
+            presenceAdapterRef.current.attach(room);
+          }
 
           // Flush HPKE key publish
           if (sframeEnabled) {
@@ -859,6 +869,11 @@ export function useWebRTC() {
         sframeRef.current = null;
       }
       setGlobalSFrame(null);
+      if (presenceAdapterRef.current) {
+        presenceAdapterRef.current.detach();
+        presenceAdapterRef.current = null;
+      }
+      usePresenceStore.getState().resetPresence();
       if (roomRef.current) {
         roomRef.current.disconnect();
         roomRef.current = null;
@@ -923,10 +938,21 @@ export function useWebRTC() {
       sframeRef.current = null;
     }
     setGlobalSFrame(null);
+    if (presenceAdapterRef.current) {
+      presenceAdapterRef.current.detach();
+      presenceAdapterRef.current = null;
+    }
+    usePresenceStore.getState().resetPresence();
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
       (window as any).__LIVEKIT_ROOM__ = null;
+    }
+  }, []);
+
+  const publishHandRaise = useCallback(async (raised: boolean) => {
+    if (presenceAdapterRef.current) {
+      await presenceAdapterRef.current.publishHandRaise(raised);
     }
   }, []);
 
@@ -941,5 +967,6 @@ export function useWebRTC() {
     startScreenShare,
     stopScreenShare,
     leave,
+    publishHandRaise,
   };
 }

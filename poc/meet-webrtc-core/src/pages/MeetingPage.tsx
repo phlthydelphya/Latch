@@ -4,6 +4,8 @@ import { useWebRTC } from '../hooks/useWebRTC';
 import { useIosLifecycle } from '../hooks/useIosLifecycle';
 import { VideoGrid } from '../components/VideoGrid';
 import { ControlBar } from '../components/ControlBar';
+import { RosterDrawer } from '../components/RosterDrawer';
+import { ToastContainer } from '../components/ToastContainer';
 import { useAppStore } from '../store/appStore';
 
 export function MeetingPage() {
@@ -22,6 +24,7 @@ export function MeetingPage() {
     startScreenShare,
     stopScreenShare,
     leave: webrtcLeave,
+    publishHandRaise,
   } = useWebRTC();
 
   const localParticipant = useAppStore((s) => s.localParticipant);
@@ -107,7 +110,9 @@ export function MeetingPage() {
         )}
       </main>
 
-      <ControlBar />
+      <ControlBar onToggleHand={publishHandRaise} />
+      <RosterDrawer />
+      <ToastContainer />
     </div>
   );
 }

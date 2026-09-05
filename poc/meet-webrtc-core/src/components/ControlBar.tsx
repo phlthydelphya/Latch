@@ -2,8 +2,14 @@ import { useAppStore } from '../store/appStore';
 import { ShieldBadge } from './ShieldBadge';
 import { ConnectionIndicator } from './ConnectionIndicator';
 import { downloadDiagnosticBundle } from '../utils/diagnostics';
+import { HandRaiseButton } from './HandRaiseButton';
+import { usePresenceStore } from '../presence/presenceStore';
 
-export function ControlBar() {
+interface ControlBarProps {
+  onToggleHand?: (raised: boolean) => Promise<void> | void;
+}
+
+export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
   const {
     localParticipant,
     toggleLocalAudio,
@@ -13,6 +19,10 @@ export function ControlBar() {
     isConnected,
     isReconnecting,
   } = useAppStore();
+
+  const isRosterOpen = usePresenceStore((s) => s.isRosterOpen);
+  const toggleRoster = usePresenceStore((s) => s.toggleRoster);
+  const participantCount = usePresenceStore((s) => s.participants.size);
 
   const audioEnabled = localParticipant?.audioEnabled ?? true;
   const videoEnabled = localParticipant?.videoEnabled ?? true;
@@ -94,9 +104,26 @@ export function ControlBar() {
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </button>
+
+        <HandRaiseButton onToggleHand={onToggleHand} disabled={!isConnected || isReconnecting} />
       </div>
 
       <div className="control-bar__group" style={{ marginLeft: 'auto' }}>
+        <button
+          className={`btn ${isRosterOpen ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={toggleRoster}
+          aria-label="Toggle Participants Roster"
+          title="Toggle Participants Roster"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px', backgroundColor: isRosterOpen ? 'var(--accent, #00d4aa)' : undefined, color: isRosterOpen ? '#000' : undefined }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginRight: '4px', verticalAlign: 'text-bottom' }}>
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          Participants ({participantCount})
+        </button>
         <button
           className="btn btn-secondary"
           onClick={() => downloadDiagnosticBundle()}

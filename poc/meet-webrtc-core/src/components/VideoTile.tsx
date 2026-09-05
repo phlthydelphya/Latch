@@ -1,4 +1,6 @@
 import { useRef, useEffect } from 'react';
+import { usePresenceStore } from '../presence/presenceStore';
+import { ConnectionBadge } from './ConnectionBadge';
 
 interface VideoTileProps {
   id: string;
@@ -23,6 +25,12 @@ export function VideoTile({
 }: VideoTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Read Presence Domain state for this participant
+  const presence = usePresenceStore((s) => s.participants.get(id));
+  const isHost = usePresenceStore((s) => s.hostId === id || presence?.isHost);
+  const isHandRaised = presence?.isHandRaised;
+  const connectionQuality = presence?.connectionQuality;
+
   useEffect(() => {
     const video = videoRef.current;
     if (video && stream) {
@@ -42,6 +50,10 @@ export function VideoTile({
       data-participant-id={id}
       role="group"
       aria-label={name}
+      style={{
+        boxShadow: speaking ? '0 0 0 2px var(--accent, #00d4aa), 0 0 16px rgba(0, 212, 170, 0.3)' : undefined,
+        transition: 'box-shadow 150ms ease',
+      }}
     >
       <video
         ref={videoRef}
@@ -69,7 +81,46 @@ export function VideoTile({
         </div>
       )}
 
-      <div className="video-tile__label">{name}{isLocal && ' (you)'}</div>
+      {/* Badges in Top Left */}
+      <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '4px', zIndex: 2 }}>
+        {isHost && (
+          <span
+            style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.85)',
+              color: '#000',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            👑 Host
+          </span>
+        )}
+        {isHandRaised && (
+          <span
+            style={{
+              backgroundColor: 'rgba(255, 165, 2, 0.9)',
+              color: '#000',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              animation: 'bounceHand 1s infinite alternate',
+            }}
+          >
+            ✋ Raised
+          </span>
+        )}
+      </div>
+
+      {/* Participant Label & Connection in Bottom Left */}
+      <div className="video-tile__label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <span>{name}{isLocal && ' (you)'}</span>
+        {connectionQuality && <ConnectionBadge quality={connectionQuality} />}
+      </div>
 
       <div className="video-tile__indicators">
         {speaking && !isLocal && (
@@ -86,6 +137,13 @@ export function VideoTile({
           </svg>
         )}
       </div>
+
+      <style>{`
+        @keyframes bounceHand {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-3px); }
+        }
+      `}</style>
     </div>
   );
 }
