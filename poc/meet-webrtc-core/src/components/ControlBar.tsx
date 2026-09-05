@@ -6,6 +6,7 @@ import { HandRaiseButton } from './HandRaiseButton';
 import { usePresenceStore } from '../presence/presenceStore';
 import { useCollaborationStore } from '../collaboration/collaborationStore';
 import { useDeviceStore } from '../devices/deviceStore';
+import { useHostControlStore } from '../host/hostControlStore';
 
 interface ControlBarProps {
   onToggleHand?: (raised: boolean) => Promise<void> | void;
@@ -25,6 +26,13 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
   const isRosterOpen = usePresenceStore((s) => s.isRosterOpen);
   const toggleRoster = usePresenceStore((s) => s.toggleRoster);
   const participantCount = usePresenceStore((s) => s.participants.size);
+  const hostId = usePresenceStore((s) => s.hostId);
+  const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const participantsMap = usePresenceStore((s) => s.participants);
+  const isLocalHost = hostId === localParticipantId || participantsMap.get(localParticipantId || '')?.isHost;
+
+  const permissions = useHostControlStore((s) => s.permissions);
+  const setHostModalOpen = useHostControlStore((s) => s.setHostModalOpen);
 
   const isChatOpen = useCollaborationStore((s) => s.isChatOpen);
   const toggleChat = useCollaborationStore((s) => s.toggleChat);
@@ -35,6 +43,11 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
   const audioEnabled = localParticipant?.audioEnabled ?? true;
   const videoEnabled = localParticipant?.videoEnabled ?? true;
   const screenSharing = localParticipant?.screenSharing ?? false;
+
+  const isMuteLocked = !audioEnabled && !permissions.canUnmuteSelf && !isLocalHost;
+  const isScreenShareLocked = !permissions.canShareScreen && !isLocalHost;
+  const isReactionsLocked = !permissions.canReact && !isLocalHost;
+  const isChatLocked = !permissions.canChat && !isLocalHost;
 
   const handleScreenShare = async () => {
     if (screenSharing) {
@@ -56,8 +69,9 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           className={`media-toggle ${audioEnabled ? 'active' : 'muted'}`}
           onClick={toggleLocalAudio}
           aria-pressed={audioEnabled}
-          aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
-          disabled={!isConnected || isReconnecting}
+          aria-label={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
+          title={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
+          disabled={!isConnected || isReconnecting || isMuteLocked}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             {audioEnabled ? (
@@ -102,8 +116,9 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           className={`media-toggle ${screenSharing ? 'active' : ''}`}
           onClick={handleScreenShare}
           aria-pressed={screenSharing}
-          aria-label={screenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
-          disabled={!isConnected || isReconnecting}
+          aria-label={isScreenShareLocked ? 'Screen sharing restricted by host' : (screenSharing ? 'Stop screen sharing' : 'Start screen sharing')}
+          title={isScreenShareLocked ? 'Screen sharing restricted by host' : (screenSharing ? 'Stop screen sharing' : 'Start screen sharing')}
+          disabled={!isConnected || isReconnecting || isScreenShareLocked}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -119,9 +134,9 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           className={`media-toggle ${isReactionsBarOpen ? 'active' : ''}`}
           onClick={() => toggleReactionsBar()}
           aria-pressed={isReactionsBarOpen}
-          aria-label="Reactions"
-          title="Send Reaction"
-          disabled={!isConnected || isReconnecting}
+          aria-label={isReactionsLocked ? 'Reactions restricted by host' : 'Reactions'}
+          title={isReactionsLocked ? 'Reactions restricted by host' : 'Send Reaction'}
+          disabled={!isConnected || isReconnecting || isReactionsLocked}
           style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <span>😊</span>
@@ -133,8 +148,9 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           className={`btn ${isChatOpen ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => toggleChat()}
           aria-pressed={isChatOpen}
-          aria-label="Toggle In-Call Chat"
-          title="Toggle In-Call Chat"
+          aria-label={isChatLocked ? 'Chat restricted by host' : 'Toggle In-Call Chat'}
+          title={isChatLocked ? 'Chat restricted by host' : 'Toggle In-Call Chat'}
+          disabled={isChatLocked}
           style={{
             marginRight: '8px',
             fontSize: '0.85rem',
@@ -144,6 +160,8 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
+            opacity: isChatLocked ? 0.5 : 1,
+            cursor: isChatLocked ? 'not-allowed' : 'pointer',
           }}
         >
           <span>💬</span>
@@ -180,6 +198,19 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           </svg>
           Participants ({participantCount})
         </button>
+
+        {isLocalHost && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => setHostModalOpen(true)}
+            aria-label="Host Controls & Moderation"
+            title="Room lock, waiting room, and attendee permissions"
+            style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+          >
+            <span style={{ marginRight: '4px' }}>🛡️</span>
+            Host Tools
+          </button>
+        )}
 
         <button
           className="btn btn-secondary"

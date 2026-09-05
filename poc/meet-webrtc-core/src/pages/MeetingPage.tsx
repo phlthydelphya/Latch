@@ -14,6 +14,10 @@ import { ReactionsBar } from '../components/collaboration/ReactionsBar';
 import { ReactionsOverlay } from '../components/collaboration/ReactionsOverlay';
 import { HostAnnouncementBanner } from '../components/collaboration/HostAnnouncementBanner';
 import { DeviceSettingsModal } from '../components/devices/DeviceSettingsModal';
+import { HostControlsModal } from '../components/host/HostControlsModal';
+import { WaitingRoomBanner } from '../components/host/WaitingRoomBanner';
+import { RoomLockBadge } from '../components/host/RoomLockBadge';
+import { useHostControlStore } from '../host/hostControlStore';
 
 export function MeetingPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -43,6 +47,7 @@ export function MeetingPage() {
   const localParticipant = useAppStore((s) => s.localParticipant);
   const isConnected = useAppStore((s) => s.isConnected);
   const error = useAppStore((s) => s.error);
+  const isKicked = useHostControlStore((s) => s.isKicked);
 
   // Extract key from hash (for E2EE key derivation)
   useEffect(() => {
@@ -57,6 +62,42 @@ export function MeetingPage() {
     clearRoom();
     window.location.href = '/';
   };
+
+  if (isKicked) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          backgroundColor: 'var(--bg, #0a0a0f)',
+          color: 'var(--fg, #eaeaea)',
+          padding: '24px',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚪</div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+          Removed from Meeting
+        </h2>
+        <p style={{ color: 'var(--fg-muted, #888899)', maxWidth: '400px', marginBottom: '24px' }}>
+          You have been removed from this meeting by the host.
+        </p>
+        <button
+          onClick={() => {
+            useHostControlStore.getState().setKicked(false);
+            window.location.href = '/';
+          }}
+          className="btn btn-primary"
+          style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
+        >
+          Return to Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', minHeight: 0 }}>
@@ -86,7 +127,10 @@ export function MeetingPage() {
           </div>
         </div>
 
-        <LayoutControls onClearSpotlight={() => publishSpotlight(null)} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <RoomLockBadge />
+          <LayoutControls onClearSpotlight={() => publishSpotlight(null)} />
+        </div>
       </header>
 
       {error && (
@@ -96,6 +140,7 @@ export function MeetingPage() {
       )}
 
       <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+        <WaitingRoomBanner />
         <VideoGrid
           localStream={localStream}
           remoteStreams={remoteStreams}
@@ -134,6 +179,7 @@ export function MeetingPage() {
       <ChatDrawer onSendMessage={publishChatMessage} />
       <RosterDrawer onLowerHand={lowerParticipantHand} />
       <DeviceSettingsModal onSwitchDevice={switchDevice} />
+      <HostControlsModal />
       <ToastContainer />
     </div>
   );

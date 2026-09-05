@@ -11,6 +11,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { usePresenceStore } from '../presence/presenceStore';
 import { ConnectionBadge } from './ConnectionBadge';
 import { SpeakingIndicator } from './SpeakingIndicator';
+import { HostControlManager } from '../host/hostControlManager';
 
 interface RosterDrawerProps {
   onLowerHand?: (targetParticipantId?: string) => Promise<void> | void;
@@ -26,6 +27,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
   const isLocalHost = hostId === localParticipantId || participantsMap.get(localParticipantId || '')?.isHost;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
 
   // Close on Escape key
   useEffect(() => {
@@ -318,6 +320,113 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
 
                   {/* Connection Quality */}
                   <ConnectionBadge quality={p.connectionQuality} />
+
+                  {/* Host Moderation Menu */}
+                  {isLocalHost && !isSelf && (
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        onClick={() => setActionMenuId(actionMenuId === p.id ? null : p.id)}
+                        aria-label={`Moderation options for ${p.name}`}
+                        aria-expanded={actionMenuId === p.id}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--fg-muted, #888899)',
+                          cursor: 'pointer',
+                          padding: '2px 4px',
+                          borderRadius: '4px',
+                          fontSize: '1rem',
+                          lineHeight: 1,
+                        }}
+                      >
+                        ⋮
+                      </button>
+                      {actionMenuId === p.id && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: '100%',
+                            backgroundColor: 'var(--bg-elevated, #1a1a28)',
+                            border: '1px solid var(--border, #33334d)',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+                            zIndex: 1100,
+                            minWidth: '130px',
+                            padding: '4px 0',
+                          }}
+                        >
+                          {p.audioEnabled && (
+                            <button
+                              onClick={() => {
+                                HostControlManager.getInstance().muteParticipant(p.id);
+                                setActionMenuId(null);
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '6px 12px',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--fg, #eaeaea)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <span>🔇</span> Mute
+                            </button>
+                          )}
+                          {!isCurrentHost && (
+                            <button
+                              onClick={() => {
+                                HostControlManager.getInstance().transferHost(p.id);
+                                setActionMenuId(null);
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '6px 12px',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--fg, #eaeaea)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <span>👑</span> Make Host
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              HostControlManager.getInstance().removeParticipant(p.id);
+                              setActionMenuId(null);
+                            }}
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '6px 12px',
+                              background: 'none',
+                              border: 'none',
+                              color: '#ff4757',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                            }}
+                          >
+                            <span>🚪</span> Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );

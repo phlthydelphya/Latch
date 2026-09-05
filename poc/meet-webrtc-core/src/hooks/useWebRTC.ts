@@ -27,6 +27,8 @@ import { CollaborationAdapter } from '../collaboration/collaborationAdapter';
 import { useCollaborationStore } from '../collaboration/collaborationStore';
 import { DeviceManager } from '../devices/deviceManager';
 import { useDeviceStore } from '../devices/deviceStore';
+import { HostControlManager } from '../host/hostControlManager';
+import { useHostControlStore } from '../host/hostControlStore';
 import {
   CHAT_TOPIC,
   REACTION_TOPIC,
@@ -262,6 +264,9 @@ export function useWebRTC() {
           // M2 Phase D: Enumerate devices and start change listener
           DeviceManager.getInstance().enumerateAndSyncDevices();
           DeviceManager.getInstance().startDeviceChangeListener();
+
+          // M2 Phase E: Initialize Host Control Manager for moderation directives
+          HostControlManager.getInstance().attach(room);
 
           // Flush HPKE key publish
           if (sframeEnabled) {
@@ -908,6 +913,25 @@ export function useWebRTC() {
         presenceAdapterRef.current = null;
       }
       usePresenceStore.getState().resetPresence();
+
+      if (layoutAdapterRef.current) {
+        layoutAdapterRef.current.detach();
+        layoutAdapterRef.current = null;
+      }
+      useLayoutStore.getState().reset();
+
+      if (collaborationAdapterRef.current) {
+        collaborationAdapterRef.current.detach();
+        collaborationAdapterRef.current = null;
+      }
+      useCollaborationStore.getState().reset();
+
+      DeviceManager.getInstance().destroy();
+      useDeviceStore.getState().reset();
+
+      HostControlManager.getInstance().detach();
+      useHostControlStore.getState().reset();
+
       if (roomRef.current) {
         roomRef.current.disconnect();
         roomRef.current = null;
@@ -992,6 +1016,9 @@ export function useWebRTC() {
 
     DeviceManager.getInstance().destroy();
     useDeviceStore.getState().reset();
+
+    HostControlManager.getInstance().detach();
+    useHostControlStore.getState().reset();
 
     if (roomRef.current) {
       await roomRef.current.disconnect();
