@@ -1,14 +1,27 @@
 # AGENTS.md — meet-secure-core
 
-## Active Milestone — M0-P0 Freeze (Authoritative)
-`docs/M0-P0.md` is the single source of truth. All prior roadmap phases (26-week plan in `docs/ROADMAP.md`, `BACKEND_ROADMAP.md` M1-M8) are **FROZEN** until 10 criteria + 5 gates pass GO/NO-GO. Do not build: breakouts, polls, reactions, whiteboard, virtual bg, captions, recording (`meet-composer`), webinar 100-1000/HLS, anon capability links `k#`, P2P↔SFU handoff, WebTransport. Allowed UX only: `landing → /r/:id#k= → pre-join preview → grid Last-N=9 → mute/cam/leave + screen share + shield`. PRs labelled `feature:not-p0` are auto-rejected; merge requires `p0-gate-verify` + 5 approvals.
+## Active Milestone — M2: Meeting Experience (Authoritative)
+`docs/M2-meeting-experience.md` is the authoritative source of truth.
+- **M0-P0 Architecture Validation:** CLOSED & ACCEPTED (RC1 commit `ef6206c`).
+- **M1 Production Hardening:** CLOSED & ACCEPTED (Commit `9864b4b`, baseline tagged `beta-ready`, `m1-release-candidate`, `v1.0.0-m1-beta`).
+- **M2 Meeting Experience:** AUTHORIZED & ACTIVE. Scope encompasses 5 phases: Phase A (Presence), Phase B (Layout), Phase C (Ephemeral Collaboration), Phase D (Device Experience), Phase E (Host Controls).
 
-**10 criteria (all mandatory, reproducible):** 1) 4-browser matrix (Chrome 127+, Edge 127+, Firefox 128+, Safari 17.4 macOS+iOS PWA), 2) 20p ×10min stable (p50 ≤150ms p95 ≤300ms, CPU<70%, loss<1%), 3) LiveKit 1.25 single SFU via Compose + K8s Helm parity, 4) SFrame RFC9605 ciphertext (Wireshark proof, SFU opaque), 5) screen share `getDisplayMedia`, 6) key rotation p95 ≤500ms, 7) reconnect p95 ≤5s, 8) TURN relay HMAC 24h, 9) Lighthouse ≥95 bundle <120kB gz + WASM 150KB async, 10) zero persistent telemetry. See `docs/architecture-brief.md` §10 for traceability, `docs/media-p0-proof.md` for measurement.
+### Permanent Product Exclusions ("Will Not Build")
+The following are strict product invariants, NOT temporary roadmap items. Any PR attempting to introduce them will be rejected:
+- ✗ AI summaries / notes
+- ✗ AI transcripts / speech-to-text
+- ✗ AI assistants / bots
+- ✗ Attention / gaze tracking
+- ✗ Usage / engagement analytics
+- ✗ Behavioral telemetry
+- ✗ Cloud recording / server-side archiving
+- ✗ Cloud transcription
+- ✗ Server-side media transcoding / processing
 
 ## Delegation & Governance — PM Owns, Never Implements
-- `opencode.jsonc`: `default_agent: "pm"` (` .opencode/agents/pm.md`). PM (muse-spark-1.2-contributor-free) coordinates roadmap/milestones/prioritization, delegates all implementation to `@architect @frontend @backend @webrtc @security @privacy @qa @reviewer`.
+- `opencode.jsonc`: `default_agent: "pm"` (` .opencode/agents/pm.md`). PM coordinates roadmap/milestones/prioritization, delegates all implementation to `@architect @frontend @backend @webrtc @security @privacy @qa @reviewer`.
 - **Never approve own work.** Every feature/milestone exit requires 5 gates: Architecture (`@architect`), Security (`@security`), Privacy (`@privacy`), QA (`@qa`), Adversarial (`@reviewer`). M0-P0 gate checklist: `docs/gates/architecture-exit-checklist.md`.
-- Decision log: ADRs in `docs/adr/` (ADR-004 LiveKit vs mediasoup **decided: LiveKit GO**, ADR-001/005 accepted). Update `docs/architecture-brief.md` §11 for new choices.
+- Decision log: ADRs in `docs/adr/`. Update `docs/architecture-brief.md` §11 for new choices.
 
 ## Repo Map
 ```
