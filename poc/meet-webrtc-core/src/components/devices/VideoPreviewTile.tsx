@@ -40,7 +40,18 @@ export function VideoPreviewTile() {
         }
       } catch (err) {
         if (!isCancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to access camera');
+          const e = err as Error;
+          if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+            setError('Camera is busy or in use by another application. Close other apps or choose another device.');
+          } else if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            setError('Camera access denied — please allow camera permission in your browser.');
+          } else if (e.name === 'NotFoundError') {
+            setError('No camera device found. Please check your camera connection.');
+          } else if (e.name === 'OverconstrainedError') {
+            setError('Camera constraints could not be satisfied. Try another camera.');
+          } else {
+            setError(e.message || 'Failed to access camera');
+          }
         }
       } finally {
         if (!isCancelled) {

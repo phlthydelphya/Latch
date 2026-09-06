@@ -3,7 +3,7 @@
  * Implements insertion points I-1 through I-13 per M0-P0 / phase2b-sframe-design-v2.1.
  */
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { Room, RoomEvent, ConnectionState, Track } from 'livekit-client';
+import { Room, RoomEvent, ParticipantEvent, ConnectionState, Track } from 'livekit-client';
 import { fetchToken, resolveSfuUrl } from '../auth/token';
 import { useAppStore } from '../store/appStore';
 import { KeyManager } from '../keys/manager';
@@ -142,6 +142,21 @@ export function useWebRTC() {
         });
         sframeRef.current = sframe;
         setGlobalSFrame(sframe);
+
+        // Attach SFrame transform synchronously when sender is created, before negotiation / media flow
+        room.localParticipant.on(ParticipantEvent.LocalSenderCreated, async (sender: any, track: any) => {
+          if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
+            try {
+              await installSFrameOnSenderShared(sender, sframe, getGlobalCounterMutex());
+              console.log('[SFrame] sender transform active on LocalSenderCreated', {
+                kid: keyManager.getCurrentEpoch(),
+                media: track?.kind,
+              });
+            } catch (err) {
+              console.warn('[SFrame] Failed to install transform on LocalSenderCreated:', err);
+            }
+          }
+        });
 
         // Deferred publish queue for HPKE public key
         const pendingPublishQueue: Array<{ topic: string; payload: Uint8Array; reliable: boolean }> = [];
@@ -423,7 +438,7 @@ export function useWebRTC() {
 
           if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
             const sender = (publication.track as any)?.sender;
-            if (sender) {
+            if (sender && !(sender as any)._sframeTransformer) {
               await installSFrameOnSenderShared(sender, sframe, getGlobalCounterMutex());
               console.log('[SFrame] sender transform active', {
                 kid: keyManager.getCurrentEpoch(),
@@ -784,7 +799,12 @@ export function useWebRTC() {
         // Connect to LiveKit room — instrumented
         console.log('[LiveKit] Room.connect start', { sfuUrl: resolvedSfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
         try {
-          await room.connect(resolvedSfuUrl, token);
+          await room.connect(resolvedSfuUrl, token, {
+            autoSubscribe: true,
+            rtcConfig: {
+              encodedInsertableStreams: true,
+            } as any,
+          });
           if (isCancelled) {
             room.disconnect();
             return;
@@ -820,7 +840,7 @@ export function useWebRTC() {
           } else if (e.name === 'NotFoundError') {
             useAppStore.getState().setError('No camera device found.');
           } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Camera already in use by another app.');
+            useAppStore.getState().setError('Camera busy — close other apps using camera, or open Settings to switch device.');
           } else {
             useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
           }
@@ -845,7 +865,7 @@ export function useWebRTC() {
           } else if (e.name === 'NotFoundError') {
             useAppStore.getState().setError('No microphone device found.');
           } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Microphone already in use by another app.');
+            useAppStore.getState().setError('Microphone busy — close other apps using microphone, or open Settings to switch device.');
           } else {
             useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
           }

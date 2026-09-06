@@ -165,16 +165,31 @@ export default defineConfig({
     chunkSizeWarningLimit: 120, // 120kB gz budget for main bundle
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'zustand', 'livekit-client'],
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'react-router-dom',
+      'zustand',
+      'livekit-client',
+      '@hpke/core',
+      'eventemitter3',
+    ],
     exclude: ['xxhash-wasm'],
   },
   define: {
     'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
   },
   server: {
-    host: process.env.VITE_HOST ?? '0.0.0.0',
+    host: process.env.VITE_HOST ?? '127.0.0.1',
     port: 5173,
     strictPort: true,
+    hmr: {
+      host: '127.0.0.1',
+      protocol: 'ws',
+    },
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',

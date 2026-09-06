@@ -22,6 +22,7 @@ export function PreJoinPage() {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('');
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('');
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
 
   // Deep-link entry: initialize session state from the URL when absent.
@@ -74,10 +75,30 @@ export function PreJoinPage() {
         }
         activeStream = stream;
         setPreviewStream(stream);
+        setCameraError(null);
+        setError(null);
       } catch (err) {
         if (!cancelled) {
           console.error('Preview failed:', err);
-          setError('Camera/microphone access denied. Please grant permissions and refresh.');
+          // If video allocation failed (e.g. Firefox "Failed to allocate videosource"), fallback to audio-only
+          if (videoEnabled) {
+            try {
+              const audioOnlyStream = await getUserMedia({
+                video: false,
+                audio: audioEnabled ? { deviceId: selectedAudioDevice || undefined } : false,
+              });
+              if (!cancelled) {
+                activeStream = audioOnlyStream;
+                setPreviewStream(audioOnlyStream);
+                setVideoEnabled(false);
+                setCameraError('Camera is in use by another application or unavailable. Joined with microphone.');
+                return;
+              }
+            } catch (audioErr) {
+              console.warn('Audio fallback also failed:', audioErr);
+            }
+          }
+          setCameraError('Camera/microphone access denied. Please grant permissions and refresh.');
         }
       }
     }
@@ -100,13 +121,6 @@ export function PreJoinPage() {
       videoRef.current.srcObject = previewStream;
     }
   }, [previewStream]);
-
-  // Update preview when devices change
-  useEffect(() => {
-    if (previewStream) {
-      previewStream.getTracks().forEach((t) => t.stop());
-    }
-  }, [devices]);
 
   const handleJoin = async () => {
     if (joining) return;
@@ -237,9 +251,37 @@ export function PreJoinPage() {
         </fieldset>
       </div>
 
-      {deviceError && (
-        <div role="alert" style={{ padding: '0.75rem', background: 'rgba(255,71,87,0.1)', border: '1px solid #ff4757', borderRadius: '8px', color: '#ff4757', fontSize: '0.875rem', textAlign: 'center' }}>
-          {deviceError}
+      {(cameraError || deviceError) && (
+        <div
+          role="alert"
+          style={{
+            padding: '0.75rem',
+            background: 'rgba(255,71,87,0.1)',
+            border: '1px solid #ff4757',
+            borderRadius: '8px',
+            color: '#ff4757',
+            fontSize: '0.875rem',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.5rem',
+            alignItems: 'center',
+          }}
+        >
+          <span>{cameraError || deviceError}</span>
+          {cameraError && !videoEnabled && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+              onClick={() => {
+                setCameraError(null);
+                setVideoEnabled(true);
+              }}
+            >
+              Retry Camera
+            </button>
+          )}
         </div>
       )}
 
