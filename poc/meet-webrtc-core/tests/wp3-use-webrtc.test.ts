@@ -140,6 +140,9 @@ const { MockRoom, mockRoomInstances } = vi.hoisted(() => {
 vi.mock('livekit-client', () => {
   return {
     Room: MockRoom,
+    ParticipantEvent: {
+      LocalSenderCreated: 'localSenderCreated',
+    },
     RoomEvent: {
       Connected: 'connected',
       Disconnected: 'disconnected',
@@ -323,6 +326,59 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
 
     expect(mockReceiver.createEncodedStreams).toHaveBeenCalled();
     expect((mockReceiver as any)._sframeTransformer).toBe(sframe);
+
+    unmount();
+  });
+
+  it('LocalSenderCreated installs SFrame transform early and avoids redundant installation on LocalTrackPublished', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const room = mockRoomInstances[mockRoomInstances.length - 1];
+    const sframe = getGlobalSFrame()!;
+
+    const mockSenderStream = {
+      readable: { pipeThrough: vi.fn().mockReturnThis() },
+      writable: {},
+    };
+    (mockSenderStream.readable.pipeThrough as any).mockReturnValue({
+      pipeTo: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const mockSender = {
+      createEncodedStreams: vi.fn().mockReturnValue(mockSenderStream),
+    };
+
+    const mockTrack = {
+      kind: 'video',
+      sender: mockSender,
+    };
+
+    // 1. LocalSenderCreated fires synchronously when sender is created
+    await act(async () => {
+      room.localParticipant.emit('localSenderCreated', mockSender, mockTrack);
+    });
+
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
+    expect((mockSender as any)._sframeTransformer).toBe(sframe);
+
+    // 2. LocalTrackPublished fires later after negotiation
+    const pub = {
+      trackSid: 'TR_video_early_1',
+      kind: 'video',
+      source: 'camera',
+      track: mockTrack,
+    };
+
+    await act(async () => {
+      room.emit('localTrackPublished', pub, room.localParticipant);
+    });
+
+    // Should NOT call createEncodedStreams a second time
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
 
     unmount();
   });

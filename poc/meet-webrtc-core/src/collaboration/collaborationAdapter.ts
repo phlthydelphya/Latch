@@ -106,10 +106,7 @@ export class CollaborationAdapter {
             const annMsg = data as AnnouncementDataChannelMessage;
             const senderId = participant?.identity || '';
             const presence = usePresenceStore.getState();
-            const isHost =
-              presence.hostId === senderId ||
-              presence.participants.get(senderId)?.isHost ||
-              !presence.hostId; // if hostId not yet assigned, trust first sender
+            const isHost = Boolean(presence.hostId && presence.hostId === senderId);
 
             if (isHost) {
               const senderName =
@@ -134,10 +131,7 @@ export class CollaborationAdapter {
             const handMsg = data as HandActionDataChannelMessage;
             const senderId = participant?.identity || '';
             const presence = usePresenceStore.getState();
-            const isHost =
-              presence.hostId === senderId ||
-              presence.participants.get(senderId)?.isHost ||
-              !presence.hostId;
+            const isHost = Boolean(presence.hostId && presence.hostId === senderId);
 
             if (isHost) {
               if (handMsg.action === 'lower-all') {

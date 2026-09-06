@@ -125,6 +125,9 @@ const { MockRoom, mockRoomInstances } = vi.hoisted(() => {
 vi.mock('livekit-client', () => {
   return {
     Room: MockRoom,
+    ParticipantEvent: {
+      LocalSenderCreated: 'localSenderCreated',
+    },
     RoomEvent: {
       Connected: 'connected',
       Disconnected: 'disconnected',

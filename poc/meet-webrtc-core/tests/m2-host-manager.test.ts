@@ -307,4 +307,52 @@ describe('M2 Phase E: HostControlManager', () => {
     await manager.updatePermissions({ canChat: false });
     expect(useHostControlStore.getState().permissions.canChat).toBe(false);
   });
+
+  it('E-21: Strictly rejects directives when hostId is null or undefined', () => {
+    usePresenceStore.getState().upsertParticipant({
+      id: 'existing-peer',
+      name: 'Existing Peer',
+      audioEnabled: true,
+      videoEnabled: true,
+      screenSharing: false,
+      isSpeaking: false,
+      connectionQuality: 'good',
+      isHandRaised: false,
+      isHost: false,
+      joinedAt: Date.now(),
+    });
+    usePresenceStore.setState({
+      hostId: null,
+    });
+
+    emitDirective({ action: 'lock-room', isLocked: true }, 'remote-attacker', true);
+    expect(useHostControlStore.getState().isRoomLocked).toBe(false);
+
+    emitDirective({ action: 'mute-participant', targetParticipantId: 'local-host' }, 'remote-attacker', true);
+    expect(mockRoom.localParticipant.setMicrophoneEnabled).not.toHaveBeenCalled();
+  });
+
+  it('E-22: Rejects directives when sender claims isHost but conflicting hostId is established', () => {
+    usePresenceStore.setState({
+      hostId: 'legitimate-host',
+    });
+    usePresenceStore.getState().upsertParticipant({
+      id: 'impostor',
+      name: 'Impostor',
+      audioEnabled: true,
+      videoEnabled: true,
+      screenSharing: false,
+      isSpeaking: false,
+      connectionQuality: 'good',
+      isHandRaised: false,
+      isHost: true,
+      joinedAt: Date.now(),
+    });
+
+    emitDirective({ action: 'lock-room', isLocked: true }, 'impostor', true);
+    expect(useHostControlStore.getState().isRoomLocked).toBe(false);
+
+    emitDirective({ action: 'mute-participant', targetParticipantId: 'legitimate-host' }, 'impostor', true);
+    expect(mockRoom.localParticipant.setMicrophoneEnabled).not.toHaveBeenCalled();
+  });
 });

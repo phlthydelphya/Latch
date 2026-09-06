@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface Participant {
   id: string;
@@ -67,114 +66,98 @@ const initialState: MeetingState = {
   error: null,
 };
 
-export const useAppStore = create<MeetingState & AppActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
-      
-      setRoom: (roomId, participantId, jwt, keyParam) =>
-        set({
-          roomId,
-          participantId,
-          jwt,
-          keyParam,
-          participants: new Map(),
-          localParticipant: null,
-          isConnected: false,
-          isReconnecting: false,
-          connectionQuality: 'disconnected',
-          shieldMode: true, // E2EE always on for P0
-          error: null,
-        }),
+export const useAppStore = create<MeetingState & AppActions>()((set) => ({
+  ...initialState,
 
-      setLivekitToken: (livekitToken) => set({ livekitToken }),
-      setSfuUrl: (sfuUrl) => set({ sfuUrl }),
-      setCredentials: (livekitToken, sfuUrl) => set({ livekitToken, sfuUrl }),
-      
-      clearRoom: () => set(initialState),
-      
-      addParticipant: (participant) =>
-        set((state) => {
-          const newParticipants = new Map(state.participants);
-          newParticipants.set(participant.id, participant);
-          return { participants: newParticipants };
-        }),
-      
-      removeParticipant: (participantId) =>
-        set((state) => {
-          const newParticipants = new Map(state.participants);
-          newParticipants.delete(participantId);
-          return { participants: newParticipants };
-        }),
-      
-      updateParticipant: (participantId, updates) =>
-        set((state) => {
-          const participant = state.participants.get(participantId);
-          if (!participant) return state;
-          
-          const newParticipants = new Map(state.participants);
-          newParticipants.set(participantId, { ...participant, ...updates });
-          return { participants: newParticipants };
-        }),
-      
-      setLocalParticipant: (participant) =>
-        set({ localParticipant: participant }),
-      
-      setConnected: (isConnected) =>
-        set({ isConnected, connectionQuality: isConnected ? 'excellent' : 'disconnected' }),
-      
-      setReconnecting: (isReconnecting) =>
-        set({ isReconnecting, connectionQuality: isReconnecting ? 'poor' : 'excellent' }),
-      
-      setConnectionQuality: (connectionQuality) => set({ connectionQuality }),
-      
-      setShieldMode: (shieldMode) => set({ shieldMode }),
-      
-      setError: (error) => set({ error }),
-      
-      toggleLocalAudio: () =>
-        set((state) => {
-          if (!state.localParticipant) return state;
-          const newParticipants = new Map(state.participants);
-          const updated = { ...state.localParticipant, audioEnabled: !state.localParticipant.audioEnabled };
-          newParticipants.set(state.localParticipant.id, updated);
-          return { localParticipant: updated, participants: newParticipants };
-        }),
-      
-      toggleLocalVideo: () =>
-        set((state) => {
-          if (!state.localParticipant) return state;
-          const newParticipants = new Map(state.participants);
-          const updated = { ...state.localParticipant, videoEnabled: !state.localParticipant.videoEnabled };
-          newParticipants.set(state.localParticipant.id, updated);
-          return { localParticipant: updated, participants: newParticipants };
-        }),
-      
-      setLocalScreenShare: (screenSharing) =>
-        set((state) => {
-          if (!state.localParticipant) return state;
-          const newParticipants = new Map(state.participants);
-          const updated = { ...state.localParticipant, screenSharing };
-          newParticipants.set(state.localParticipant.id, updated);
-          return { localParticipant: updated, participants: newParticipants };
-        }),
-      
-      leave: () => set(initialState),
+  setRoom: (roomId, participantId, jwt, keyParam) =>
+    set({
+      roomId,
+      participantId,
+      jwt,
+      keyParam,
+      participants: new Map(),
+      localParticipant: null,
+      isConnected: false,
+      isReconnecting: false,
+      connectionQuality: 'disconnected',
+      shieldMode: true, // E2EE always on for P0
+      error: null,
     }),
-    {
-      name: 'meet-secure-state',
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({
-        roomId: state.roomId,
-        participantId: state.participantId,
-        jwt: state.jwt,
-        livekitToken: state.livekitToken,
-        sfuUrl: state.sfuUrl,
-        keyParam: state.keyParam,
-      }),
-    }
-  )
-);
+
+  setLivekitToken: (livekitToken) => set({ livekitToken }),
+  setSfuUrl: (sfuUrl) => set({ sfuUrl }),
+  setCredentials: (livekitToken, sfuUrl) => set({ livekitToken, sfuUrl }),
+
+  clearRoom: () => set(initialState),
+
+  addParticipant: (participant) =>
+    set((state) => {
+      const newParticipants = new Map(state.participants);
+      newParticipants.set(participant.id, participant);
+      return { participants: newParticipants };
+    }),
+
+  removeParticipant: (participantId) =>
+    set((state) => {
+      const newParticipants = new Map(state.participants);
+      newParticipants.delete(participantId);
+      return { participants: newParticipants };
+    }),
+
+  updateParticipant: (participantId, updates) =>
+    set((state) => {
+      const participant = state.participants.get(participantId);
+      if (!participant) return state;
+
+      const newParticipants = new Map(state.participants);
+      newParticipants.set(participantId, { ...participant, ...updates });
+      return { participants: newParticipants };
+    }),
+
+  setLocalParticipant: (participant) =>
+    set({ localParticipant: participant }),
+
+  setConnected: (isConnected) =>
+    set({ isConnected, connectionQuality: isConnected ? 'excellent' : 'disconnected' }),
+
+  setReconnecting: (isReconnecting) =>
+    set({ isReconnecting, connectionQuality: isReconnecting ? 'poor' : 'excellent' }),
+
+  setConnectionQuality: (connectionQuality) => set({ connectionQuality }),
+
+  setShieldMode: (shieldMode) => set({ shieldMode }),
+
+  setError: (error) => set({ error }),
+
+  toggleLocalAudio: () =>
+    set((state) => {
+      if (!state.localParticipant) return state;
+      const newParticipants = new Map(state.participants);
+      const updated = { ...state.localParticipant, audioEnabled: !state.localParticipant.audioEnabled };
+      newParticipants.set(state.localParticipant.id, updated);
+      return { localParticipant: updated, participants: newParticipants };
+    }),
+
+  toggleLocalVideo: () =>
+    set((state) => {
+      if (!state.localParticipant) return state;
+      const newParticipants = new Map(state.participants);
+      const updated = { ...state.localParticipant, videoEnabled: !state.localParticipant.videoEnabled };
+      newParticipants.set(state.localParticipant.id, updated);
+      return { localParticipant: updated, participants: newParticipants };
+    }),
+
+  setLocalScreenShare: (screenSharing) =>
+    set((state) => {
+      if (!state.localParticipant) return state;
+      const newParticipants = new Map(state.participants);
+      const updated = { ...state.localParticipant, screenSharing };
+      newParticipants.set(state.localParticipant.id, updated);
+      return { localParticipant: updated, participants: newParticipants };
+    }),
+
+  leave: () => set(initialState),
+}));
 
 // Selectors for performance
 export const useRoomId = () => useAppStore((s) => s.roomId);

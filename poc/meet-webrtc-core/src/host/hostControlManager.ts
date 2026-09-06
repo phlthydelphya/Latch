@@ -38,11 +38,8 @@ export class HostControlManager {
         const senderId = participant?.identity || '';
         const presence = usePresenceStore.getState();
         const localId = presence.localParticipantId || '';
-        const isLocalHost = presence.hostId === localId || presence.participants.get(localId)?.isHost;
-        const isSenderHost =
-          presence.hostId === senderId ||
-          presence.participants.get(senderId)?.isHost ||
-          !presence.hostId;
+        const isLocalHost = Boolean(presence.hostId && presence.hostId === localId);
+        const isSenderHost = Boolean(presence.hostId && presence.hostId === senderId);
 
         // Knock messages are sent by attendees to the host
         if (msg.action === 'waiting-room-knock') {
