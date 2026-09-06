@@ -157,6 +157,17 @@ vi.mock('livekit-client', () => {
         Video: 'video',
       },
     },
+    VideoQuality: {
+      LOW: 0,
+      MEDIUM: 1,
+      HIGH: 2,
+      OFF: 3,
+    },
+    VideoPresets: {
+      h180: { width: 320, height: 180, encoding: { maxBitrate: 160000, maxFramerate: 15 } },
+      h360: { width: 640, height: 360, encoding: { maxBitrate: 450000, maxFramerate: 30 } },
+      h720: { width: 1280, height: 720, encoding: { maxBitrate: 1500000, maxFramerate: 30 } },
+    },
   };
 });
 

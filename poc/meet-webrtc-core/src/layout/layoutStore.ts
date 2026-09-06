@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { LayoutMode, PipPosition, FilmstripPosition, PresentationMode } from './types';
+import { LayoutMode, PipPosition, FilmstripPosition, PresentationMode, BandwidthTier } from './types';
 import { layoutEngine } from './layoutEngine';
 
 export interface LayoutState {
@@ -15,6 +15,7 @@ export interface LayoutState {
   screenShareOwnerId: string | null;
   galleryPage: number;
   visibleTileIds: string[];
+  bandwidthTier: BandwidthTier;
   isPipEnabled: boolean;
   pipPosition: PipPosition;
   filmstripPosition: FilmstripPosition;
@@ -30,6 +31,7 @@ export interface LayoutState {
   setScreenShareOwner: (id: string | null) => void;
   setGalleryPage: (page: number) => void;
   setVisibleTileIds: (ids: string[]) => void;
+  setBandwidthTier: (tier: BandwidthTier) => void;
   togglePip: () => void;
   setPipPosition: (pos: PipPosition) => void;
   setFilmstripPosition: (pos: FilmstripPosition) => void;
@@ -50,6 +52,7 @@ const initialState = {
   screenShareOwnerId: null,
   galleryPage: 0,
   visibleTileIds: [] as string[],
+  bandwidthTier: 'optimal' as BandwidthTier,
   isPipEnabled: true,
   pipPosition: 'bottom-right' as PipPosition,
   filmstripPosition: 'bottom' as FilmstripPosition,
@@ -188,6 +191,9 @@ export const useLayoutStore = create<LayoutState>((set) => ({
 
   setVisibleTileIds: (visibleTileIds) =>
     set({ visibleTileIds }),
+
+  setBandwidthTier: (bandwidthTier) =>
+    set({ bandwidthTier }),
 
   togglePip: () =>
     set((state) => ({

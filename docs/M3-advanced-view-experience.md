@@ -1,10 +1,10 @@
 # M3 Milestone Specification — Advanced View Experience
 
-**Milestone:** M3 Advanced View Experience  
-**Status:** PROPOSED & PLANNED 📋  
-**Prerequisites:** M0-P0 (RC1 Closed), M1 Hardening (Closed, baseline tagged `beta-ready`), M2 Meeting Experience (Complete, Commit `1d2cacc`)  
-**Timeline:** 4–5 Weeks (Recommended split: M3A [Weeks 1–2] & M3B [Weeks 3–4])  
-**Owner:** PM (muse-spark-1.2-contributor-free, Coordinator)  
+**Milestone:** M3 Advanced View Experience
+**Status:** M3A CLOSED (`docs/M3A-exit-report.md`) | M3B AUTHORITATIVE & ACTIVE (`docs/M3B-multi-stream-specification.md`)
+**Prerequisites:** M0-P0 (RC1 Closed), M1 Hardening (Closed, baseline tagged `beta-ready`), M2 Meeting Experience (Complete, Commit `1d2cacc`), M3A Closed (Baseline tagged `m3a-accepted`, commit `d3c504d` / `cbac579`)
+**Timeline:** 4–5 Weeks (M3A Closed; M3B Active Weeks 3–4)
+**Owner:** PM & TPM
 **Governance:** 5-Gate Review (`@architect`, `@security`, `@privacy`, `@qa`, `@reviewer`)  
 
 ---

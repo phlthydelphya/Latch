@@ -29,6 +29,9 @@ import { DeviceManager } from '../devices/deviceManager';
 import { useDeviceStore } from '../devices/deviceStore';
 import { HostControlManager } from '../host/hostControlManager';
 import { useHostControlStore } from '../host/hostControlStore';
+import { SubscriptionManager } from '../webrtc/subscriptionManager';
+import { BandwidthEngine } from '../webrtc/bandwidthEngine';
+import { M3B_PUBLISH_DEFAULTS } from '../webrtc/simulcastConfig';
 import {
   CHAT_TOPIC,
   REACTION_TOPIC,
@@ -44,6 +47,8 @@ export function useWebRTC() {
   const presenceAdapterRef = useRef<PresenceAdapter | null>(null);
   const layoutAdapterRef = useRef<LayoutAdapter | null>(null);
   const collaborationAdapterRef = useRef<CollaborationAdapter | null>(null);
+  const subscriptionManagerRef = useRef<SubscriptionManager | null>(null);
+  const bandwidthEngineRef = useRef<BandwidthEngine | null>(null);
   const isConnectingRef = useRef(false);
   const activeRoomIdRef = useRef<string | null>(null);
 
@@ -111,10 +116,7 @@ export function useWebRTC() {
         const room = new Room({
           adaptiveStream: !sframeEnabled,
           dynacast: !sframeEnabled,
-          publishDefaults: {
-            simulcast: true,
-            videoEncoding: { maxBitrate: 1800000 },
-          },
+          publishDefaults: M3B_PUBLISH_DEFAULTS,
         });
         roomRef.current = room;
 
@@ -282,6 +284,22 @@ export function useWebRTC() {
 
           // M2 Phase E: Initialize Host Control Manager for moderation directives
           HostControlManager.getInstance().attach(room);
+
+          // M3B: Initialize Subscription Manager for dynamic track subscription & Last-N=9 gating
+          if (!subscriptionManagerRef.current) {
+            subscriptionManagerRef.current = new SubscriptionManager(room);
+          } else {
+            subscriptionManagerRef.current.attach(room);
+          }
+
+          // M3B: Initialize Bandwidth Engine for downlink WebRTC congestion adaptation
+          if (!bandwidthEngineRef.current) {
+            bandwidthEngineRef.current = new BandwidthEngine();
+          }
+          bandwidthEngineRef.current.attach(room);
+
+          (window as any).__SUBSCRIPTION_MANAGER__ = subscriptionManagerRef.current;
+          (window as any).__BANDWIDTH_ENGINE__ = bandwidthEngineRef.current;
 
           // Flush HPKE key publish
           if (sframeEnabled) {
@@ -951,6 +969,19 @@ export function useWebRTC() {
 
       HostControlManager.getInstance().detach();
       useHostControlStore.getState().reset();
+
+      if (subscriptionManagerRef.current) {
+        subscriptionManagerRef.current.detach();
+        subscriptionManagerRef.current = null;
+      }
+
+      if (bandwidthEngineRef.current) {
+        bandwidthEngineRef.current.detach();
+        bandwidthEngineRef.current = null;
+      }
+
+      delete (window as any).__SUBSCRIPTION_MANAGER__;
+      delete (window as any).__BANDWIDTH_ENGINE__;
 
       if (roomRef.current) {
         roomRef.current.disconnect();

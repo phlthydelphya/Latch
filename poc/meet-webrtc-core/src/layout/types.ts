@@ -6,6 +6,8 @@ export type FilmstripPosition = 'bottom' | 'side';
 
 export type PresentationMode = 'side-by-side' | 'over-below' | 'pip' | 'content-only';
 
+export type BandwidthTier = 'optimal' | 'congested-mild' | 'congested-moderate' | 'congested-severe' | 'emergency-audio-only';
+
 export interface LayoutParticipantTile {
   id: string;
   name: string;

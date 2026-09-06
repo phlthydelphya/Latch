@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { generateDiagnosticBundle, downloadDiagnosticBundle, SanitizedDiagnosticBundle } from '../../utils/diagnostics';
 import { useAppStore } from '../../store/appStore';
+import { useLayoutStore } from '../../layout/layoutStore';
 
 export function NetworkDiagnosticsView() {
   const [bundle, setBundle] = useState<SanitizedDiagnosticBundle | null>(null);
   const isConnected = useAppStore((s) => s.isConnected);
   const connectionQuality = useAppStore((s) => s.connectionQuality);
+  const bandwidthTier = useLayoutStore((s) => s.bandwidthTier);
+  const visibleTileIds = useLayoutStore((s) => s.visibleTileIds);
 
   useEffect(() => {
     let isMounted = true;
@@ -134,6 +137,34 @@ export function NetworkDiagnosticsView() {
           <div style={metricRowStyle}>
             <span style={{ color: 'var(--fg-muted, #888899)' }}>Browser Engine:</span>
             <span style={{ fontWeight: 600 }}>{client?.browserEngine ?? 'Web'}</span>
+          </div>
+
+          <div style={metricRowStyle}>
+            <span style={{ color: 'var(--fg-muted, #888899)' }}>Bandwidth Tier:</span>
+            <span
+              style={{
+                fontWeight: 600,
+                fontFamily: 'var(--font-mono, monospace)',
+                color:
+                  bandwidthTier === 'emergency-audio-only' || bandwidthTier === 'congested-severe'
+                    ? 'var(--danger, #ff4757)'
+                    : 'var(--accent, #00d4aa)',
+              }}
+            >
+              {bandwidthTier.toUpperCase()}
+            </span>
+          </div>
+
+          <div style={metricRowStyle}>
+            <span style={{ color: 'var(--fg-muted, #888899)' }}>Subscribed Video:</span>
+            <span style={{ fontWeight: 600, fontFamily: 'var(--font-mono, monospace)' }}>
+              {bandwidthTier === 'emergency-audio-only'
+                ? '0 (Audio Only)'
+                : `${Math.min(
+                    bandwidthTier === 'congested-severe' ? 4 : bandwidthTier === 'congested-moderate' ? 6 : 9,
+                    visibleTileIds.length || 1
+                  )} tracks (Effective N)`}
+            </span>
           </div>
         </div>
       </div>
