@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { useDeviceStore } from '../../devices/deviceStore';
 import { DeviceManager } from '../../devices/deviceManager';
 import { DeviceSettingsTab } from '../../devices/types';
 import { MicLevelMeter } from './MicLevelMeter';
 import { VideoPreviewTile } from './VideoPreviewTile';
-import { NetworkDiagnosticsView } from './NetworkDiagnosticsView';
+
+const NetworkDiagnosticsView = lazy(() => import('./NetworkDiagnosticsView').then(m => ({ default: m.NetworkDiagnosticsView })));
 
 interface DeviceSettingsModalProps {
   onSwitchDevice?: (kind: MediaDeviceKind, deviceId: string) => Promise<void> | void;
@@ -331,7 +332,11 @@ export function DeviceSettingsModal({ onSwitchDevice }: DeviceSettingsModalProps
             </div>
           )}
 
-          {activeTab === 'diagnostics' && <NetworkDiagnosticsView />}
+          {activeTab === 'diagnostics' && (
+            <Suspense fallback={null}>
+              <NetworkDiagnosticsView />
+            </Suspense>
+          )}
         </div>
 
         {/* Footer */}

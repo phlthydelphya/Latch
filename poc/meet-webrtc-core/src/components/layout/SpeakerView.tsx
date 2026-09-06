@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useLayoutStore } from '../../layout/layoutStore';
 import { LayoutParticipantTile } from '../../layout/types';
 import { VideoTile } from '../VideoTile';
+import { layoutEngine } from '../../layout/layoutEngine';
 
 interface SpeakerViewProps {
   tiles: LayoutParticipantTile[];
@@ -16,19 +17,26 @@ export function SpeakerView({ tiles, onPin, onSpotlight }: SpeakerViewProps) {
   const filmstripPosition = useLayoutStore((s) => s.filmstripPosition);
   const pinParticipant = useLayoutStore((s) => s.pinParticipant);
 
-  // Determine stage participant
+  // Determine stage participant via deterministic layoutEngine hierarchy (Pin > Spotlight > Speaker)
   const { stageTile, filmstripTiles } = useMemo(() => {
     if (tiles.length === 0) {
       return { stageTile: null, filmstripTiles: [] };
     }
 
+    const resolved = layoutEngine.resolveStageParticipant({
+      hasScreenShare: false,
+      screenShareOwnerId: null,
+      spotlightParticipantId,
+      pinnedParticipantId,
+      activeSpeakerId,
+      speakerConfidence: useLayoutStore.getState().speakerConfidence,
+      userLockedMode: null,
+      totalParticipants: tiles.length,
+    });
+
     let featuredId: string | null = null;
-    if (spotlightParticipantId && tiles.some((t) => t.id === spotlightParticipantId)) {
-      featuredId = spotlightParticipantId;
-    } else if (pinnedParticipantId && tiles.some((t) => t.id === pinnedParticipantId)) {
-      featuredId = pinnedParticipantId;
-    } else if (activeSpeakerId && tiles.some((t) => t.id === activeSpeakerId)) {
-      featuredId = activeSpeakerId;
+    if (resolved && tiles.some((t) => t.id === resolved)) {
+      featuredId = resolved;
     } else {
       // Default to first non-local participant, or local
       const firstRemote = tiles.find((t) => !t.isLocal);

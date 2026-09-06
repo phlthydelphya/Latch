@@ -65,23 +65,29 @@ describe('M2 Phase B: LiveKit Layout Adapter', () => {
   });
 
   it('B-3: Synchronizes active speakers from PresenceStore', () => {
-    adapter.attach(mockRoom as any);
+    vi.useFakeTimers();
+    try {
+      adapter.attach(mockRoom as any);
 
-    usePresenceStore.getState().setLocalParticipant({
-      id: 'local-alice',
-      name: 'Alice',
-      audioEnabled: true,
-      videoEnabled: true,
-      screenSharing: false,
-      isSpeaking: false,
-      connectionQuality: 'excellent',
-      isHandRaised: false,
-      isHost: true,
-      joinedAt: Date.now(),
-    });
+      usePresenceStore.getState().setLocalParticipant({
+        id: 'local-alice',
+        name: 'Alice',
+        audioEnabled: true,
+        videoEnabled: true,
+        screenSharing: false,
+        isSpeaking: false,
+        connectionQuality: 'excellent',
+        isHandRaised: false,
+        isHost: true,
+        joinedAt: Date.now(),
+      });
 
-    usePresenceStore.getState().setActiveSpeakers(['remote-charlie']);
-    expect(useLayoutStore.getState().activeSpeakerId).toBe('remote-charlie');
+      usePresenceStore.getState().setActiveSpeakers(['remote-charlie']);
+      vi.advanceTimersByTime(750);
+      expect(useLayoutStore.getState().activeSpeakerId).toBe('remote-charlie');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('B-4: Processes host spotlight broadcast via DataChannel', () => {

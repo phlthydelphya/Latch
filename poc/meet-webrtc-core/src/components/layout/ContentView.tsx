@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLayoutStore } from '../../layout/layoutStore';
-import { LayoutParticipantTile } from '../../layout/types';
+import { LayoutParticipantTile, PresentationMode } from '../../layout/types';
 import { VideoTile } from '../VideoTile';
 import { PipPresenter } from './PipPresenter';
 
@@ -13,9 +13,12 @@ interface ContentViewProps {
 
 export function ContentView({ screenStream, tiles, onPin, onSpotlight }: ContentViewProps) {
   const screenShareOwnerId = useLayoutStore((s) => s.screenShareOwnerId);
-  const filmstripPosition = useLayoutStore((s) => s.filmstripPosition);
+  const presentationMode = useLayoutStore((s) => s.presentationMode);
+  const setPresentationMode = useLayoutStore((s) => s.setPresentationMode);
+  const splitRatio = useLayoutStore((s) => s.splitRatio);
+  const setSplitRatio = useLayoutStore((s) => s.setSplitRatio);
 
-  // Presenter tile for PiP overlay
+  // Presenter tile for PiP overlay or side-by-side
   const presenterTile = useMemo(() => {
     if (!screenShareOwnerId) {
       return tiles.find((t) => t.isScreen || t.isLocal) || tiles[0];
@@ -27,18 +30,22 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
     );
   }, [tiles, screenShareOwnerId]);
 
-  // Peer filmstrip excludes the presenter if PiP is visible, or shows peers
   const filmstripTiles = useMemo(() => {
     return tiles.filter((t) => !t.isScreen);
   }, [tiles]);
 
-  const isVertical = filmstripPosition === 'side';
+  const isContentOnly = presentationMode === 'content-only';
+  const isSideBySide = presentationMode === 'side-by-side';
+  const isOverBelow = presentationMode === 'over-below';
+  const isPip = presentationMode === 'pip';
 
   return (
     <div
+      data-testid="presentation-container"
+      data-mode={presentationMode}
       style={{
         display: 'flex',
-        flexDirection: isVertical ? 'row' : 'column',
+        flexDirection: isOverBelow ? 'column' : 'row',
         height: '100%',
         minHeight: 0,
         gap: '8px',
@@ -48,19 +55,58 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
         overflow: 'hidden',
       }}
     >
-      {/* Screen Share Stage */}
+      {/* Mode Switcher Toolbar */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          zIndex: 30,
+          display: 'flex',
+          gap: '4px',
+          background: 'rgba(10, 10, 15, 0.85)',
+          padding: '4px 8px',
+          borderRadius: '8px',
+          border: '1px solid var(--border, #222233)',
+          backdropFilter: 'blur(8px)',
+        }}
+        role="toolbar"
+        aria-label="Presentation Layout Controls"
+      >
+        {(['side-by-side', 'pip', 'content-only', 'over-below'] as PresentationMode[]).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setPresentationMode(mode)}
+            style={{
+              background: presentationMode === mode ? 'var(--primary, #6366f1)' : 'transparent',
+              color: presentationMode === mode ? '#ffffff' : 'var(--fg-muted, #888899)',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              textTransform: 'capitalize',
+            }}
+            data-testid={`mode-btn-${mode}`}
+          >
+            {mode.replace('-', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {/* Primary Screen Share Stage */}
       <div
         role="region"
         aria-label="Shared screen content"
         style={{
-          flex: 1,
+          flex: isContentOnly ? '1 1 100%' : isSideBySide ? `${splitRatio} 1 0` : isOverBelow ? `${splitRatio} 1 0` : '1 1 100%',
           minHeight: 0,
           minWidth: 0,
           position: 'relative',
           borderRadius: '12px',
           overflow: 'hidden',
           background: '#050508',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--border, #222233)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -68,65 +114,55 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
       >
         {screenStream ? (
           <video
+            ref={(el) => {
+              if (el && el.srcObject !== screenStream) {
+                el.srcObject = screenStream;
+              }
+            }}
             autoPlay
             playsInline
             muted
-            ref={(el) => {
-              if (el) el.srcObject = screenStream;
-            }}
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              background: '#000',
             }}
-            aria-label="Screen presentation"
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--fg-muted)' }}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg>
-            <span>Waiting for screen share content…</span>
+          <div style={{ color: 'var(--fg-muted)', fontSize: '0.9rem' }}>
+            No screen content available
           </div>
         )}
 
-        {/* Picture-in-Picture Presenter Tile */}
-        {presenterTile && <PipPresenter presenterTile={presenterTile} />}
+        {/* Floating PiP Presenter if PiP mode is selected */}
+        {isPip && presenterTile && (
+          <PipPresenter presenterTile={presenterTile} />
+        )}
       </div>
 
-      {/* Peer Filmstrip */}
-      {filmstripTiles.length > 0 && (
+      {/* Side-by-Side or Over/Below Presenter / Filmstrip Panel */}
+      {!isContentOnly && !isPip && (
         <div
-          role="region"
-          aria-label="Audience filmstrip"
+          data-testid="presentation-sidebar"
           style={{
+            flex: isSideBySide ? `${1 - splitRatio} 1 0` : isOverBelow ? `${1 - splitRatio} 1 0` : '0 0 auto',
+            minWidth: isSideBySide ? '180px' : '0',
+            maxWidth: isSideBySide ? '400px' : 'none',
+            minHeight: isOverBelow ? '120px' : '0',
             display: 'flex',
-            flexDirection: isVertical ? 'column' : 'row',
+            flexDirection: isSideBySide ? 'column' : 'row',
             gap: '8px',
-            overflowX: isVertical ? 'hidden' : 'auto',
-            overflowY: isVertical ? 'auto' : 'hidden',
-            width: isVertical ? '200px' : '100%',
-            height: isVertical ? '100%' : '120px',
-            minHeight: isVertical ? 'auto' : '120px',
-            flexShrink: 0,
-            padding: '4px',
-            boxSizing: 'border-box',
+            overflowY: isSideBySide ? 'auto' : 'hidden',
+            overflowX: isOverBelow ? 'auto' : 'hidden',
           }}
         >
           {filmstripTiles.map((tile) => (
             <div
               key={tile.id}
               style={{
-                width: isVertical ? '100%' : '160px',
-                height: isVertical ? '100px' : '100%',
+                width: isSideBySide ? '100%' : '180px',
+                height: isSideBySide ? '140px' : '100%',
                 flexShrink: 0,
-                position: 'relative',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                border: '1px solid var(--border)',
               }}
             >
               <VideoTile

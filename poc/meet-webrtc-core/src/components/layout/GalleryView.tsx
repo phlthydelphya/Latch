@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import { useLayoutStore } from '../../layout/layoutStore';
 import { LayoutParticipantTile } from '../../layout/types';
 import { VideoTile } from '../VideoTile';
+import { calculateOptimalGrid, paginateParticipants, MAX_PAGE_TILES } from '../../layout/gridOptimizer';
 
 interface GalleryViewProps {
   tiles: LayoutParticipantTile[];
@@ -9,24 +10,91 @@ interface GalleryViewProps {
   onSpotlight?: (id: string) => void;
 }
 
-const PAGE_SIZE = 9; // Last-N=9 bandwidth limit
-
 export function GalleryView({ tiles, onPin, onSpotlight }: GalleryViewProps) {
   const galleryPage = useLayoutStore((s) => s.galleryPage);
   const setGalleryPage = useLayoutStore((s) => s.setGalleryPage);
+  const setVisibleTileIds = useLayoutStore((s) => s.setVisibleTileIds);
 
-  const totalPages = Math.max(1, Math.ceil(tiles.length / PAGE_SIZE));
-  const currentPage = Math.min(galleryPage, totalPages - 1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 1280, height: 720 });
 
-  // Slice visible tiles for current page (enforcing Last-N=9 per page)
+  // Dynamic viewport sizing via ResizeObserver (M3A Condition 4)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({
+          width: Math.floor(rect.width),
+          height: Math.floor(rect.height),
+        });
+      }
+    };
+
+    updateSize();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width > 0 && height > 0) {
+            setDimensions({
+              width: Math.floor(width),
+              height: Math.floor(height),
+            });
+          }
+        }
+      });
+      observer.observe(el);
+      return () => observer.disconnect();
+    } else {
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
+  }, []);
+
+  // Deduplicated pagination via gridOptimizer.paginateParticipants (M3A Condition 6)
+  const allIds = useMemo(() => tiles.map((t) => t.id), [tiles]);
+  const pagination = useMemo(() => {
+    return paginateParticipants(allIds, galleryPage, MAX_PAGE_TILES);
+  }, [allIds, galleryPage]);
+
   const visibleTiles = useMemo(() => {
-    const start = currentPage * PAGE_SIZE;
-    return tiles.slice(start, start + PAGE_SIZE);
-  }, [tiles, currentPage]);
+    const visibleSet = new Set(pagination.visibleTileIds);
+    return tiles.filter((t) => visibleSet.has(t.id));
+  }, [tiles, pagination.visibleTileIds]);
+
+  // Synchronize visible tiles to store for subscriber-track throttling
+  useEffect(() => {
+    setVisibleTileIds(pagination.visibleTileIds);
+  }, [pagination.visibleTileIds, setVisibleTileIds]);
+
+  // Synchronize clamped page back to store when participant count changes
+  useEffect(() => {
+    if (galleryPage !== pagination.currentPage) {
+      setGalleryPage(pagination.currentPage);
+    }
+  }, [galleryPage, pagination.currentPage, setGalleryPage]);
+
+  const totalPages = pagination.totalPages;
+  const currentPage = pagination.currentPage;
 
   const count = visibleTiles.length;
-  let gridStyle: React.CSSProperties = {
+  const gridGeometry = useMemo(() => {
+    return calculateOptimalGrid({
+      containerWidth: dimensions.width,
+      containerHeight: dimensions.height,
+      participantCount: count,
+      maxPerPage: MAX_PAGE_TILES,
+    });
+  }, [count, dimensions.width, dimensions.height]);
+
+  const gridStyle: React.CSSProperties = {
     display: 'grid',
+    gridTemplateColumns: `repeat(${gridGeometry.cols}, minmax(0, 1fr))`,
+    gridTemplateRows: `repeat(${gridGeometry.rows}, minmax(0, 1fr))`,
     gap: '8px',
     width: '100%',
     height: '100%',
@@ -34,27 +102,10 @@ export function GalleryView({ tiles, onPin, onSpotlight }: GalleryViewProps) {
     boxSizing: 'border-box',
   };
 
-  if (count === 1) {
-    gridStyle.gridTemplateColumns = '1fr';
-    gridStyle.gridTemplateRows = '1fr';
-  } else if (count === 2) {
-    gridStyle.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
-    gridStyle.gridTemplateRows = '1fr';
-  } else if (count <= 4) {
-    gridStyle.gridTemplateColumns = 'repeat(2, 1fr)';
-    gridStyle.gridTemplateRows = 'repeat(2, 1fr)';
-  } else if (count <= 6) {
-    gridStyle.gridTemplateColumns = 'repeat(3, 1fr)';
-    gridStyle.gridTemplateRows = 'repeat(2, 1fr)';
-  } else {
-    // 7 to 9
-    gridStyle.gridTemplateColumns = 'repeat(3, 1fr)';
-    gridStyle.gridTemplateRows = 'repeat(3, 1fr)';
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, position: 'relative' }}>
       <div
+        ref={containerRef}
         role="region"
         aria-label="Gallery view"
         style={{ flex: 1, minHeight: 0, position: 'relative', overflow: 'hidden' }}

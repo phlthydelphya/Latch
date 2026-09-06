@@ -10,12 +10,15 @@ import { Room, RoomEvent, Participant, Track, RemoteTrack, TrackPublication, Rem
 import { useLayoutStore } from './layoutStore';
 import { usePresenceStore } from '../presence/presenceStore';
 import { SpotlightDataChannelMessage } from './types';
+import { SpeakerSmoothingEngine } from './speakerSmoothing';
 
 export const SPOTLIGHT_TOPIC = 'layout-spotlight';
 
 export class LayoutAdapter {
   private room: Room | null = null;
   private unsubscribers: Array<() => void> = [];
+  private speakerSmoothingEngine: SpeakerSmoothingEngine = new SpeakerSmoothingEngine();
+  private smoothingInterval: any = null;
 
   constructor(room?: Room) {
     if (room) {
@@ -105,8 +108,8 @@ export class LayoutAdapter {
           const hostId = presence.hostId;
           const senderId = participant?.identity;
 
-          // Verify authority: host can always spotlight. If hostId not set, allow sender.
-          if (!hostId || senderId === hostId || presence.participants.get(senderId || '')?.isHost) {
+          // Verify authority: host can always spotlight.
+          if (hostId && senderId === hostId) {
             useLayoutStore.getState().setSpotlight(msg.participantId);
           } else {
             console.warn('[LayoutAdapter] Rejected unauthorized spotlight from:', senderId);
@@ -117,11 +120,41 @@ export class LayoutAdapter {
       }
     };
 
+    // 5. Active speaker smoothing integration (M3A Category 2)
+    const onActiveSpeakersChanged = (speakers: Participant[]) => {
+      const now = Date.now();
+      const speakingIds = new Set<string>();
+
+      for (const speaker of speakers) {
+        speakingIds.add(speaker.identity);
+        const energy = typeof (speaker as any).audioLevel === 'number' && (speaker as any).audioLevel > 0
+          ? (speaker as any).audioLevel
+          : 0.85;
+        this.speakerSmoothingEngine.updateEnergy(speaker.identity, energy, now);
+      }
+
+      if (room.remoteParticipants) {
+        for (const remote of room.remoteParticipants.values()) {
+          if (!speakingIds.has(remote.identity)) {
+            this.speakerSmoothingEngine.updateEnergy(remote.identity, 0, now);
+          }
+        }
+      }
+      this.evaluateSpeakerAndLayout(now);
+    };
+
+    const onParticipantDisconnected = (participant: Participant) => {
+      this.speakerSmoothingEngine.removeSpeaker(participant.identity);
+      this.evaluateSpeakerAndLayout();
+    };
+
     room.on(RoomEvent.TrackSubscribed, onTrackSubscribed);
     room.on(RoomEvent.TrackUnsubscribed, onTrackUnsubscribed);
     room.on(RoomEvent.LocalTrackPublished, onLocalTrackPublished);
     room.on(RoomEvent.LocalTrackUnpublished, onLocalTrackUnpublished);
     room.on(RoomEvent.DataReceived, onDataReceived);
+    room.on(RoomEvent.ActiveSpeakersChanged, onActiveSpeakersChanged);
+    room.on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
 
     this.unsubscribers.push(() => {
       const remove = typeof room.off === 'function'
@@ -136,23 +169,57 @@ export class LayoutAdapter {
         remove(RoomEvent.LocalTrackPublished, onLocalTrackPublished);
         remove(RoomEvent.LocalTrackUnpublished, onLocalTrackUnpublished);
         remove(RoomEvent.DataReceived, onDataReceived);
+        remove(RoomEvent.ActiveSpeakersChanged, onActiveSpeakersChanged);
+        remove(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
       }
     });
 
-    // 5. Presence Store subscription for active speakers sync
+    // 6. Presence Store subscription for active speakers sync
     const unsubPresence = usePresenceStore.subscribe((presenceState) => {
       const activeList = Array.from(presenceState.activeSpeakers);
+      const now = Date.now();
       if (activeList.length > 0) {
-        const localId = presenceState.localParticipantId;
-        const remoteSpeaker = activeList.find((id) => id !== localId);
-        useLayoutStore.getState().setActiveSpeaker(remoteSpeaker || activeList[0]);
+        for (const id of activeList) {
+          this.speakerSmoothingEngine.updateEnergy(id, 0.85, now);
+        }
       }
+      this.evaluateSpeakerAndLayout(now);
     });
 
     this.unsubscribers.push(unsubPresence);
+
+    // 7. Periodic evaluation ticker for hysteresis hold expiration and continuous speech qualification
+    this.smoothingInterval = setInterval(() => {
+      const now = Date.now();
+      const activeList = Array.from(usePresenceStore.getState().activeSpeakers);
+      for (const id of activeList) {
+        this.speakerSmoothingEngine.updateEnergy(id, 0.85, now);
+      }
+      this.evaluateSpeakerAndLayout(now);
+    }, 150);
+  }
+
+  public evaluateSpeakerAndLayout(now: number = Date.now()): void {
+    const electedSpeaker = this.speakerSmoothingEngine.resolveActiveSpeaker(now);
+    const confidence = electedSpeaker ? this.speakerSmoothingEngine.getConfidence(electedSpeaker, now) : 0;
+    const current = useLayoutStore.getState().activeSpeakerId;
+    const currentConf = useLayoutStore.getState().speakerConfidence;
+
+    if (electedSpeaker !== current || Math.abs(confidence - currentConf) > 0.05) {
+      useLayoutStore.getState().setActiveSpeaker(electedSpeaker, confidence);
+    }
+  }
+
+  public getSpeakerSmoothingEngine(): SpeakerSmoothingEngine {
+    return this.speakerSmoothingEngine;
   }
 
   detach(): void {
+    if (this.smoothingInterval) {
+      clearInterval(this.smoothingInterval);
+      this.smoothingInterval = null;
+    }
+    this.speakerSmoothingEngine.reset();
     for (const unsub of this.unsubscribers) {
       try {
         unsub();

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWebRTC } from '../hooks/useWebRTC';
 import { useIosLifecycle } from '../hooks/useIosLifecycle';
@@ -9,15 +9,16 @@ import { ToastContainer } from '../components/ToastContainer';
 import { LayoutControls } from '../components/layout/LayoutControls';
 import { useLayoutStore } from '../layout/layoutStore';
 import { useAppStore } from '../store/appStore';
-import { ChatDrawer } from '../components/collaboration/ChatDrawer';
 import { ReactionsBar } from '../components/collaboration/ReactionsBar';
 import { ReactionsOverlay } from '../components/collaboration/ReactionsOverlay';
 import { HostAnnouncementBanner } from '../components/collaboration/HostAnnouncementBanner';
-import { DeviceSettingsModal } from '../components/devices/DeviceSettingsModal';
-import { HostControlsModal } from '../components/host/HostControlsModal';
 import { WaitingRoomBanner } from '../components/host/WaitingRoomBanner';
 import { RoomLockBadge } from '../components/host/RoomLockBadge';
 import { useHostControlStore } from '../host/hostControlStore';
+
+const DeviceSettingsModal = lazy(() => import('../components/devices/DeviceSettingsModal').then(m => ({ default: m.DeviceSettingsModal })));
+const HostControlsModal = lazy(() => import('../components/host/HostControlsModal').then(m => ({ default: m.HostControlsModal })));
+const ChatDrawer = lazy(() => import('../components/collaboration/ChatDrawer').then(m => ({ default: m.ChatDrawer })));
 
 export function MeetingPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -176,10 +177,12 @@ export function MeetingPage() {
       <ReactionsOverlay />
       <ControlBar onToggleHand={publishHandRaise} />
       <ReactionsBar onSendReaction={publishReaction} />
-      <ChatDrawer onSendMessage={publishChatMessage} />
       <RosterDrawer onLowerHand={lowerParticipantHand} />
-      <DeviceSettingsModal onSwitchDevice={switchDevice} />
-      <HostControlsModal />
+      <Suspense fallback={null}>
+        <ChatDrawer onSendMessage={publishChatMessage} />
+        <DeviceSettingsModal onSwitchDevice={switchDevice} />
+        <HostControlsModal />
+      </Suspense>
       <ToastContainer />
     </div>
   );
