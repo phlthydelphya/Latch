@@ -15,7 +15,7 @@ describe('M2 Phase A1: Presence Domain & Store', () => {
     usePresenceStore.getState().resetPresence();
   });
 
-  it('A1-1: Manages local participant and automatic initial host election', () => {
+  it('A1-1: Manages local participant and server-asserted initial host', () => {
     const store = usePresenceStore.getState();
 
     store.setLocalParticipant({
@@ -27,13 +27,13 @@ describe('M2 Phase A1: Presence Domain & Store', () => {
       isSpeaking: false,
       connectionQuality: 'excellent',
       isHandRaised: false,
-      isHost: false,
+      isHost: true,
       joinedAt: 1000,
     });
 
     const state = usePresenceStore.getState();
     expect(state.localParticipantId).toBe('alice-1');
-    expect(state.hostId).toBe('alice-1'); // First participant elected host
+    expect(state.hostId).toBe('alice-1');
     expect(state.participants.get('alice-1')?.isHost).toBe(true);
     expect(state.participants.get('alice-1')?.isLocal).toBe(true);
   });
@@ -216,6 +216,7 @@ describe('M2 Phase A1: Presence Domain & Store', () => {
 
   it('A1-6: Host migration upon current host disconnection', () => {
     const store = usePresenceStore.getState();
+    store.setAuthoritativeHost('host-alice');
 
     store.upsertParticipant({
       id: 'host-alice',

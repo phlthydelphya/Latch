@@ -15,21 +15,30 @@ export type HostDirectiveAction =
   | 'mute-participant'
   | 'remove-participant'
   | 'transfer-host'
+  | 'host-changed'
   | 'lock-room'
   | 'set-waiting-room'
   | 'waiting-room-knock'
   | 'waiting-room-admit'
   | 'waiting-room-reject'
-  | 'update-permissions';
+  | 'update-permissions'
+  | 'host-announce'
+  | 'host-query';
 
 export interface HostDirectiveMessage {
   type: 'host-directive';
   action: HostDirectiveAction;
   targetParticipantId?: string;
+  senderId?: string;
+  hostToken?: string;          // M4A: Server-signed ES256 host claim
+  newHostId?: string;          // For host-changed events
+  newHostToken?: string;       // For host-changed events
+  hostKey?: string;            // For host-changed events
   isLocked?: boolean;
   isWaitingRoomEnabled?: boolean;
   participantName?: string;
   permissions?: Partial<MeetingPermissions>;
+  nonce?: string;
   timestamp: number;
 }
 

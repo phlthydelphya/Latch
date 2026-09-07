@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMediaDevices } from '../hooks/useMediaDevices';
 import { useAppStore } from '../store/appStore';
+import { usePresenceStore } from '../presence/presenceStore';
+import { useHostControlStore } from '../host/hostControlStore';
+import { HostControlManager } from '../host/hostControlManager';
 import { fetchToken } from '../auth/token';
 
 function generateKeyParam(): string {
@@ -14,6 +17,7 @@ export function PreJoinPage() {
   const navigate = useNavigate();
   const { roomId } = useParams<{ roomId: string }>();
   const { participantId, jwt, livekitToken, sfuUrl, keyParam, setRoom, setCredentials, setLocalParticipant, setError } = useAppStore();
+  const existingName = useAppStore((s) => s.localParticipant?.name) || '';
   const { devices, getUserMedia, error: deviceError, loading: deviceLoading } = useMediaDevices();
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -24,41 +28,51 @@ export function PreJoinPage() {
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [displayName, setDisplayName] = useState(existingName);
+  const [nameTouched, setNameTouched] = useState(false);
 
-  // Deep-link entry: initialize session state from the URL when absent.
-  // A joiner opens /r/:roomId#k=... directly, bypassing the landing page.
+  const trimmedName = displayName.trim();
+  const nameError = trimmedName.length === 0
+    ? 'Display name is required.'
+    : trimmedName.length > 64
+      ? 'Display name must be 64 characters or fewer.'
+      : null;
+
+  // Preflight room status result
+  const [roomStatus, setRoomStatus] = useState<{
+    checked: boolean;
+    exists: boolean;
+    locked: boolean;
+  }>({ checked: false, exists: true, locked: false });
+
+  // Deep-link entry: redirect to home if no roomId
   useEffect(() => {
     if (!roomId) {
       navigate('/', { replace: true });
-      return;
     }
-    if (participantId && jwt && livekitToken && sfuUrl) return;
+  }, [roomId, navigate]);
 
+  // Preflight: check room existence and lock status before showing UI
+  useEffect(() => {
+    if (!roomId) return;
     let cancelled = false;
     (async () => {
-      const hashKey = window.location.hash.slice(1).replace(/^k=/, '');
-      const generatedKey = hashKey || generateKeyParam();
       try {
-        // Backend issues the signed JWT (services/meet-signal POST /token)
-        const res = await fetchToken(roomId, 'Guest');
-        if (!cancelled) {
-          setRoom(roomId, res.participantId, res.token, generatedKey);
-          if (res.livekitToken && res.sfuUrl) {
-            setCredentials(res.livekitToken, res.sfuUrl);
-          }
+        const res = await fetch(`/room/status?roomId=${encodeURIComponent(roomId)}`);
+        if (!cancelled && res.ok) {
+          const data = await res.json() as { exists: boolean; joinable: boolean; locked: boolean };
+          setRoomStatus({ checked: true, exists: data.exists, locked: data.locked });
         }
-      } catch (err) {
-        console.error('Token issuance failed:', err);
-        if (!cancelled) setError('Could not join meeting. Signaling service unavailable.');
+      } catch {
+        // Network error — proceed optimistically (service may not support endpoint yet)
       }
     })();
-
     return () => { cancelled = true; };
-  }, [roomId, participantId, jwt, livekitToken, sfuUrl, setRoom, setCredentials, setError, navigate]);
+  }, [roomId]);
 
   // Initialize media preview
   useEffect(() => {
-    if (!roomId || !participantId || !jwt) return;
+    if (!roomId) return;
 
     let cancelled = false;
     let activeStream: MediaStream | null = null;
@@ -111,7 +125,7 @@ export function PreJoinPage() {
         activeStream.getTracks().forEach((t) => t.stop());
       }
     };
-  }, [videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, roomId, participantId, jwt, getUserMedia, setError]);
+  }, [videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, roomId, getUserMedia, setError]);
 
   // Attach the preview stream once the <video> element has rendered.
   // (setPreviewStream above re-renders after this effect body runs, so the
@@ -123,14 +137,53 @@ export function PreJoinPage() {
   }, [previewStream]);
 
   const handleJoin = async () => {
+    setNameTouched(true);
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      setError('Display name is required.');
+      return;
+    }
+    if (trimmed.length > 64) {
+      setError('Display name must be 64 characters or fewer.');
+      return;
+    }
     if (joining) return;
     setJoining(true);
 
     try {
+      let activeParticipantId = participantId;
+      let activeKeyParam = keyParam;
+
+      if (!activeParticipantId || !jwt) {
+        const hashKey = window.location.hash.slice(1).replace(/^k=/, '');
+        activeKeyParam = hashKey || generateKeyParam();
+        const res = await fetchToken(roomId!, trimmed);
+        activeParticipantId = res.participantId;
+        setRoom(roomId!, res.participantId, res.token, activeKeyParam);
+        if (res.livekitToken && res.sfuUrl) {
+          setCredentials(res.livekitToken, res.sfuUrl);
+        }
+        HostControlManager.getInstance().setSessionContext({
+          roomId: roomId!,
+          localParticipantId: res.participantId,
+          hostToken: res.hostToken,
+          hostKey: res.hostKey,
+        });
+        if (res.role === 'host') {
+          usePresenceStore.getState().setAuthoritativeHost(res.participantId);
+          useHostControlStore.getState().setIsWaitingInLobby(false);
+        } else {
+          usePresenceStore.getState().setAuthoritativeHost(null);
+          if (useHostControlStore.getState().isWaitingRoomEnabled) {
+            useHostControlStore.getState().setIsWaitingInLobby(true);
+          }
+        }
+      }
+
       // Create local participant object
       const localParticipant = {
-        id: participantId!,
-        name: 'You',
+        id: activeParticipantId!,
+        name: trimmed,
         audioEnabled,
         videoEnabled,
         screenSharing: false,
@@ -149,7 +202,7 @@ export function PreJoinPage() {
       setError(null);
       
       // Navigate to meeting with key param in hash
-      navigate(`/r/${roomId}/join#k=${keyParam}`, { replace: true });
+      navigate(`/r/${roomId}/join#k=${activeKeyParam}`, { replace: true });
     } catch (err) {
       console.error('Join failed:', err);
       setError('Failed to join meeting. Please try again.');
@@ -159,6 +212,53 @@ export function PreJoinPage() {
 
   const videoDevices = devices.filter((d) => d.kind === 'videoinput');
   const audioDevices = devices.filter((d) => d.kind === 'audioinput');
+
+  // Preflight: room not found
+  if (roomStatus.checked && !roomStatus.exists) {
+    return (
+      <main className="preview-container" id="main" role="main">
+        <div role="alert" style={{ textAlign: 'center', maxWidth: '360px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🔍</div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Meeting not found</h2>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            The meeting link or ID <code style={{ fontFamily: 'var(--font-mono)', background: 'var(--bg-elevated)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>{roomId}</code> does not exist.
+            Check the link and try again.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            onClick={() => navigate('/', { replace: true })}
+          >
+            Back to Home
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // Preflight: room locked by host
+  if (roomStatus.checked && roomStatus.locked) {
+    return (
+      <main className="preview-container" id="main" role="main">
+        <div role="alert" style={{ textAlign: 'center', maxWidth: '360px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🔒</div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>Meeting is locked</h2>
+          <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            The host has locked this meeting. No new participants can join at this time.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            onClick={() => navigate('/', { replace: true })}
+          >
+            Back to Home
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="preview-container" id="main" role="main">
@@ -180,6 +280,32 @@ export function PreJoinPage() {
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--fg-muted)' }}>
             {deviceLoading ? 'Loading camera…' : 'No camera available'}
+          </div>
+        )}
+      </div>
+
+      <div className="input-group" style={{ width: '100%', maxWidth: '360px', margin: '1rem auto 0 auto' }}>
+        <label htmlFor="displayName" className="input-label">
+          Your Name
+        </label>
+        <input
+          id="displayName"
+          type="text"
+          className="input-field"
+          placeholder="Enter your name"
+          value={displayName}
+          onChange={(e) => {
+            setDisplayName(e.target.value);
+            setNameTouched(true);
+          }}
+          onBlur={() => setNameTouched(true)}
+          maxLength={64}
+          autoComplete="name"
+          disabled={joining}
+        />
+        {nameTouched && nameError && (
+          <div role="alert" style={{ marginTop: '0.25rem', color: '#ff4757', fontSize: '0.8rem' }}>
+            {nameError}
           </div>
         )}
       </div>
@@ -289,7 +415,7 @@ export function PreJoinPage() {
         className="btn btn-primary"
         style={{ width: '100%', marginTop: '0.5rem' }}
         onClick={handleJoin}
-        disabled={joining}
+        disabled={joining || !displayName.trim() || displayName.trim().length > 64}
       >
         {joining ? 'Joining…' : 'Join Meeting'}
       </button>

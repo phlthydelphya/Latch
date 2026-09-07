@@ -63,6 +63,7 @@ export interface PresenceActions {
   updateParticipantTracks: (participantId: string, updates: Partial<Pick<ParticipantPresence, 'audioEnabled' | 'videoEnabled' | 'screenSharing'>>) => void;
   
   setHostId: (hostId: string | null) => void;
+  setAuthoritativeHost: (hostId: string | null) => void;
   setActiveSpeakers: (speakerIds: string[]) => void;
   setConnectionQuality: (participantId: string, quality: ConnectionQualityRating) => void;
   

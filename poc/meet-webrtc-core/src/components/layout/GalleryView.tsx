@@ -36,19 +36,25 @@ export function GalleryView({ tiles, onPin, onSpotlight }: GalleryViewProps) {
     updateSize();
 
     if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          if (width > 0 && height > 0) {
-            setDimensions({
-              width: Math.floor(width),
-              height: Math.floor(height),
-            });
+      try {
+        const observer = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            if (width > 0 && height > 0) {
+              setDimensions({
+                width: Math.floor(width),
+                height: Math.floor(height),
+              });
+            }
           }
+        });
+        if (observer && typeof observer.observe === 'function') {
+          observer.observe(el);
+          return () => observer.disconnect();
         }
-      });
-      observer.observe(el);
-      return () => observer.disconnect();
+      } catch {}
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
     } else {
       window.addEventListener('resize', updateSize);
       return () => window.removeEventListener('resize', updateSize);

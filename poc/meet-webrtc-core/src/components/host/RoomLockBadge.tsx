@@ -14,8 +14,7 @@ export const RoomLockBadge: React.FC = () => {
 
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
-  const participants = usePresenceStore((s) => s.participants);
-  const isLocalHost = hostId === localParticipantId || participants.get(localParticipantId || '')?.isHost;
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
 
   if (!isRoomLocked) return null;
 

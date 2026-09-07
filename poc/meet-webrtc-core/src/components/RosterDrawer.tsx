@@ -9,9 +9,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { usePresenceStore } from '../presence/presenceStore';
+import { useHostControlStore } from '../host/hostControlStore';
 import { ConnectionBadge } from './ConnectionBadge';
 import { SpeakingIndicator } from './SpeakingIndicator';
 import { HostControlManager } from '../host/hostControlManager';
+import { useAppStore } from '../store/appStore';
+import { InviteModal } from './InviteModal';
 
 interface RosterDrawerProps {
   onLowerHand?: (targetParticipantId?: string) => Promise<void> | void;
@@ -24,10 +27,12 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
   const raisedHands = usePresenceStore((s) => s.raisedHands);
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
-  const isLocalHost = hostId === localParticipantId || participantsMap.get(localParticipantId || '')?.isHost;
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
+  const waitingQueue = useHostControlStore((s) => s.waitingQueue);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [isInviteOpen, setInviteOpen] = useState(false);
 
   // Close on Escape key
   useEffect(() => {
@@ -40,14 +45,22 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, setRosterOpen]);
 
+  const waitingIds = useMemo(
+    () => new Set(waitingQueue.map((w) => w.participantId)),
+    [waitingQueue]
+  );
+
+  const activeParticipantsList = useMemo(() => {
+    return Array.from(participantsMap.values()).filter((p) => !waitingIds.has(p.id));
+  }, [participantsMap, waitingIds]);
+
   const participantsList = useMemo(() => {
-    const list = Array.from(participantsMap.values());
-    if (!searchQuery.trim()) return list;
+    if (!searchQuery.trim()) return activeParticipantsList;
     const q = searchQuery.toLowerCase();
-    return list.filter(
+    return activeParticipantsList.filter(
       (p) => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)
     );
-  }, [participantsMap, searchQuery]);
+  }, [activeParticipantsList, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -93,22 +106,44 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
               color: 'var(--fg-muted, #888899)',
             }}
           >
-            {participantsMap.size}
+            {activeParticipantsList.length}
           </span>
         </div>
-        <button
-          onClick={() => setRosterOpen(false)}
-          aria-label="Close roster"
-          style={{
-            color: 'var(--fg-muted, #888899)',
-            fontSize: '1.25rem',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            lineHeight: 1,
-          }}
-        >
-          ✕
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => setInviteOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '4px 10px',
+              backgroundColor: 'rgba(0, 212, 170, 0.15)',
+              border: '1px solid rgba(0, 212, 170, 0.4)',
+              color: '#00d4aa',
+              borderRadius: '6px',
+              cursor: 'pointer',
+            }}
+            title="Invite people to meeting"
+          >
+            <span>🔗</span>
+            <span>Invite</span>
+          </button>
+          <button
+            onClick={() => setRosterOpen(false)}
+            aria-label="Close roster"
+            style={{
+              color: 'var(--fg-muted, #888899)',
+              fontSize: '1.25rem',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              lineHeight: 1,
+            }}
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {/* Hand Raise Alert Banner */}
@@ -183,6 +218,92 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
           padding: '8px 0',
         }}
       >
+        {isLocalHost && waitingQueue.length > 0 && (
+          <div
+            style={{
+              margin: '8px 16px 16px 16px',
+              padding: '12px',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '8px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#f59e0b' }}>
+                Waiting in Lobby ({waitingQueue.length})
+              </span>
+              <button
+                onClick={async () => {
+                  for (const p of [...waitingQueue]) {
+                    await HostControlManager.getInstance().admitParticipant(p.participantId);
+                  }
+                }}
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '2px 8px',
+                  backgroundColor: '#00d4aa',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+              >
+                Admit All
+              </button>
+            </div>
+            {waitingQueue.map((wp) => (
+              <div
+                key={wp.participantId}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '6px 0',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                  fontSize: '0.85rem',
+                }}
+              >
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+                  {wp.name}
+                </span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    onClick={() => HostControlManager.getInstance().admitParticipant(wp.participantId)}
+                    style={{
+                      fontSize: '0.7rem',
+                      padding: '2px 6px',
+                      backgroundColor: '#00d4aa',
+                      color: '#000',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Admit
+                  </button>
+                  <button
+                    onClick={() => HostControlManager.getInstance().rejectParticipant(wp.participantId)}
+                    style={{
+                      fontSize: '0.7rem',
+                      padding: '2px 6px',
+                      backgroundColor: 'rgba(255, 71, 87, 0.2)',
+                      color: '#ff4757',
+                      border: '1px solid rgba(255, 71, 87, 0.4)',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {participantsList.length === 0 ? (
           <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--fg-muted, #888899)', fontSize: '0.875rem' }}>
             No participants found
@@ -190,7 +311,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
         ) : (
           participantsList.map((p) => {
             const isSelf = p.isLocal;
-            const isCurrentHost = p.id === hostId || p.isHost;
+            const isCurrentHost = hostId !== null && hostId === p.id;
 
             return (
               <div
@@ -439,6 +560,12 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
           to { transform: translateX(0); }
         }
       `}</style>
+      <InviteModal
+        isOpen={isInviteOpen}
+        onClose={() => setInviteOpen(false)}
+        roomId={useAppStore.getState().roomId || ''}
+        keyParam={useAppStore.getState().keyParam || undefined}
+      />
     </aside>
   );
 };

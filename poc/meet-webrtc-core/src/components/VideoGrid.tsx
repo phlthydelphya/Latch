@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useLayoutStore } from '../layout/layoutStore';
 import { usePresenceStore } from '../presence/presenceStore';
+import { useHostControlStore } from '../host/hostControlStore';
 import { LayoutParticipantTile } from '../layout/types';
 import { GalleryView } from './layout/GalleryView';
 import { SpeakerView } from './layout/SpeakerView';
@@ -32,6 +33,7 @@ export function VideoGrid({
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
   const localPresence = presenceParticipants.get(localParticipantId || '');
   const activeSpeakers = usePresenceStore((s) => s.activeSpeakers);
+  const waitingQueue = useHostControlStore((s) => s.waitingQueue);
 
   // Construct LayoutParticipantTiles from streams + presence store
   const tiles = useMemo(() => {
@@ -51,8 +53,10 @@ export function VideoGrid({
     });
 
     // Remote participant tiles
-    // Map remote participants from presence store first if available, else by index
-    const remoteList = Array.from(presenceParticipants.values()).filter((p) => !p.isLocal);
+    // Exclude participants who are still in the waiting room queue
+    const waitingIds = new Set(waitingQueue.map((w) => w.participantId));
+    const remotePresenceList = Array.from(presenceParticipants.values()).filter((p) => !p.isLocal);
+    const remoteList = remotePresenceList.filter((p) => !waitingIds.has(p.id));
 
     if (remoteList.length > 0) {
       remoteList.forEach((p, idx) => {
@@ -68,7 +72,7 @@ export function VideoGrid({
           speaking: activeSpeakers.has(p.id),
         });
       });
-    } else {
+    } else if (remotePresenceList.length === 0) {
       // Fallback for mock/test runs without full presence roster
       remoteStreams.forEach((stream, idx) => {
         const id = `remote-${idx}`;
@@ -96,6 +100,7 @@ export function VideoGrid({
     presenceParticipants,
     localPresence,
     activeSpeakers,
+    waitingQueue,
   ]);
 
   if (mode === 'content') {

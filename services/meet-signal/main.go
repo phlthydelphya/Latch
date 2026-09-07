@@ -9,6 +9,11 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,13 +43,16 @@ type Claims struct {
 	ParticipantID string `json:"sub"`
 	RoomID        string `json:"room"`
 	Name          string `json:"name"`
+	Role          string `json:"role,omitempty"`
 	jwt.RegisteredClaims
 }
 
 // LiveKitClaims represents the JWT claims for LiveKit access tokens.
 // Uses golang-jwt/jwt/v5 with custom VideoGrant claims (no livekit/protocol dependency).
 type LiveKitClaims struct {
-	Video LiveKitVideoGrant `json:"video"`
+	Video    LiveKitVideoGrant `json:"video"`
+	Metadata string            `json:"metadata,omitempty"`
+	Role     string            `json:"role,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -62,12 +70,145 @@ type TokenRequest struct {
 }
 
 type TokenResponse struct {
-	Token         string `json:"token"`           // Legacy mesh token / LiveKit JWT (backward compat)
-	LiveKitToken  string `json:"livekitToken"`    // Alias for token when LiveKit path is used
+	Token         string `json:"token"`                  // Legacy mesh token / LiveKit JWT (backward compat)
+	LiveKitToken  string `json:"livekitToken"`           // Alias for token when LiveKit path is used
 	ParticipantID string `json:"participantId"`
 	RoomID        string `json:"roomId"`
-	URL           string `json:"url,omitempty"`    // Legacy field (backward compat)
-	SFUUrl        string `json:"sfuUrl,omitempty"` // Alias for url when LiveKit path is used
+	Role          string `json:"role"`                   // M4A: "host" or "participant"
+	HostToken     string `json:"hostToken,omitempty"`    // M4A: Server-signed ES256 host claim (if role == "host")
+	HostKey       string `json:"hostKey,omitempty"`      // M4A: Public key in hex for peer verification
+	URL           string `json:"url,omitempty"`          // Legacy field (backward compat)
+	SFUUrl        string `json:"sfuUrl,omitempty"`        // Alias for url when LiveKit path is used
+}
+
+type RoomAuthority struct {
+	RoomID        string    `json:"roomId"`
+	HostID        string    `json:"hostId"`
+	CreatedAt     time.Time `json:"createdAt"`
+	HostUpdatedAt time.Time `json:"hostUpdatedAt"`
+	GraceExpiry   time.Time `json:"graceExpiry,omitempty"`
+	Locked        bool      `json:"locked"`
+}
+
+type authorityManager struct {
+	mu    sync.RWMutex
+	rooms map[string]*RoomAuthority
+}
+
+func newAuthorityManager() *authorityManager {
+	return &authorityManager{
+		rooms: make(map[string]*RoomAuthority),
+	}
+}
+
+func (am *authorityManager) createRoom(roomID, creatorID string) (*RoomAuthority, error) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	now := time.Now()
+	auth, exists := am.rooms[roomID]
+	if exists && auth.HostID != "" && (auth.GraceExpiry.IsZero() || auth.GraceExpiry.After(now)) {
+		return nil, errors.New("room already exists with active host")
+	}
+
+	auth = &RoomAuthority{
+		RoomID:        roomID,
+		HostID:        creatorID,
+		CreatedAt:     now,
+		HostUpdatedAt: now,
+		Locked:        false,
+	}
+	am.rooms[roomID] = auth
+	return auth, nil
+}
+
+func (am *authorityManager) assignRole(roomID, participantID string, isHostReconn ...bool) (string, bool) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	isHost := false
+	if len(isHostReconn) > 0 && isHostReconn[0] {
+		isHost = true
+	}
+
+	auth, exists := am.rooms[roomID]
+	now := time.Now()
+	if !exists {
+		// Room not created via /room/create — register unhosted room
+		am.rooms[roomID] = &RoomAuthority{
+			RoomID:        roomID,
+			HostID:        "",
+			CreatedAt:     now,
+			HostUpdatedAt: now,
+		}
+		return "participant", false
+	}
+
+	if isHost || (auth.HostID != "" && auth.HostID == participantID) {
+		auth.HostID = participantID
+		auth.GraceExpiry = time.Time{}
+		return "host", false
+	}
+
+	return "participant", false
+}
+
+func (am *authorityManager) getAuthority(roomID string) (*RoomAuthority, bool) {
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+	auth, ok := am.rooms[roomID]
+	if !ok {
+		return nil, false
+	}
+	copy := *auth
+	return &copy, true
+}
+
+func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantID string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	auth, exists := am.rooms[roomID]
+	if !exists {
+		return errors.New("room not found")
+	}
+	if auth.HostID != requesterID {
+		return errors.New("unauthorized: requester is not host")
+	}
+	auth.HostID = targetParticipantID
+	auth.HostUpdatedAt = time.Now()
+	auth.GraceExpiry = time.Time{}
+	return nil
+}
+
+func (am *authorityManager) startHostGrace(roomID, hostID string, graceDuration time.Duration, onTimeout func(string)) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	auth, exists := am.rooms[roomID]
+	if !exists || auth.HostID != hostID {
+		return
+	}
+	auth.GraceExpiry = time.Now().Add(graceDuration)
+
+	go func() {
+		time.Sleep(graceDuration)
+		am.mu.Lock()
+		defer am.mu.Unlock()
+
+		currentAuth, stillExists := am.rooms[roomID]
+		if !stillExists || currentAuth.HostID != hostID {
+			return
+		}
+		if time.Now().Before(currentAuth.GraceExpiry) {
+			return
+		}
+
+		currentAuth.HostID = ""
+		if onTimeout != nil {
+			go onTimeout(roomID)
+		}
+	}()
 }
 
 // SignalMessage mirrors the client signaling frame shape:
@@ -190,6 +331,53 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
+var (
+	hostPrivateKey   *ecdsa.PrivateKey
+	hostPublicKeyHex string
+	authManager      = newAuthorityManager()
+)
+
+func initHostSigning() {
+	var err error
+	hostPrivateKey, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		log.Fatalf("failed to generate host ECDSA key: %v", err)
+	}
+	pubBytes, err := x509.MarshalPKIXPublicKey(&hostPrivateKey.PublicKey)
+	if err != nil {
+		log.Fatalf("failed to marshal host public key: %v", err)
+	}
+	hostPublicKeyHex = hex.EncodeToString(pubBytes)
+	log.Printf("host_auth: ECDSA P-256 signing initialized (pubkey_prefix=%s)", hostPublicKeyHex[:16]+"...")
+}
+
+type HostClaims struct {
+	ParticipantID string `json:"sub"`
+	RoomID        string `json:"room"`
+	Role          string `json:"role"`
+	jwt.RegisteredClaims
+}
+
+func mintHostToken(participantID, roomID string, ttl time.Duration) (string, error) {
+	now := time.Now()
+	claims := HostClaims{
+		ParticipantID: participantID,
+		RoomID:        roomID,
+		Role:          "host",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    jwtIssuer,
+			Subject:   participantID,
+			Audience:  jwt.ClaimStrings{roomID},
+			IssuedAt:  jwt.NewNumericDate(now),
+			NotBefore: jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+			ID:        uuid.New().String(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	return token.SignedString(hostPrivateKey)
+}
+
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	log.SetOutput(os.Stdout)
@@ -216,6 +404,8 @@ func main() {
 		log.Fatal("LIVEKIT_API_SECRET must be at least 32 characters when set")
 	}
 
+	initHostSigning()
+
 	h := newHub()
 
 	mux := http.NewServeMux()
@@ -225,6 +415,16 @@ func main() {
 		json.NewEncoder(w).Encode(healthResponse{Status: "ok", Service: "meet-signal"})
 	})
 	mux.HandleFunc("/token", handleToken)
+	mux.HandleFunc("/room/create", handleCreateRoom)
+	mux.HandleFunc("/room/transfer-host", func(w http.ResponseWriter, r *http.Request) {
+		handleTransferHost(h, authManager, w, r)
+	})
+	mux.HandleFunc("/room/authority", func(w http.ResponseWriter, r *http.Request) {
+		handleRoomAuthority(authManager, w, r)
+	})
+	mux.HandleFunc("/room/status", func(w http.ResponseWriter, r *http.Request) {
+		handleRoomStatus(authManager, w, r)
+	})
 	mux.HandleFunc("/signal", func(w http.ResponseWriter, r *http.Request) {
 		handleSignal(h, w, r)
 	})
@@ -330,6 +530,68 @@ func handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func handleCreateRoom(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		RoomID string `json:"roomId,omitempty"`
+		Name   string `json:"name"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	name := strings.TrimSpace(req.Name)
+	if name == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "display name is required", http.StatusBadRequest)
+		return
+	}
+	if len(name) > 64 {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "display name too long", http.StatusBadRequest)
+		return
+	}
+
+	roomID := strings.TrimSpace(req.RoomID)
+	if roomID == "" {
+		roomID = "room-" + uuid.New().String()[:12]
+	}
+	if len(roomID) > 64 {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "roomId too long", http.StatusBadRequest)
+		return
+	}
+
+	participantID := "p-" + uuid.New().String()[:8]
+	atomic.AddInt64(&metricTokensIssued, 1)
+
+	// Authoritative Room Creation & Host Election
+	_, err := authManager.createRoom(roomID, participantID)
+	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, err.Error(), http.StatusConflict)
+		return
+	}
+
+	role := "host"
+	hostToken, err := mintHostToken(participantID, roomID, jwtTTL)
+	if err != nil {
+		log.Printf("create_room: failed to mint host token: %v", err)
+	}
+
+	if liveKitAPISecret != "" {
+		issueLiveKitToken(w, participantID, roomID, name, role, hostToken)
+		return
+	}
+	issueLegacyToken(w, participantID, roomID, name, role, hostToken)
+}
+
 func handleToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		atomic.AddInt64(&metricSignalErrors, 1)
@@ -343,29 +605,59 @@ func handleToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
+	req.RoomID = strings.TrimSpace(req.RoomID)
+	name := strings.TrimSpace(req.Name)
 	if req.RoomID == "" {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "roomId is required", http.StatusBadRequest)
 		return
 	}
-	if len(req.RoomID) > 64 || len(req.Name) > 64 {
+	if name == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "display name is required", http.StatusBadRequest)
+		return
+	}
+	if len(req.RoomID) > 64 || len(name) > 64 {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "roomId/name too long", http.StatusBadRequest)
 		return
 	}
 
+	// Check if reconnecting with an existing server-issued host token
+	isHostReconnection := false
+	authHeader := r.Header.Get("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		claims, err := validateJWT(tokenStr)
+		if err == nil && claims.RoomID == req.RoomID && claims.Role == "host" {
+			isHostReconnection = true
+		}
+	}
+
 	participantID := "p-" + uuid.New().String()[:8]
 	atomic.AddInt64(&metricTokensIssued, 1)
 
+	// M4A: Attendees/guests calling /token receive "participant" role.
+	// Only reconnecting hosts (authenticated via server signature) retain "host".
+	role, _ := authManager.assignRole(req.RoomID, participantID, isHostReconnection)
+	var hostToken string
+	if role == "host" {
+		var err error
+		hostToken, err = mintHostToken(participantID, req.RoomID, jwtTTL)
+		if err != nil {
+			log.Printf("token: failed to mint host token: %v", err)
+		}
+	}
+
 	// Dual-path: LiveKit JWT with VideoGrant if LIVEKIT_API_SECRET is set, else legacy mesh token
 	if liveKitAPISecret != "" {
-		issueLiveKitToken(w, participantID, req.RoomID, req.Name)
+		issueLiveKitToken(w, participantID, req.RoomID, name, role, hostToken)
 		return
 	}
-	issueLegacyToken(w, participantID, req.RoomID, req.Name)
+	issueLegacyToken(w, participantID, req.RoomID, name, role, hostToken)
 }
 
-func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name string) {
+func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken string) {
 	now := time.Now()
 	expiresAt := now.Add(liveKitTTL)
 
@@ -380,6 +672,8 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name string
 			CanSubscribe:   true,
 			CanPublishData: true,
 		},
+		Metadata: fmt.Sprintf(`{"role":"%s"}`, role),
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    liveKitAPIKey,
 			Subject:   participantID,
@@ -391,8 +685,6 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name string
 		},
 	}
 
-	// Add name as metadata in the token (LiveKit supports this via 'name' claim in video grant context)
-	// We also include it as a custom claim for compatibility
 	type liveKitClaimsWithName struct {
 		LiveKitClaims
 		Name string `json:"name"`
@@ -411,7 +703,7 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name string
 	}
 
 	// Sanitized log: only token prefix
-	log.Printf("token: issued livekit token for participant=%s room=%s token_prefix=%s", participantID, roomID, signed[:16]+"...")
+	log.Printf("token: issued livekit token for participant=%s room=%s role=%s token_prefix=%s", participantID, roomID, role, signed[:16]+"...")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
@@ -419,20 +711,25 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name string
 		LiveKitToken:  signed,
 		ParticipantID: participantID,
 		RoomID:        roomID,
+		Role:          role,
+		HostToken:     hostToken,
+		HostKey:       hostPublicKeyHex,
 		URL:           wsURL,
 		SFUUrl:        wsURL,
 	})
 }
 
-func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name string) {
+func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken string) {
 	now := time.Now()
 	claims := Claims{
 		ParticipantID: participantID,
 		RoomID:        roomID,
 		Name:          name,
+		Role:          role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    jwtIssuer,
 			Subject:   participantID,
+			Audience:  jwt.ClaimStrings{roomID},
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(jwtTTL)),
 		},
@@ -446,7 +743,7 @@ func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name string)
 		return
 	}
 
-	log.Printf("token: issued legacy mesh token for participant=%s room=%s token_prefix=%s", participantID, roomID, signed[:16]+"...")
+	log.Printf("token: issued legacy mesh token for participant=%s room=%s role=%s token_prefix=%s", participantID, roomID, role, signed[:16]+"...")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
@@ -454,6 +751,9 @@ func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name string)
 		LiveKitToken:  "",
 		ParticipantID: participantID,
 		RoomID:        roomID,
+		Role:          role,
+		HostToken:     hostToken,
+		HostKey:       hostPublicKeyHex,
 		URL:           "",
 		SFUUrl:        "",
 	})
@@ -541,20 +841,176 @@ func fallbackSFUAddr() string {
 }
 
 func validateJWT(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); ok {
+			return jwtSecret, nil
 		}
-		return jwtSecret, nil
+		if _, ok := t.Method.(*jwt.SigningMethodECDSA); ok && hostPrivateKey != nil {
+			return &hostPrivateKey.PublicKey, nil
+		}
+		return nil, errors.New("unexpected signing method")
 	})
+	if err == nil && token.Valid {
+		return claims, nil
+	}
+
+	// Try LiveKit secret if configured
+	if liveKitAPISecret != "" {
+		token, err = jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return []byte(liveKitAPISecret), nil
+		})
+		if err == nil && token.Valid {
+			return claims, nil
+		}
+	}
+
+	return nil, errors.New("invalid token")
+}
+
+func handleTransferHost(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+	tokenStr := strings.TrimPrefix(auth, "Bearer ")
+
+	claims, err := validateJWT(tokenStr)
 	if err != nil {
-		return nil, err
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
 	}
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+
+	var req struct {
+		RoomID              string `json:"roomId"`
+		TargetParticipantID string `json:"targetParticipantId"`
 	}
-	return claims, nil
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if req.RoomID == "" || req.TargetParticipantID == "" {
+		http.Error(w, "roomId and targetParticipantId required", http.StatusBadRequest)
+		return
+	}
+
+	// Verify requester is host
+	if err := am.transferHost(req.RoomID, claims.ParticipantID, req.TargetParticipantID); err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	// Mint new host token for target
+	newHostToken, err := mintHostToken(req.TargetParticipantID, req.RoomID, jwtTTL)
+	if err != nil {
+		http.Error(w, "failed to mint new host token", http.StatusInternalServerError)
+		return
+	}
+
+	// Broadcast host-changed to room hub
+	broadcastPayload, _ := json.Marshal(map[string]any{
+		"action":       "host-changed",
+		"newHostId":    req.TargetParticipantID,
+		"newHostToken": newHostToken,
+		"hostKey":      hostPublicKeyHex,
+		"timestamp":    time.Now().UnixMilli(),
+	})
+	sigMsg := SignalMessage{
+		Type:          "host-changed",
+		Payload:       broadcastPayload,
+		RoomID:        req.RoomID,
+		ParticipantID: "system",
+		Timestamp:     time.Now().UnixMilli(),
+	}
+	rawMsg, _ := json.Marshal(sigMsg)
+	for _, peer := range h.peers(req.RoomID, nil) {
+		_ = peer.writeRaw(rawMsg)
+	}
+
+	log.Printf("host_transfer: room=%s transferred from %s to %s", req.RoomID, claims.ParticipantID, req.TargetParticipantID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":       "ok",
+		"roomId":       req.RoomID,
+		"hostId":       req.TargetParticipantID,
+		"newHostToken": newHostToken,
+		"hostKey":      hostPublicKeyHex,
+	})
+}
+
+func handleRoomAuthority(am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	roomID := r.URL.Query().Get("roomId")
+	if roomID == "" {
+		http.Error(w, "roomId is required", http.StatusBadRequest)
+		return
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	if !ok {
+		http.Error(w, "room not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"roomId":    auth.RoomID,
+		"hostId":    auth.HostID,
+		"locked":    auth.Locked,
+		"hostKey":   hostPublicKeyHex,
+		"timestamp": time.Now().UnixMilli(),
+	})
+}
+
+func handleRoomStatus(am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	roomID := strings.TrimSpace(r.URL.Query().Get("roomId"))
+	if roomID == "" {
+		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		if len(pathParts) >= 2 && pathParts[0] == "room" && pathParts[len(pathParts)-1] == "status" {
+			roomID = pathParts[1]
+		}
+	}
+	if roomID == "" {
+		http.Error(w, "roomId is required", http.StatusBadRequest)
+		return
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	w.Header().Set("Content-Type", "application/json")
+	if !ok {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"roomId":   roomID,
+			"exists":   false,
+			"joinable": false,
+			"locked":   false,
+		})
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]any{
+		"roomId":   auth.RoomID,
+		"exists":   true,
+		"joinable": !auth.Locked,
+		"locked":   auth.Locked,
+	})
 }
 
 func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {

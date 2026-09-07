@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { useAppStore } from '../store/appStore';
 import { ShieldBadge } from './ShieldBadge';
 import { ConnectionIndicator } from './ConnectionIndicator';
@@ -7,12 +8,16 @@ import { usePresenceStore } from '../presence/presenceStore';
 import { useCollaborationStore } from '../collaboration/collaborationStore';
 import { useDeviceStore } from '../devices/deviceStore';
 import { useHostControlStore } from '../host/hostControlStore';
+import { HostControlManager } from '../host/hostControlManager';
+import { LeaveConfirmationModal } from './LeaveConfirmationModal';
+import { InviteModal } from './InviteModal';
 
 interface ControlBarProps {
   onToggleHand?: (raised: boolean) => Promise<void> | void;
+  onLeave?: () => Promise<void> | void;
 }
 
-export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
+export function ControlBar({ onToggleHand, onLeave }: ControlBarProps = {}) {
   const {
     localParticipant,
     toggleLocalAudio,
@@ -25,11 +30,21 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
 
   const isRosterOpen = usePresenceStore((s) => s.isRosterOpen);
   const toggleRoster = usePresenceStore((s) => s.toggleRoster);
-  const participantCount = usePresenceStore((s) => s.participants.size);
+  const participantsMap = usePresenceStore((s) => s.participants);
+  const waitingQueue = useHostControlStore((s) => s.waitingQueue);
+
+  const participantCount = useMemo(() => {
+    const waitingIds = new Set(waitingQueue.map((w) => w.participantId));
+    let count = 0;
+    for (const p of participantsMap.values()) {
+      if (!waitingIds.has(p.id)) count++;
+    }
+    return count;
+  }, [participantsMap, waitingQueue]);
+
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
-  const participantsMap = usePresenceStore((s) => s.participants);
-  const isLocalHost = hostId === localParticipantId || participantsMap.get(localParticipantId || '')?.isHost;
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
 
   const permissions = useHostControlStore((s) => s.permissions);
   const setHostModalOpen = useHostControlStore((s) => s.setHostModalOpen);
@@ -48,6 +63,45 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
   const isScreenShareLocked = !permissions.canShareScreen && !isLocalHost;
   const isReactionsLocked = !permissions.canReact && !isLocalHost;
   const isChatLocked = !permissions.canChat && !isLocalHost;
+
+  const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [isInviteModalOpen, setInviteModalOpen] = useState(false);
+
+  const handleLeaveClick = () => {
+    // If host is the final participant, leave directly without modal
+    if (isLocalHost && participantCount <= 1) {
+      if (onLeave) {
+        onLeave();
+      } else {
+        leave();
+      }
+      return;
+    }
+    setLeaveModalOpen(true);
+  };
+
+  const handleConfirmLeave = async () => {
+    setLeaveModalOpen(false);
+    if (onLeave) {
+      await onLeave();
+    } else {
+      leave();
+    }
+  };
+
+  const handleTransferAndLeave = async (targetId: string) => {
+    try {
+      await HostControlManager.getInstance().transferHost(targetId);
+    } catch (err) {
+      console.error('Host transfer before leave failed:', err);
+    }
+    setLeaveModalOpen(false);
+    if (onLeave) {
+      await onLeave();
+    } else {
+      leave();
+    }
+  };
 
   const handleScreenShare = async () => {
     if (screenSharing) {
@@ -199,6 +253,17 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           Participants ({participantCount})
         </button>
 
+        <button
+          className="btn btn-secondary"
+          onClick={() => setInviteModalOpen(true)}
+          aria-label="Invite Participants"
+          title="Share meeting link and QR code"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+        >
+          <span style={{ marginRight: '4px' }}>🔗</span>
+          Invite
+        </button>
+
         {isLocalHost && (
           <button
             className="btn btn-secondary"
@@ -239,7 +304,7 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
         </button>
         <button
           className="btn btn-danger"
-          onClick={leave}
+          onClick={handleLeaveClick}
           aria-label="Leave meeting"
           disabled={!isConnected || isReconnecting}
         >
@@ -251,6 +316,21 @@ export function ControlBar({ onToggleHand }: ControlBarProps = {}) {
           Leave
         </button>
       </div>
+
+      <LeaveConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        onConfirmLeave={handleConfirmLeave}
+        onTransferAndLeave={handleTransferAndLeave}
+        isHost={isLocalHost}
+      />
+
+      <InviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        roomId={useAppStore.getState().roomId || ''}
+        keyParam={useAppStore.getState().keyParam || undefined}
+      />
     </footer>
   );
 }

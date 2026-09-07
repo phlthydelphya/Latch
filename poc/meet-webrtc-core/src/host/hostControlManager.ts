@@ -7,11 +7,15 @@ import {
   HostDirectiveMessage,
   MeetingPermissions,
 } from './types';
+import { HostTokenVerifier } from './hostTokenVerifier';
 
 export class HostControlManager {
   private static instance: HostControlManager | null = null;
   private room: Room | null = null;
   private unsubscribers: Array<() => void> = [];
+  private localHostToken: string | null = null;
+  private hostPublicKey: string | null = null;
+  private activeRoomId: string | null = null;
 
   static getInstance(): HostControlManager {
     if (!HostControlManager.instance) {
@@ -20,11 +24,35 @@ export class HostControlManager {
     return HostControlManager.instance;
   }
 
+  setSessionContext(ctx: {
+    roomId: string;
+    localParticipantId?: string;
+    hostToken?: string | null;
+    hostKey?: string | null;
+  }): void {
+    if (ctx.roomId) this.activeRoomId = ctx.roomId;
+    if (ctx.hostToken !== undefined) this.localHostToken = ctx.hostToken;
+    if (ctx.hostKey !== undefined) this.hostPublicKey = ctx.hostKey;
+  }
+
+  setLocalHostToken(token: string | null, hostKey?: string | null): void {
+    this.localHostToken = token;
+    if (hostKey) this.hostPublicKey = hostKey;
+  }
+
+  getLocalHostToken(): string | null {
+    return this.localHostToken;
+  }
+
+  getHostPublicKey(): string | null {
+    return this.hostPublicKey;
+  }
+
   attach(room: Room): void {
     this.detach();
     this.room = room;
 
-    const onDataReceived = (
+    const onDataReceived = async (
       payload: Uint8Array,
       participant?: Participant,
       _kind?: any,
@@ -35,11 +63,26 @@ export class HostControlManager {
       try {
         const text = new TextDecoder().decode(payload);
         const msg = JSON.parse(text) as HostDirectiveMessage;
-        const senderId = participant?.identity || '';
+        const senderId = participant?.identity || msg.senderId || '';
         const presence = usePresenceStore.getState();
-        const localId = presence.localParticipantId || '';
-        const isLocalHost = Boolean(presence.hostId && presence.hostId === localId);
-        const isSenderHost = Boolean(presence.hostId && presence.hostId === senderId);
+        const appState = useAppStore.getState();
+        const localId =
+          presence.localParticipantId ||
+          this.room?.localParticipant?.identity ||
+          appState.participantId ||
+          appState.localParticipant?.id ||
+          '';
+        const myIdentities = new Set<string>(
+          [
+            presence.localParticipantId,
+            this.room?.localParticipant?.identity,
+            appState.participantId,
+            appState.localParticipant?.id,
+          ].filter(Boolean) as string[]
+        );
+        const isLocalHost = Boolean(
+          presence.hostId && (presence.hostId === localId || myIdentities.has(presence.hostId))
+        );
 
         // Knock messages are sent by attendees to the host
         if (msg.action === 'waiting-room-knock') {
@@ -51,31 +94,166 @@ export class HostControlManager {
               participant?.name ||
               `Guest (${knockerId.slice(0, 6)})`;
 
-            useHostControlStore.getState().addWaitingParticipant({
-              participantId: knockerId,
-              name: knockerName,
-              timestamp: msg.timestamp || Date.now(),
-            });
+            const currentQueue = useHostControlStore.getState().waitingQueue;
+            const alreadyQueued = currentQueue.some((p) => p.participantId === knockerId);
+
+            if (!alreadyQueued) {
+              useHostControlStore.getState().addWaitingParticipant({
+                participantId: knockerId,
+                name: knockerName,
+                timestamp: msg.timestamp || Date.now(),
+              });
+
+              usePresenceStore.getState().pushToast({
+                type: 'info',
+                title: 'Waiting Room',
+                message: `${knockerName} is waiting to join`,
+                durationMs: 4000,
+              });
+            }
+          }
+          return;
+        }
+
+        // host-changed event from server or host
+        if (msg.action === 'host-changed') {
+          const newHostId = msg.newHostId || msg.targetParticipantId;
+          if (newHostId) {
+            usePresenceStore.getState().setAuthoritativeHost(newHostId);
+            if (msg.hostKey) {
+              this.hostPublicKey = msg.hostKey;
+            }
+            if (newHostId === localId && msg.newHostToken) {
+              this.setLocalHostToken(msg.newHostToken, msg.hostKey);
+            } else if (newHostId !== localId && this.localHostToken) {
+              this.localHostToken = null;
+            }
+
+            const newHostName =
+              presence.participants.get(newHostId)?.name ||
+              (newHostId === localId ? 'You' : 'Participant');
 
             usePresenceStore.getState().pushToast({
-              type: 'info',
-              title: 'Waiting Room',
-              message: `${knockerName} is waiting to join`,
+              type: 'host',
+              title: 'Host Transfer',
+              message:
+                newHostId === localId
+                  ? 'You are now the meeting host'
+                  : `${newHostName} is now the meeting host`,
               durationMs: 4000,
             });
           }
           return;
         }
 
-        // All other directives require host authority
-        if (!isSenderHost) {
-          console.warn('[HostControlManager] Unauthorized host directive rejected from:', senderId, msg.action);
+        // host-announce event: informs new joiners who the current host is without triggering a "Host Transfer" toast
+        if (msg.action === 'host-announce') {
+          const announcedHostId = msg.newHostId || msg.senderId;
+          if (announcedHostId) {
+            usePresenceStore.getState().setAuthoritativeHost(announcedHostId);
+            if (msg.hostKey) {
+              this.hostPublicKey = msg.hostKey;
+            }
+            // If currently waiting in lobby, re-knock so host receives our presence in queue
+            if (useHostControlStore.getState().isWaitingInLobby && announcedHostId !== localId) {
+              const localName = useAppStore.getState().localParticipant?.name || 'Guest';
+              this.knockWaitingRoom(localName).catch(() => {});
+            }
+          }
           return;
         }
 
+        // host-query event: newcomer asks for current host identity
+        if (msg.action === 'host-query') {
+          if (isLocalHost && localId) {
+            this.publishDirective({
+              action: 'host-announce',
+              newHostId: localId,
+              hostKey: this.hostPublicKey || undefined,
+            }).catch(() => {});
+          }
+          return;
+        }
+
+        // M4A: Cryptographic Verification of Moderation Directives
+        const activeRoomId = (this.activeRoomId || appState.roomId || this.room?.name || '').trim();
+        let isAuthorized = false;
+
+        // Auto-learn host public key if included in directive
+        if (msg.hostKey && !this.hostPublicKey) {
+          this.hostPublicKey = msg.hostKey;
+        }
+
+        const establishedHostId = usePresenceStore.getState().hostId;
+
+        // If an established host is already known, the sender MUST be that host (or local self)
+        if (establishedHostId && senderId !== establishedHostId && !myIdentities.has(senderId)) {
+          console.warn(
+            `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Does not match established host ${establishedHostId}`
+          );
+          return;
+        }
+
+        // If no established host is known yet, only admission/announcement events can establish authority
+        if (!establishedHostId) {
+          const allowedUnestablishedActions = [
+            'waiting-room-admit',
+            'waiting-room-reject',
+            'set-waiting-room',
+            'host-announce',
+          ];
+          if (!allowedUnestablishedActions.includes(msg.action)) {
+            console.warn(
+              `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: No established host in room`
+            );
+            return;
+          }
+        }
+
+        if (msg.hostToken) {
+          const verification = this.hostPublicKey
+            ? await HostTokenVerifier.verifyDirective(
+                msg,
+                activeRoomId,
+                senderId,
+                this.hostPublicKey
+              )
+            : HostTokenVerifier.verifyClaimsSync(msg, activeRoomId, senderId);
+
+          if (verification.valid) {
+            isAuthorized = true;
+            // Cryptographically proven host: establish as authoritative host if not already set
+            if (!establishedHostId) {
+              usePresenceStore.getState().setAuthoritativeHost(senderId);
+            }
+          } else {
+            console.warn(
+              `[HostControlManager] Rejected invalid hostToken directive '${msg.action}' from ${senderId}: ${verification.error}`
+            );
+            return;
+          }
+        } else {
+          // If no hostToken attached (e.g. dev/test mode without host token), check if senderId is established host
+          if (establishedHostId && (senderId === establishedHostId || myIdentities.has(senderId))) {
+            isAuthorized = true;
+          }
+        }
+
+        if (!isAuthorized) {
+          console.warn(
+            `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Not the authoritative host (current host: ${establishedHostId})`
+          );
+          return;
+        }
+
+        const isTargetLocal = (targetId?: string): boolean => {
+          if (!targetId) return false;
+          return targetId === '*' || targetId === localId || myIdentities.has(targetId);
+        };
+
         switch (msg.action) {
           case 'mute-participant': {
-            if (msg.targetParticipantId === localId) {
+            if (isTargetLocal(msg.targetParticipantId)) {
               const app = useAppStore.getState();
               if (app.localParticipant?.audioEnabled) {
                 app.toggleLocalAudio();
@@ -94,7 +272,7 @@ export class HostControlManager {
           }
 
           case 'remove-participant': {
-            if (msg.targetParticipantId === localId) {
+            if (isTargetLocal(msg.targetParticipantId)) {
               useHostControlStore.getState().setKicked(true);
               usePresenceStore.getState().pushToast({
                 type: 'info',
@@ -111,18 +289,21 @@ export class HostControlManager {
 
           case 'transfer-host': {
             if (msg.targetParticipantId) {
-              usePresenceStore.getState().setHostId(msg.targetParticipantId);
+              const isTargetLocalHost = isTargetLocal(msg.targetParticipantId);
+              usePresenceStore.getState().setAuthoritativeHost(msg.targetParticipantId);
+              if (!isTargetLocalHost && this.localHostToken) {
+                this.localHostToken = null;
+              }
               const newHostName =
                 presence.participants.get(msg.targetParticipantId)?.name ||
-                (msg.targetParticipantId === localId ? 'You' : 'Participant');
+                (isTargetLocalHost ? 'You' : 'Participant');
 
               usePresenceStore.getState().pushToast({
                 type: 'host',
                 title: 'Host Transfer',
-                message:
-                  msg.targetParticipantId === localId
-                    ? 'You are now the meeting host'
-                    : `${newHostName} is now the meeting host`,
+                message: isTargetLocalHost
+                  ? 'You are now the meeting host'
+                  : `${newHostName} is now the meeting host`,
                 durationMs: 4000,
               });
             }
@@ -144,20 +325,51 @@ export class HostControlManager {
           }
 
           case 'set-waiting-room': {
-            useHostControlStore.getState().setWaitingRoomEnabled(!!msg.isWaitingRoomEnabled);
+            const enabled = !!msg.isWaitingRoomEnabled;
+            useHostControlStore.getState().setWaitingRoomEnabled(enabled);
+            if (!enabled && useHostControlStore.getState().isWaitingInLobby) {
+              useHostControlStore.getState().setIsWaitingInLobby(false);
+              if (this.room?.localParticipant) {
+                const shouldPublishVideo = useAppStore.getState().localParticipant?.videoEnabled ?? true;
+                if (shouldPublishVideo) {
+                  this.room.localParticipant.setCameraEnabled(true).catch(() => {});
+                }
+                const shouldPublishAudio = useAppStore.getState().localParticipant?.audioEnabled ?? true;
+                if (shouldPublishAudio) {
+                  this.room.localParticipant.setMicrophoneEnabled(true).catch(() => {});
+                }
+              }
+            }
             break;
           }
 
           case 'waiting-room-admit': {
             if (msg.targetParticipantId) {
-              useHostControlStore.getState().removeWaitingParticipant(msg.targetParticipantId);
-              if (msg.targetParticipantId === localId) {
+              useHostControlStore.getState().admitParticipantId(msg.targetParticipantId);
+              if (isTargetLocal(msg.targetParticipantId)) {
+                useHostControlStore.getState().setIsWaitingInLobby(false);
                 usePresenceStore.getState().pushToast({
                   type: 'info',
                   title: 'Admitted',
                   message: 'The host admitted you to the meeting',
                   durationMs: 4000,
                 });
+
+                // Auto-publish camera and microphone now that guest is admitted
+                if (this.room?.localParticipant) {
+                  const shouldPublishVideo = useAppStore.getState().localParticipant?.videoEnabled ?? true;
+                  if (shouldPublishVideo) {
+                    this.room.localParticipant.setCameraEnabled(true).catch((e) => {
+                      console.warn('[HostControlManager] Post-admit camera enable failed:', e);
+                    });
+                  }
+                  const shouldPublishAudio = useAppStore.getState().localParticipant?.audioEnabled ?? true;
+                  if (shouldPublishAudio) {
+                    this.room.localParticipant.setMicrophoneEnabled(true).catch((e) => {
+                      console.warn('[HostControlManager] Post-admit mic enable failed:', e);
+                    });
+                  }
+                }
               }
             }
             break;
@@ -166,7 +378,8 @@ export class HostControlManager {
           case 'waiting-room-reject': {
             if (msg.targetParticipantId) {
               useHostControlStore.getState().removeWaitingParticipant(msg.targetParticipantId);
-              if (msg.targetParticipantId === localId) {
+              if (isTargetLocal(msg.targetParticipantId)) {
+                useHostControlStore.getState().setIsWaitingInLobby(false);
                 usePresenceStore.getState().pushToast({
                   type: 'info',
                   title: 'Admission Declined',
@@ -234,8 +447,21 @@ export class HostControlManager {
   private async publishDirective(directive: Omit<HostDirectiveMessage, 'type' | 'timestamp'>): Promise<void> {
     if (!this.room?.localParticipant) return;
 
+    const presence = usePresenceStore.getState();
+    const appState = useAppStore.getState();
+    const localId =
+      presence.localParticipantId ||
+      this.room.localParticipant.identity ||
+      appState.participantId ||
+      appState.localParticipant?.id ||
+      '';
+
     const msg: HostDirectiveMessage = {
       type: 'host-directive',
+      senderId: localId,
+      hostToken: this.localHostToken || undefined,
+      hostKey: this.hostPublicKey || undefined,
+      nonce: Math.random().toString(36).slice(2) + Date.now().toString(36),
       ...directive,
       timestamp: Date.now(),
     };
@@ -263,11 +489,66 @@ export class HostControlManager {
   }
 
   async transferHost(targetParticipantId: string): Promise<void> {
+    const presence = usePresenceStore.getState();
+    const localId = this.room?.localParticipant?.identity || presence.localParticipantId;
+    if (!presence.hostId || presence.hostId !== localId) {
+      throw new Error('Only the meeting host can transfer host authority');
+    }
+
+    const roomId = this.activeRoomId || useAppStore.getState().roomId || '';
+    const store = useAppStore.getState();
+    const token = this.localHostToken || store.jwt || store.livekitToken;
+
+    let newHostToken: string | undefined;
+    let hostKey: string | undefined;
+
+    // 1. Authoritative API call to meet-signal if token and roomId are available
+    if (token && roomId && typeof fetch !== 'undefined') {
+      try {
+        const res = await fetch('/room/transfer-host', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            roomId,
+            targetParticipantId,
+          }),
+        });
+
+        if (res.ok) {
+          const body = await res.json();
+          newHostToken = body.newHostToken;
+          hostKey = body.hostKey;
+          if (hostKey) this.hostPublicKey = hostKey;
+        } else if (res.status === 404) {
+          console.warn('[HostControlManager] Server transfer-host endpoint returned 404, falling back to data channel broadcast');
+        } else {
+          console.warn('[HostControlManager] Server transfer-host returned non-200:', res.status);
+          throw new Error(`Server rejected host transfer with status ${res.status}`);
+        }
+      } catch (err: any) {
+        if (err?.message?.includes('status 404')) {
+          // Fallback to data channel broadcast
+        } else {
+          console.warn('[HostControlManager] Server transfer-host request failed:', err);
+        }
+      }
+    }
+
+    // 2. Broadcast host-changed directive via DataChannel
     await this.publishDirective({
-      action: 'transfer-host',
+      action: 'host-changed',
       targetParticipantId,
+      newHostId: targetParticipantId,
+      newHostToken,
+      hostKey,
     });
-    usePresenceStore.getState().setHostId(targetParticipantId);
+
+    // 3. Demote local host state
+    this.localHostToken = null;
+    usePresenceStore.getState().setAuthoritativeHost(targetParticipantId);
   }
 
   async setRoomLocked(locked: boolean): Promise<void> {
@@ -283,6 +564,15 @@ export class HostControlManager {
       action: 'set-waiting-room',
       isWaitingRoomEnabled: enabled,
     });
+    if (!enabled) {
+      const queue = [...useHostControlStore.getState().waitingQueue];
+      for (const p of queue) {
+        await this.publishDirective({
+          action: 'waiting-room-admit',
+          targetParticipantId: p.participantId,
+        });
+      }
+    }
     useHostControlStore.getState().setWaitingRoomEnabled(enabled);
   }
 
@@ -291,7 +581,24 @@ export class HostControlManager {
       action: 'waiting-room-admit',
       targetParticipantId,
     });
-    useHostControlStore.getState().removeWaitingParticipant(targetParticipantId);
+    useHostControlStore.getState().admitParticipantId(targetParticipantId);
+
+    // Redundant retry after 150ms for guaranteed DataChannel delivery
+    setTimeout(() => {
+      this.publishDirective({
+        action: 'waiting-room-admit',
+        targetParticipantId,
+      }).catch(() => {});
+    }, 150);
+
+    const p = usePresenceStore.getState().participants.get(targetParticipantId);
+    const name = p?.name || `User (${targetParticipantId.slice(0, 6)})`;
+    usePresenceStore.getState().pushToast({
+      type: 'join',
+      title: `${name} admitted`,
+      participantId: targetParticipantId,
+      durationMs: 4000,
+    });
   }
 
   async rejectParticipant(targetParticipantId: string): Promise<void> {
@@ -312,7 +619,13 @@ export class HostControlManager {
 
   async knockWaitingRoom(name?: string): Promise<void> {
     const presence = usePresenceStore.getState();
-    const localId = presence.localParticipantId || '';
+    const appState = useAppStore.getState();
+    const localId =
+      presence.localParticipantId ||
+      this.room?.localParticipant?.identity ||
+      appState.participantId ||
+      appState.localParticipant?.id ||
+      '';
     const participantName = name || presence.participants.get(localId)?.name || 'Guest';
 
     await this.publishDirective({
@@ -320,5 +633,23 @@ export class HostControlManager {
       targetParticipantId: localId,
       participantName,
     });
+  }
+
+  async queryHost(): Promise<void> {
+    await this.publishDirective({
+      action: 'host-query',
+    });
+  }
+
+  async announceHost(newHostId?: string): Promise<void> {
+    const presence = usePresenceStore.getState();
+    const hostId = newHostId || presence.hostId || this.room?.localParticipant?.identity || '';
+    if (hostId) {
+      await this.publishDirective({
+        action: 'host-announce',
+        newHostId: hostId,
+        hostKey: this.hostPublicKey || undefined,
+      });
+    }
   }
 }

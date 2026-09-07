@@ -49,12 +49,33 @@ describe('M2 Phase E: HostControlManager', () => {
 
     mockRoom = new MockLiveKitRoom();
     manager = HostControlManager.getInstance();
+    manager.setSessionContext({
+      roomId: 'test-room',
+      localParticipantId: 'local-host',
+      hostToken: createMockHostToken('local-host'),
+    });
     manager.attach(mockRoom as any);
   });
 
   afterEach(() => {
     manager.detach();
   });
+
+  function createMockHostToken(sub: string, room: string = 'test-room'): string {
+    const header = btoa(JSON.stringify({ alg: 'ES256', typ: 'JWT' })).replace(/=/g, '');
+    const payload = btoa(
+      JSON.stringify({
+        sub,
+        room,
+        aud: room,
+        role: 'host',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      })
+    ).replace(/=/g, '');
+    const signature = btoa('mock-signature-bytes').replace(/=/g, '');
+    return `${header}.${payload}.${signature}`;
+  }
 
   function emitDirective(msg: Partial<HostDirectiveMessage>, senderId: string, senderIsHost: boolean = false) {
     if (!usePresenceStore.getState().participants.has(senderId)) {
@@ -72,10 +93,13 @@ describe('M2 Phase E: HostControlManager', () => {
       });
     }
 
+    const hostToken = senderIsHost ? (msg.hostToken || createMockHostToken(senderId)) : msg.hostToken;
+
     const payload = new TextEncoder().encode(
       JSON.stringify({
         type: 'host-directive',
         timestamp: Date.now(),
+        hostToken,
         ...msg,
       })
     );

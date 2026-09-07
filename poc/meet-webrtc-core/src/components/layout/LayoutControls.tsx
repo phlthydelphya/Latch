@@ -16,7 +16,7 @@ export function LayoutControls({ onClearSpotlight }: LayoutControlsProps) {
 
   const presence = usePresenceStore();
   const localId = presence.localParticipantId;
-  const isHost = presence.participants.get(localId || '')?.isHost || presence.hostId === localId;
+  const isHost = presence.hostId !== null && presence.hostId === localId;
 
   const pinnedName = pinnedParticipantId
     ? presence.participants.get(pinnedParticipantId)?.name || 'Participant'

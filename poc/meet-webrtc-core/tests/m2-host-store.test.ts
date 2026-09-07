@@ -10,7 +10,7 @@ describe('M2 Phase E: HostControlStore', () => {
   it('E-1: Initializes with default open policy and empty queue', () => {
     const state = useHostControlStore.getState();
     expect(state.isRoomLocked).toBe(false);
-    expect(state.isWaitingRoomEnabled).toBe(false);
+    expect(state.isWaitingRoomEnabled).toBe(true);
     expect(state.waitingQueue).toEqual([]);
     expect(state.permissions).toEqual(DEFAULT_PERMISSIONS);
     expect(state.isHostModalOpen).toBe(false);
@@ -119,7 +119,7 @@ describe('M2 Phase E: HostControlStore', () => {
 
     const state = useHostControlStore.getState();
     expect(state.isRoomLocked).toBe(false);
-    expect(state.isWaitingRoomEnabled).toBe(false);
+    expect(state.isWaitingRoomEnabled).toBe(true);
     expect(state.waitingQueue).toEqual([]);
     expect(state.permissions).toEqual(DEFAULT_PERMISSIONS);
     expect(state.isHostModalOpen).toBe(false);

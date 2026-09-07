@@ -16,8 +16,7 @@ export const WaitingRoomBanner: React.FC = () => {
 
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
-  const participants = usePresenceStore((s) => s.participants);
-  const isLocalHost = hostId === localParticipantId || participants.get(localParticipantId || '')?.isHost;
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
 
   if (!isLocalHost || waitingQueue.length === 0) return null;
 

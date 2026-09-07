@@ -222,6 +222,11 @@ export default defineConfig({
           });
         },
       },
+      '/room': {
+        target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
+        changeOrigin: true,
+        secure: false,
+      },
       '/signal': {
         target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
         changeOrigin: true,

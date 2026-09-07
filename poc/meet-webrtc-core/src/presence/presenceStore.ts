@@ -36,10 +36,13 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
       const participants = new Map(state.participants);
       const existing = participants.get(id);
 
+      const activeHostId = state.hostId ?? (participantData.isHost ? id : null);
+      const isThisParticipantHost = activeHostId !== null && activeHostId === id;
+
       const local: ParticipantPresence = {
         ...participantData,
         isLocal: true,
-        isHost: state.hostId === id || participantData.isHost || state.participants.size === 0,
+        isHost: isThisParticipantHost,
         joinedAt: existing?.joinedAt ?? Date.now(),
       };
 
@@ -47,25 +50,25 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
       return {
         participants,
         localParticipantId: id,
-        hostId: local.isHost ? id : state.hostId,
+        hostId: activeHostId,
       };
     }),
 
   upsertParticipant: (participant) =>
     set((state) => {
       const participants = new Map(state.participants);
-      const isFirstParticipant = participants.size === 0;
-      const isHost = state.hostId === participant.id || (isFirstParticipant && state.hostId === null);
+      const activeHostId = state.hostId;
+      const isThisParticipantHost = activeHostId !== null && activeHostId === participant.id;
 
       participants.set(participant.id, {
         ...participant,
-        isHost: isHost || participant.isHost,
+        isHost: isThisParticipantHost,
         isSpeaking: state.activeSpeakers.has(participant.id),
       });
 
       return {
         participants,
-        hostId: isHost ? participant.id : state.hostId,
+        hostId: activeHostId,
       };
     }),
 
@@ -113,6 +116,18 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
     }),
 
   setHostId: (hostId) =>
+    set((state) => {
+      const participants = new Map(state.participants);
+      for (const [id, p] of participants.entries()) {
+        participants.set(id, {
+          ...p,
+          isHost: id === hostId,
+        });
+      }
+      return { participants, hostId };
+    }),
+
+  setAuthoritativeHost: (hostId) =>
     set((state) => {
       const participants = new Map(state.participants);
       for (const [id, p] of participants.entries()) {

@@ -33,13 +33,13 @@ export function VideoTile({
 
   // Read Presence Domain state for this participant
   const presence = usePresenceStore((s) => s.participants.get(id));
-  const isHost = usePresenceStore((s) => s.hostId === id || presence?.isHost);
+  const isHost = usePresenceStore((s) => s.hostId !== null && s.hostId === id);
   const isHandRaised = presence?.isHandRaised;
   const connectionQuality = presence?.connectionQuality;
 
   // Local user host state for spotlight permission
   const localId = usePresenceStore((s) => s.localParticipantId);
-  const isLocalHost = usePresenceStore((s) => s.hostId === localId || s.participants.get(localId || '')?.isHost);
+  const isLocalHost = usePresenceStore((s) => s.hostId !== null && s.hostId === localId);
 
   // Read Layout state
   const isPinned = useLayoutStore((s) => s.pinnedParticipantId === id);

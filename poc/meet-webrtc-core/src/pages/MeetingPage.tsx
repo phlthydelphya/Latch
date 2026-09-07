@@ -15,6 +15,7 @@ import { HostAnnouncementBanner } from '../components/collaboration/HostAnnounce
 import { WaitingRoomBanner } from '../components/host/WaitingRoomBanner';
 import { RoomLockBadge } from '../components/host/RoomLockBadge';
 import { useHostControlStore } from '../host/hostControlStore';
+import { usePresenceStore } from '../presence/presenceStore';
 
 const DeviceSettingsModal = lazy(() => import('../components/devices/DeviceSettingsModal').then(m => ({ default: m.DeviceSettingsModal })));
 const HostControlsModal = lazy(() => import('../components/host/HostControlsModal').then(m => ({ default: m.HostControlsModal })));
@@ -49,6 +50,11 @@ export function MeetingPage() {
   const isConnected = useAppStore((s) => s.isConnected);
   const error = useAppStore((s) => s.error);
   const isKicked = useHostControlStore((s) => s.isKicked);
+  const isWaitingInLobby = useHostControlStore((s) => s.isWaitingInLobby);
+  const admittedParticipants = useHostControlStore((s) => s.admittedParticipants);
+  const hostId = usePresenceStore((s) => s.hostId);
+  const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
 
   // Extract key from hash (for E2EE key derivation)
   useEffect(() => {
@@ -57,6 +63,12 @@ export function MeetingPage() {
       console.log('[Meeting] Key param from hash:', hashKey.slice(0, 8) + '…');
     }
   }, [keyParam]);
+
+  useEffect(() => {
+    if (isLocalHost) {
+      useHostControlStore.getState().setIsWaitingInLobby(false);
+    }
+  }, [isLocalHost]);
 
   const handleLeave = async () => {
     await webrtcLeave();
@@ -95,6 +107,47 @@ export function MeetingPage() {
           style={{ padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}
         >
           Return to Home
+        </button>
+      </div>
+    );
+  }
+
+  const isAdmitted =
+    (localParticipantId && admittedParticipants.has(localParticipantId)) ||
+    admittedParticipants.has('*');
+
+  if (isWaitingInLobby && !isLocalHost && !isAdmitted) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          backgroundColor: 'var(--bg, #0a0a0f)',
+          color: 'var(--fg, #eaeaea)',
+          padding: '24px',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>⏳</div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+          Waiting for the host to let you in
+        </h2>
+        <p style={{ color: 'var(--fg-muted, #888899)', maxWidth: '440px', marginBottom: '24px', lineHeight: 1.5 }}>
+          The host has enabled a waiting room for this meeting. You will join the call automatically once admitted.
+        </p>
+        <div style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--border, #28283c)', marginBottom: '24px' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted, #888899)' }}>Meeting ID: </span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{roomId}</span>
+        </div>
+        <button
+          onClick={handleLeave}
+          className="btn btn-secondary"
+          style={{ padding: '10px 24px', borderRadius: '8px', cursor: 'pointer' }}
+        >
+          Leave Meeting
         </button>
       </div>
     );
@@ -175,7 +228,7 @@ export function MeetingPage() {
 
       <HostAnnouncementBanner />
       <ReactionsOverlay />
-      <ControlBar onToggleHand={publishHandRaise} />
+      <ControlBar onToggleHand={publishHandRaise} onLeave={handleLeave} />
       <ReactionsBar onSendReaction={publishReaction} />
       <RosterDrawer onLowerHand={lowerParticipantHand} />
       <Suspense fallback={null}>

@@ -4,7 +4,9 @@ import { MeetingPermissions, WaitingParticipant, DEFAULT_PERMISSIONS } from './t
 export interface HostControlState {
   isRoomLocked: boolean;
   isWaitingRoomEnabled: boolean;
+  isWaitingInLobby: boolean;
   waitingQueue: WaitingParticipant[];
+  admittedParticipants: Set<string>;
   permissions: MeetingPermissions;
   isHostModalOpen: boolean;
   activeTab: 'security' | 'permissions';
@@ -12,8 +14,10 @@ export interface HostControlState {
 
   setRoomLocked: (locked: boolean) => void;
   setWaitingRoomEnabled: (enabled: boolean) => void;
+  setIsWaitingInLobby: (waiting: boolean) => void;
   addWaitingParticipant: (p: WaitingParticipant) => void;
   removeWaitingParticipant: (participantId: string) => void;
+  admitParticipantId: (participantId: string) => void;
   clearWaitingQueue: () => void;
   updatePermissions: (perms: Partial<MeetingPermissions>) => void;
   setHostModalOpen: (open: boolean, tab?: 'security' | 'permissions') => void;
@@ -24,8 +28,10 @@ export interface HostControlState {
 
 const initialState = {
   isRoomLocked: false,
-  isWaitingRoomEnabled: false,
+  isWaitingRoomEnabled: true,
+  isWaitingInLobby: false,
   waitingQueue: [] as WaitingParticipant[],
+  admittedParticipants: new Set<string>(),
   permissions: { ...DEFAULT_PERMISSIONS },
   isHostModalOpen: false,
   activeTab: 'security' as 'security' | 'permissions',
@@ -38,10 +44,25 @@ export const useHostControlStore = create<HostControlState>((set) => ({
   setRoomLocked: (locked) => set({ isRoomLocked: locked }),
 
   setWaitingRoomEnabled: (enabled) =>
-    set((state) => ({
-      isWaitingRoomEnabled: enabled,
-      waitingQueue: enabled ? state.waitingQueue : [],
-    })),
+    set((state) => {
+      if (!enabled) {
+        const nextAdmitted = new Set(state.admittedParticipants);
+        for (const p of state.waitingQueue) {
+          nextAdmitted.add(p.participantId);
+        }
+        return {
+          isWaitingRoomEnabled: false,
+          isWaitingInLobby: false,
+          waitingQueue: [],
+          admittedParticipants: nextAdmitted,
+        };
+      }
+      return {
+        isWaitingRoomEnabled: true,
+      };
+    }),
+
+  setIsWaitingInLobby: (waiting) => set({ isWaitingInLobby: waiting }),
 
   addWaitingParticipant: (p) =>
     set((state) => {
@@ -55,6 +76,16 @@ export const useHostControlStore = create<HostControlState>((set) => ({
     set((state) => ({
       waitingQueue: state.waitingQueue.filter((p) => p.participantId !== participantId),
     })),
+
+  admitParticipantId: (participantId) =>
+    set((state) => {
+      const next = new Set(state.admittedParticipants);
+      next.add(participantId);
+      return {
+        admittedParticipants: next,
+        waitingQueue: state.waitingQueue.filter((p) => p.participantId !== participantId),
+      };
+    }),
 
   clearWaitingQueue: () => set({ waitingQueue: [] }),
 
@@ -79,6 +110,7 @@ export const useHostControlStore = create<HostControlState>((set) => ({
   reset: () =>
     set({
       ...initialState,
+      admittedParticipants: new Set<string>(),
       permissions: { ...DEFAULT_PERMISSIONS },
       waitingQueue: [],
     }),

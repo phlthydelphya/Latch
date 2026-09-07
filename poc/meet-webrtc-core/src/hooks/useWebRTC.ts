@@ -102,6 +102,16 @@ export function useWebRTC() {
             store.setCredentials(token, fetched.sfuUrl);
             console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
           }
+          // M4A: Pass server-signed host credentials to HostControlManager and presence
+          HostControlManager.getInstance().setSessionContext({
+            roomId: targetRoomId,
+            localParticipantId: fetched.participantId,
+            hostToken: fetched.hostToken,
+            hostKey: fetched.hostKey,
+          });
+          if (fetched.role === 'host') {
+            usePresenceStore.getState().setAuthoritativeHost(fetched.participantId);
+          }
         }
 
         if (isCancelled) return;
@@ -257,6 +267,12 @@ export function useWebRTC() {
           useAppStore.getState().setConnected(true);
           useAppStore.getState().setShieldMode(true);
 
+          // M2 Phase E / M4A: Initialize Host Control Manager for moderation directives
+          HostControlManager.getInstance().setSessionContext({
+            roomId: targetRoomId,
+          });
+          HostControlManager.getInstance().attach(room);
+
           // M2 Phase A: Initialize Presence Adapter for presence domain events
           if (!presenceAdapterRef.current) {
             presenceAdapterRef.current = new PresenceAdapter(room);
@@ -281,9 +297,6 @@ export function useWebRTC() {
           // M2 Phase D: Enumerate devices and start change listener
           DeviceManager.getInstance().enumerateAndSyncDevices();
           DeviceManager.getInstance().startDeviceChangeListener();
-
-          // M2 Phase E: Initialize Host Control Manager for moderation directives
-          HostControlManager.getInstance().attach(room);
 
           // M3B: Initialize Subscription Manager for dynamic track subscription & Last-N=9 gating
           if (!subscriptionManagerRef.current) {
@@ -841,53 +854,62 @@ export function useWebRTC() {
 
         if (isCancelled) return;
 
-        // Auto-publish camera and microphone after successful connection
-        console.log('[LiveKit] setCameraEnabled start');
-        try {
-          await room.localParticipant.setCameraEnabled(true);
-          console.log('[LiveKit] setCameraEnabled success', {
-            trackPublicationsSize: room.localParticipant.trackPublications.size,
-            isCameraEnabled: room.localParticipant.isCameraEnabled,
-          });
-          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
-        } catch (err) {
-          const e = err as Error;
-          console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
-          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            useAppStore.getState().setError('Camera access denied — grant permission and reload.');
-          } else if (e.name === 'NotFoundError') {
-            useAppStore.getState().setError('No camera device found.');
-          } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Camera busy — close other apps using camera, or open Settings to switch device.');
-          } else {
-            useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
+        // Auto-publish camera and microphone after successful connection (only if not held in lobby)
+        const isWaitingInLobby = useHostControlStore.getState().isWaitingInLobby;
+        if (!isWaitingInLobby) {
+          const shouldPublishVideo = useAppStore.getState().localParticipant?.videoEnabled ?? true;
+          if (shouldPublishVideo) {
+            console.log('[LiveKit] setCameraEnabled start');
+            try {
+              await room.localParticipant.setCameraEnabled(true);
+              console.log('[LiveKit] setCameraEnabled success', {
+                trackPublicationsSize: room.localParticipant.trackPublications.size,
+                isCameraEnabled: room.localParticipant.isCameraEnabled,
+              });
+              console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+            } catch (err) {
+              const e = err as Error;
+              console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
+              if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                useAppStore.getState().setError('Camera access denied — grant permission and reload.');
+              } else if (e.name === 'NotFoundError') {
+                useAppStore.getState().setError('No camera device found.');
+              } else if (e.name === 'NotReadableError') {
+                useAppStore.getState().setError('Camera busy — close other apps using camera, or open Settings to switch device.');
+              } else {
+                useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
+              }
+              console.warn('[LiveKit] Camera publish failed (permission/device):', e.message);
+            }
           }
-          console.warn('[LiveKit] Camera publish failed (permission/device):', e.message);
-        }
 
-        if (isCancelled) return;
+          if (isCancelled) return;
 
-        console.log('[LiveKit] setMicrophoneEnabled start');
-        try {
-          await room.localParticipant.setMicrophoneEnabled(true);
-          console.log('[LiveKit] setMicrophoneEnabled success', {
-            trackPublicationsSize: room.localParticipant.trackPublications.size,
-            isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
-          });
-          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
-        } catch (err) {
-          const e = err as Error;
-          console.error('[LiveKit] setMicrophoneEnabled failure', { name: e.name, message: e.message });
-          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            useAppStore.getState().setError('Microphone access denied — grant permission and reload.');
-          } else if (e.name === 'NotFoundError') {
-            useAppStore.getState().setError('No microphone device found.');
-          } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Microphone busy — close other apps using microphone, or open Settings to switch device.');
-          } else {
-            useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
+          const shouldPublishAudio = useAppStore.getState().localParticipant?.audioEnabled ?? true;
+          if (shouldPublishAudio) {
+            console.log('[LiveKit] setMicrophoneEnabled start');
+            try {
+              await room.localParticipant.setMicrophoneEnabled(true);
+              console.log('[LiveKit] setMicrophoneEnabled success', {
+                trackPublicationsSize: room.localParticipant.trackPublications.size,
+                isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
+              });
+              console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+            } catch (err) {
+              const e = err as Error;
+              console.error('[LiveKit] setMicrophoneEnabled failure', { name: e.name, message: e.message });
+              if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                useAppStore.getState().setError('Microphone access denied — grant permission and reload.');
+              } else if (e.name === 'NotFoundError') {
+                useAppStore.getState().setError('No microphone device found.');
+              } else if (e.name === 'NotReadableError') {
+                useAppStore.getState().setError('Microphone busy — close other apps using microphone, or open Settings to switch device.');
+              } else {
+                useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
+              }
+              console.warn('[LiveKit] Microphone publish failed (permission/device):', e.message);
+            }
           }
-          console.warn('[LiveKit] Microphone publish failed (permission/device):', e.message);
         }
 
         if (isCancelled) return;

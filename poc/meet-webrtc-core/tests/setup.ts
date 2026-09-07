@@ -108,18 +108,26 @@ Object.defineProperty(global, 'VideoFrame', {
 });
 
 // Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+const MockResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+global.ResizeObserver = MockResizeObserver;
+if (typeof window !== 'undefined') {
+  window.ResizeObserver = MockResizeObserver;
+}
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+const MockIntersectionObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+global.IntersectionObserver = MockIntersectionObserver;
+if (typeof window !== 'undefined') {
+  window.IntersectionObserver = MockIntersectionObserver;
+}
 
 // Silence console errors in tests
 const originalError = console.error;
