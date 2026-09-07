@@ -48,11 +48,17 @@ export function useMediaDevices() {
       setDevices(
         deviceList
           .filter((d): d is MediaDeviceInfoExtended => 
-            d.kind === 'audioinput' || d.kind === 'videoinput'
+            d.kind === 'audioinput' || d.kind === 'videoinput' || d.kind === 'audiooutput'
           )
           .map((d) => ({
             ...d,
-            label: d.label || `${d.kind === 'videoinput' ? 'Camera' : 'Microphone'} ${d.deviceId ? d.deviceId.slice(0, 8) : ''}`,
+            label: d.label || `${
+              d.kind === 'videoinput'
+                ? 'Camera'
+                : d.kind === 'audioinput'
+                  ? 'Microphone'
+                  : 'Speaker'
+            } ${d.deviceId ? d.deviceId.slice(0, 8) : ''}`,
           }))
       );
       setError(null);
@@ -84,5 +90,7 @@ export function useMediaDevices() {
     return navigator.mediaDevices.getUserMedia(constraints);
   }, []);
 
-  return { devices, getUserMedia, error, loading, refreshDevices };
+  const supportsSinkId = typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
+
+  return { devices, getUserMedia, error, loading, refreshDevices, supportsSinkId };
 }

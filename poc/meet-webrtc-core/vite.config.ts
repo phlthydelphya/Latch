@@ -9,7 +9,7 @@ export default defineConfig({
       jsxImportSource: 'react',
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
         name: 'meet-secure',

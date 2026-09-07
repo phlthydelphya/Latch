@@ -4,6 +4,7 @@ import { PreJoinPage } from './pages/PreJoinPage';
 import { MeetingPage } from './pages/MeetingPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
+import { ReloadPrompt } from './components/ReloadPrompt';
 import { useAppStore } from './store/appStore';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -22,6 +23,7 @@ export function App() {
       <a href="#main" className="skip-link">
         Skip to main content
       </a>
+      <ReloadPrompt />
       <LoadingScreen />
       <Routes>
         <Route path="/" element={<LandingPage />} />

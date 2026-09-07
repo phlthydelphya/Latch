@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMediaDevices } from '../hooks/useMediaDevices';
+import { useAudioMeter } from '../hooks/useAudioMeter';
 import { useAppStore } from '../store/appStore';
 import { usePresenceStore } from '../presence/presenceStore';
 import { useHostControlStore } from '../host/hostControlStore';
@@ -18,18 +19,24 @@ export function PreJoinPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { participantId, jwt, livekitToken, sfuUrl, keyParam, setRoom, setCredentials, setLocalParticipant, setError } = useAppStore();
   const existingName = useAppStore((s) => s.localParticipant?.name) || '';
-  const { devices, getUserMedia, error: deviceError, loading: deviceLoading } = useMediaDevices();
+  const { devices, getUserMedia, error: deviceError, loading: deviceLoading, supportsSinkId } = useMediaDevices();
   
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioTestRef = useRef<HTMLAudioElement | null>(null);
   const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('');
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('');
+  const [selectedSpeakerDevice, setSelectedSpeakerDevice] = useState<string>('');
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [isPlayingTestSound, setIsPlayingTestSound] = useState(false);
   const [joining, setJoining] = useState(false);
   const [displayName, setDisplayName] = useState(existingName);
   const [nameTouched, setNameTouched] = useState(false);
+
+  const audioLevel = useAudioMeter(previewStream, audioEnabled);
 
   const trimmedName = displayName.trim();
   const nameError = trimmedName.length === 0
@@ -78,6 +85,14 @@ export function PreJoinPage() {
     let activeStream: MediaStream | null = null;
 
     async function startPreview() {
+      // If user disabled both, clear active preview stream cleanly
+      if (!videoEnabled && !audioEnabled) {
+        setPreviewStream(null);
+        setCameraError(null);
+        setAudioError(null);
+        return;
+      }
+
       try {
         const stream = await getUserMedia({
           video: videoEnabled ? { deviceId: selectedVideoDevice || undefined } : false,
@@ -90,16 +105,17 @@ export function PreJoinPage() {
         activeStream = stream;
         setPreviewStream(stream);
         setCameraError(null);
+        setAudioError(null);
         setError(null);
       } catch (err) {
         if (!cancelled) {
-          console.error('Preview failed:', err);
-          // If video allocation failed (e.g. Firefox "Failed to allocate videosource"), fallback to audio-only
-          if (videoEnabled) {
+          console.warn('[PreJoin] Full media stream request failed:', err);
+          // If video was requested, try falling back to audio-only
+          if (videoEnabled && audioEnabled) {
             try {
               const audioOnlyStream = await getUserMedia({
                 video: false,
-                audio: audioEnabled ? { deviceId: selectedAudioDevice || undefined } : false,
+                audio: { deviceId: selectedAudioDevice || undefined },
               });
               if (!cancelled) {
                 activeStream = audioOnlyStream;
@@ -109,10 +125,23 @@ export function PreJoinPage() {
                 return;
               }
             } catch (audioErr) {
-              console.warn('Audio fallback also failed:', audioErr);
+              console.warn('[PreJoin] Audio fallback also failed:', audioErr);
             }
           }
-          setCameraError('Camera/microphone access denied. Please grant permissions and refresh.');
+
+          // If audio was requested, try falling back to video-only
+          if (!videoEnabled && audioEnabled) {
+            setAudioEnabled(false);
+            setAudioError('Microphone is unavailable or permission denied. Joined in listen-only mode.');
+          } else if (videoEnabled && !audioEnabled) {
+            setVideoEnabled(false);
+            setCameraError('Camera is unavailable or permission denied.');
+          } else {
+            // Both failed
+            setVideoEnabled(false);
+            setAudioEnabled(false);
+            setCameraError('Camera and microphone access denied. You can still join in listen-only mode.');
+          }
         }
       }
     }
@@ -228,6 +257,30 @@ export function PreJoinPage() {
 
   const videoDevices = devices.filter((d) => d.kind === 'videoinput');
   const audioDevices = devices.filter((d) => d.kind === 'audioinput');
+  const speakerDevices = devices.filter((d) => d.kind === 'audiooutput');
+
+  const handleTestSound = async () => {
+    try {
+      setIsPlayingTestSound(true);
+      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 440Hz chime
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+      setTimeout(() => {
+        setIsPlayingTestSound(false);
+        audioCtx.close().catch(() => {});
+      }, 500);
+    } catch {
+      setIsPlayingTestSound(false);
+    }
+  };
 
   // Preflight: room not found
   if (roomStatus.checked && !roomStatus.exists) {
@@ -342,10 +395,10 @@ export function PreJoinPage() {
             </svg>
           </button>
           
-          {videoDevices.length > 1 && (
+          {videoDevices.length > 0 ? (
             <select
-              className="input-field"
-              style={{ maxWidth: '200px' }}
+              className="input-field device-select"
+              style={{ maxWidth: '220px' }}
               value={selectedVideoDevice}
               onChange={(e) => setSelectedVideoDevice(e.target.value)}
               aria-label="Select camera"
@@ -356,6 +409,8 @@ export function PreJoinPage() {
                 </option>
               ))}
             </select>
+          ) : (
+            <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>No camera detected</span>
           )}
         </fieldset>
 
@@ -363,7 +418,7 @@ export function PreJoinPage() {
           <legend className="input-label">Microphone</legend>
           <button
             className={`media-toggle ${audioEnabled ? 'active' : 'muted'}`}
-            onClick={() => setAudioEnabled((v) => !v)}
+            onClick={() => setAudioEnabled((a) => !a)}
             aria-pressed={audioEnabled}
             aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
             disabled={audioDevices.length === 0}
@@ -375,10 +430,10 @@ export function PreJoinPage() {
             </svg>
           </button>
           
-          {audioDevices.length > 1 && (
+          {audioDevices.length > 0 ? (
             <select
-              className="input-field"
-              style={{ maxWidth: '200px' }}
+              className="input-field device-select"
+              style={{ maxWidth: '220px' }}
               value={selectedAudioDevice}
               onChange={(e) => setSelectedAudioDevice(e.target.value)}
               aria-label="Select microphone"
@@ -389,11 +444,64 @@ export function PreJoinPage() {
                 </option>
               ))}
             </select>
+          ) : (
+            <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>No microphone detected</span>
           )}
         </fieldset>
+
+        {/* Live Audio Activity Meter */}
+        <div className="audio-meter-container" aria-label="Microphone activity">
+          <div className="audio-meter-label">
+            <span>Mic Activity</span>
+            <span>{audioEnabled ? `${audioLevel}%` : 'Muted'}</span>
+          </div>
+          <div
+            className="audio-meter-bar"
+            role="progressbar"
+            aria-valuenow={audioEnabled ? audioLevel : 0}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Microphone input level"
+          >
+            <div
+              className="audio-meter-fill"
+              style={{ width: `${audioEnabled ? audioLevel : 0}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Speaker / Audio Output Selection (when supported) */}
+        {supportsSinkId && speakerDevices.length > 0 && (
+          <fieldset className="preview-controls__row">
+            <legend className="input-label">Speaker / Output</legend>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
+              onClick={handleTestSound}
+              disabled={isPlayingTestSound}
+              aria-label="Test speaker sound"
+            >
+              {isPlayingTestSound ? 'Playing…' : '🔊 Test Sound'}
+            </button>
+            <select
+              className="input-field device-select"
+              style={{ maxWidth: '220px' }}
+              value={selectedSpeakerDevice}
+              onChange={(e) => setSelectedSpeakerDevice(e.target.value)}
+              aria-label="Select speaker"
+            >
+              {speakerDevices.map((d) => (
+                <option key={d.deviceId} value={d.deviceId}>
+                  {d.label || `Speaker ${speakerDevices.indexOf(d) + 1}`}
+                </option>
+              ))}
+            </select>
+          </fieldset>
+        )}
       </div>
 
-      {(cameraError || deviceError) && (
+      {(cameraError || audioError || deviceError) && (
         <div
           role="alert"
           style={{
@@ -408,22 +516,40 @@ export function PreJoinPage() {
             flexDirection: 'column',
             gap: '0.5rem',
             alignItems: 'center',
+            width: '100%',
+            maxWidth: '360px',
+            margin: '0 auto',
           }}
         >
-          <span>{cameraError || deviceError}</span>
-          {cameraError && !videoEnabled && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
-              onClick={() => {
-                setCameraError(null);
-                setVideoEnabled(true);
-              }}
-            >
-              Retry Camera
-            </button>
-          )}
+          <span>{cameraError || audioError || deviceError}</span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {cameraError && !videoEnabled && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                onClick={() => {
+                  setCameraError(null);
+                  setVideoEnabled(true);
+                }}
+              >
+                Retry Camera
+              </button>
+            )}
+            {audioError && !audioEnabled && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                onClick={() => {
+                  setAudioError(null);
+                  setAudioEnabled(true);
+                }}
+              >
+                Retry Microphone
+              </button>
+            )}
+          </div>
         </div>
       )}
 
