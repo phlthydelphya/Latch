@@ -151,12 +151,26 @@ export function PreJoinPage() {
     setJoining(true);
 
     try {
-      let activeParticipantId = participantId;
-      let activeKeyParam = keyParam;
+      const storedRoomId = useAppStore.getState().roomId;
+      const credentialsMatchRoute =
+        Boolean(participantId) &&
+        Boolean(jwt) &&
+        storedRoomId === roomId;
 
-      if (!activeParticipantId || !jwt) {
+      let activeParticipantId = credentialsMatchRoute ? participantId : null;
+      let activeKeyParam = credentialsMatchRoute ? keyParam : null;
+
+      console.log(`[PREJOIN] routeRoomMatchesStore=${credentialsMatchRoute} fragmentPresent=${Boolean(window.location.hash.slice(1).replace(/^k=/, ''))}`);
+
+      if (!credentialsMatchRoute) {
+        console.log('[JOIN REQUEST] credentialReuse=false');
         const hashKey = window.location.hash.slice(1).replace(/^k=/, '');
-        activeKeyParam = hashKey || generateKeyParam();
+        if (!hashKey) {
+          setError('Unable to join securely. This invitation is missing its encryption key. Ask the host for a new invitation.');
+          setJoining(false);
+          return;
+        }
+        activeKeyParam = hashKey;
         const res = await fetchToken(roomId!, trimmed);
         activeParticipantId = res.participantId;
         setRoom(roomId!, res.participantId, res.token, activeKeyParam);
@@ -178,6 +192,8 @@ export function PreJoinPage() {
             useHostControlStore.getState().setIsWaitingInLobby(true);
           }
         }
+      } else {
+        console.log('[JOIN REQUEST] credentialReuse=true');
       }
 
       // Create local participant object

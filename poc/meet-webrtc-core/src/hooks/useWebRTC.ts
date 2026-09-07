@@ -100,7 +100,7 @@ export function useWebRTC() {
           // Persist credentials for session reloads / evidence
           if (token && fetched.sfuUrl) {
             store.setCredentials(token, fetched.sfuUrl);
-            console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
+            console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPresent: true });
           }
           // M4A: Pass server-signed host credentials to HostControlManager and presence
           HostControlManager.getInstance().setSessionContext({
@@ -827,8 +827,8 @@ export function useWebRTC() {
           }
         }
 
-        // Connect to LiveKit room — instrumented
-        console.log('[LiveKit] Room.connect start', { sfuUrl: resolvedSfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
+        // Connect to LiveKit room — safe instrumented diagnostic
+        console.log(`[LIVEKIT CONNECT] targetRoomMatchesToken=${Boolean(token && targetRoomId)}`);
         try {
           await room.connect(resolvedSfuUrl, token, {
             autoSubscribe: true,

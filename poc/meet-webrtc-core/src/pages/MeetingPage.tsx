@@ -60,7 +60,7 @@ export function MeetingPage() {
   useEffect(() => {
     const hashKey = window.location.hash.slice(1).replace('k=', '');
     if (hashKey && hashKey !== keyParam) {
-      console.log('[Meeting] Key param from hash:', hashKey.slice(0, 8) + '…');
+      console.log('[Meeting] Key param present in hash, differs from store');
     }
   }, [keyParam]);
 

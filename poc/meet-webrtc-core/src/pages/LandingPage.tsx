@@ -5,7 +5,7 @@ import { usePresenceStore } from '../presence/presenceStore';
 import { useHostControlStore } from '../host/hostControlStore';
 import { HostControlManager } from '../host/hostControlManager';
 import { createRoom } from '../auth/token';
-import { parseMeetingInput, formatMeetingUrl, formatInvitationText } from '../utils/roomUrl';
+import { parseMeetingInput, formatMeetingUrl, formatMeetingPath, formatInvitationText } from '../utils/roomUrl';
 import { InviteModal } from '../components/InviteModal';
 
 // ─── Meeting Ready Card ───────────────────────────────────────────────────────
@@ -236,8 +236,12 @@ export function LandingPage() {
   };
 
   const handleStartMeeting = () => {
-    if (!readyRoomId) return;
-    navigate(`/r/${readyRoomId}`, { replace: true });
+    if (!readyRoomId || !readyKeyParam) {
+      setError('Meeting encryption key is unavailable.');
+      return;
+    }
+    console.log(`[ROOM CREATE] roomId=${readyRoomId} keyPresent=true`);
+    navigate(formatMeetingPath(readyRoomId, readyKeyParam), { replace: true });
   };
 
   // ── Join flow ────────────────────────────────────────────────────────────

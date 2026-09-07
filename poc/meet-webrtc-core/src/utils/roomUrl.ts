@@ -117,6 +117,15 @@ export function formatMeetingUrl(roomId: string, keyParam?: string): string {
 }
 
 /**
+ * Formats a canonical local meeting path for internal React Router navigation.
+ */
+export function formatMeetingPath(roomId: string, keyParam?: string): string {
+  const cleanRoom = roomId.trim().toLowerCase();
+  const hash = keyParam ? `#k=${keyParam}` : '';
+  return `/r/${cleanRoom}${hash}`;
+}
+
+/**
  * Formats full human-readable invitation text (INV-02).
  */
 export function formatInvitationText(
