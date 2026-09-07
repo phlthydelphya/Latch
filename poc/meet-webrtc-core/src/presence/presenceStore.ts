@@ -13,9 +13,33 @@ import {
   PresenceState,
   PresenceActions,
   ParticipantPresence,
+  TrackMediaState,
   ConnectionQualityRating,
   EphemeralToast,
 } from './types';
+
+/**
+ * Derives the canonical boolean fields from the three-value TrackMediaState.
+ * audioEnabled = true iff microphoneState === 'on'
+ * videoEnabled = true iff cameraState === 'on'
+ */
+function deriveMediaBooleans(
+  microphoneState: TrackMediaState,
+  cameraState: TrackMediaState
+): { audioEnabled: boolean; videoEnabled: boolean } {
+  return {
+    audioEnabled: microphoneState === 'on',
+    videoEnabled: cameraState === 'on',
+  };
+}
+
+/**
+ * Maps legacy boolean pair (from pre-M4A-MEDIA callers) to a TrackMediaState.
+ * "enabled" → 'on', "disabled" → 'muted' (conservative: publication assumed to exist).
+ */
+function boolToTrackState(enabled: boolean): TrackMediaState {
+  return enabled ? 'on' : 'muted';
+}
 
 const initialState: PresenceState = {
   participants: new Map(),
@@ -39,10 +63,19 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
       const activeHostId = state.hostId ?? (participantData.isHost ? id : null);
       const isThisParticipantHost = activeHostId !== null && activeHostId === id;
 
+      // Ensure canonical three-value state is set; fall back from legacy booleans if not provided
+      const microphoneState: TrackMediaState =
+        participantData.microphoneState ?? boolToTrackState(participantData.audioEnabled);
+      const cameraState: TrackMediaState =
+        participantData.cameraState ?? boolToTrackState(participantData.videoEnabled);
+
       const local: ParticipantPresence = {
         ...participantData,
         isLocal: true,
         isHost: isThisParticipantHost,
+        microphoneState,
+        cameraState,
+        ...deriveMediaBooleans(microphoneState, cameraState),
         joinedAt: existing?.joinedAt ?? Date.now(),
       };
 
@@ -60,10 +93,18 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
       const activeHostId = state.hostId;
       const isThisParticipantHost = activeHostId !== null && activeHostId === participant.id;
 
+      const microphoneState: TrackMediaState =
+        participant.microphoneState ?? boolToTrackState(participant.audioEnabled);
+      const cameraState: TrackMediaState =
+        participant.cameraState ?? boolToTrackState(participant.videoEnabled);
+
       participants.set(participant.id, {
         ...participant,
         isHost: isThisParticipantHost,
         isSpeaking: state.activeSpeakers.has(participant.id),
+        microphoneState,
+        cameraState,
+        ...deriveMediaBooleans(microphoneState, cameraState),
       });
 
       return {
@@ -101,7 +142,38 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
       };
     }),
 
+  /**
+   * M4A-MEDIA: Updates canonical three-value microphoneState and/or cameraState,
+   * then derives the boolean audioEnabled/videoEnabled from the canonical state.
+   * Called by TrackMuted, TrackUnmuted events (mute/unmute — publication still exists).
+   */
   updateParticipantTracks: (participantId, updates) =>
+    set((state) => {
+      const participants = new Map(state.participants);
+      const existing = participants.get(participantId);
+      if (!existing) return state;
+
+      const microphoneState = updates.microphoneState ?? existing.microphoneState;
+      const cameraState = updates.cameraState ?? existing.cameraState;
+
+      participants.set(participantId, {
+        ...existing,
+        ...updates,
+        microphoneState,
+        cameraState,
+        ...deriveMediaBooleans(microphoneState, cameraState),
+        // screenSharing updated directly if provided
+        ...(updates.screenSharing !== undefined ? { screenSharing: updates.screenSharing } : {}),
+      });
+
+      return { participants };
+    }),
+
+  /**
+   * M4A-MEDIA: Sets the full canonical media state for a participant.
+   * Called by TrackPublished/TrackUnpublished events to reflect publication lifecycle.
+   */
+  setParticipantMediaState: (participantId, microphoneState, cameraState) =>
     set((state) => {
       const participants = new Map(state.participants);
       const existing = participants.get(participantId);
@@ -109,7 +181,9 @@ export const usePresenceStore = create<PresenceState & PresenceActions>((set, ge
 
       participants.set(participantId, {
         ...existing,
-        ...updates,
+        microphoneState,
+        cameraState,
+        ...deriveMediaBooleans(microphoneState, cameraState),
       });
 
       return { participants };

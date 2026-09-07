@@ -10,7 +10,7 @@
  * 3. Standardized quality metrics through ConnectionQualityAggregator.
  */
 
-import { Room, RoomEvent, Participant, ConnectionQuality as LKConnectionQuality } from 'livekit-client';
+import { Room, RoomEvent, Participant, ConnectionQuality as LKConnectionQuality, TrackPublication, Track } from 'livekit-client';
 import { usePresenceStore } from './presenceStore';
 import { ConnectionQualityRating } from './types';
 import { HOST_CONTROL_TOPIC } from '../host/types';
@@ -54,6 +54,8 @@ export class PresenceAdapter {
       store.setLocalParticipant({
         id: room.localParticipant.identity,
         name: room.localParticipant.name || `User (${room.localParticipant.identity.slice(0, 6)})`,
+        microphoneState: this.deriveMicState(room.localParticipant),
+        cameraState: this.deriveCamState(room.localParticipant),
         audioEnabled: room.localParticipant.isMicrophoneEnabled,
         videoEnabled: room.localParticipant.isCameraEnabled,
         screenSharing: room.localParticipant.isScreenShareEnabled,
@@ -83,6 +85,8 @@ export class PresenceAdapter {
         id: remote.identity,
         name: remote.name || `User (${remote.identity.slice(0, 6)})`,
         isLocal: false,
+        microphoneState: this.deriveMicState(remote),
+        cameraState: this.deriveCamState(remote),
         audioEnabled: remote.isMicrophoneEnabled,
         videoEnabled: remote.isCameraEnabled,
         screenSharing: remote.isScreenShareEnabled,
@@ -155,6 +159,8 @@ export class PresenceAdapter {
         id: participant.identity,
         name,
         isLocal: false,
+        microphoneState: this.deriveMicState(participant),
+        cameraState: this.deriveCamState(participant),
         audioEnabled: participant.isMicrophoneEnabled,
         videoEnabled: participant.isCameraEnabled,
         screenSharing: participant.isScreenShareEnabled,
@@ -235,20 +241,52 @@ export class PresenceAdapter {
       store.setConnectionQuality(participant.identity, rating);
     };
 
-    const onTrackMuted = (pub: any, participant: Participant) => {
-      if (pub.kind === 'audio') {
-        store.updateParticipantTracks(participant.identity, { audioEnabled: false });
-      } else if (pub.kind === 'video') {
-        store.updateParticipantTracks(participant.identity, { videoEnabled: false });
+    const onTrackMuted = (pub: TrackPublication, participant: Participant) => {
+      // Publication still exists — state is 'muted' (not 'unavailable')
+      if (pub.kind === Track.Kind.Audio) {
+        store.updateParticipantTracks(participant.identity, { microphoneState: 'muted' });
+      } else if (pub.kind === Track.Kind.Video && pub.source !== Track.Source.ScreenShare) {
+        store.updateParticipantTracks(participant.identity, { cameraState: 'muted' });
       }
     };
 
-    const onTrackUnmuted = (pub: any, participant: Participant) => {
-      if (pub.kind === 'audio') {
-        store.updateParticipantTracks(participant.identity, { audioEnabled: true });
-      } else if (pub.kind === 'video') {
-        store.updateParticipantTracks(participant.identity, { videoEnabled: true });
+    const onTrackUnmuted = (pub: TrackPublication, participant: Participant) => {
+      // Publication exists and is now active — state is 'on'
+      if (pub.kind === Track.Kind.Audio) {
+        store.updateParticipantTracks(participant.identity, { microphoneState: 'on' });
+      } else if (pub.kind === Track.Kind.Video && pub.source !== Track.Source.ScreenShare) {
+        store.updateParticipantTracks(participant.identity, { cameraState: 'on' });
       }
+    };
+
+    /**
+     * M4A-MEDIA: TrackPublished — re-derive full canonical state from the participant.
+     * A newly published audio track that is not muted → microphone 'on'.
+     * A newly published video (non-screenshare) that is not muted → camera 'on'.
+     */
+    const onTrackPublished = (pub: TrackPublication, participant: Participant) => {
+      if (pub.source === Track.Source.ScreenShare) {
+        store.updateParticipantTracks(participant.identity, { screenSharing: true });
+        return;
+      }
+      // Recompute full state from all publications
+      const micState = this.deriveMicState(participant);
+      const camState = this.deriveCamState(participant);
+      store.setParticipantMediaState(participant.identity, micState, camState);
+    };
+
+    /**
+     * M4A-MEDIA: TrackUnpublished — track is gone entirely → state becomes 'unavailable'.
+     * This is distinct from muting, where the publication still exists.
+     */
+    const onTrackUnpublished = (pub: TrackPublication, participant: Participant) => {
+      if (pub.source === Track.Source.ScreenShare) {
+        store.updateParticipantTracks(participant.identity, { screenSharing: false });
+        return;
+      }
+      const micState = this.deriveMicState(participant);
+      const camState = this.deriveCamState(participant);
+      store.setParticipantMediaState(participant.identity, micState, camState);
     };
 
     const onDataReceived = (payload: Uint8Array, participant?: Participant, _kind?: any, topic?: string) => {
@@ -300,6 +338,8 @@ export class PresenceAdapter {
     room.on(RoomEvent.ConnectionQualityChanged, onConnectionQualityChanged);
     room.on(RoomEvent.TrackMuted, onTrackMuted);
     room.on(RoomEvent.TrackUnmuted, onTrackUnmuted);
+    room.on(RoomEvent.TrackPublished, onTrackPublished);
+    room.on(RoomEvent.TrackUnpublished, onTrackUnpublished);
     room.on(RoomEvent.DataReceived, onDataReceived);
 
     this.unsubscribers.push(() => {
@@ -309,6 +349,8 @@ export class PresenceAdapter {
       room.off(RoomEvent.ConnectionQualityChanged, onConnectionQualityChanged);
       room.off(RoomEvent.TrackMuted, onTrackMuted);
       room.off(RoomEvent.TrackUnmuted, onTrackUnmuted);
+      room.off(RoomEvent.TrackPublished, onTrackPublished);
+      room.off(RoomEvent.TrackUnpublished, onTrackUnpublished);
       room.off(RoomEvent.DataReceived, onDataReceived);
     });
   }
@@ -351,6 +393,44 @@ export class PresenceAdapter {
       reliable: true,
       topic: HAND_RAISE_TOPIC,
     });
+  }
+
+  /**
+   * M4A-MEDIA: Derives the canonical microphone TrackMediaState from a LiveKit participant.
+   * - No audio publication → 'unavailable'
+   * - Audio publication muted → 'muted'
+   * - Audio publication active → 'on'
+   */
+  private deriveMicState(participant: Participant): import('./types').TrackMediaState {
+    if (typeof participant.getTrackPublication === 'function') {
+      const audioPub = participant.getTrackPublication(Track.Source.Microphone);
+      if (!audioPub) return 'unavailable';
+      return audioPub.isMuted ? 'muted' : 'on';
+    }
+    // Fallback for mock participants or simplified objects
+    if ('isMicrophoneEnabled' in participant) {
+      return participant.isMicrophoneEnabled ? 'on' : 'muted';
+    }
+    return 'unavailable';
+  }
+
+  /**
+   * M4A-MEDIA: Derives the canonical camera TrackMediaState from a LiveKit participant.
+   * - No video publication (camera source) → 'unavailable'
+   * - Video publication muted/disabled → 'muted'
+   * - Video publication active → 'on'
+   */
+  private deriveCamState(participant: Participant): import('./types').TrackMediaState {
+    if (typeof participant.getTrackPublication === 'function') {
+      const videoPub = participant.getTrackPublication(Track.Source.Camera);
+      if (!videoPub) return 'unavailable';
+      return videoPub.isMuted ? 'muted' : 'on';
+    }
+    // Fallback for mock participants or simplified objects
+    if ('isCameraEnabled' in participant) {
+      return participant.isCameraEnabled ? 'on' : 'muted';
+    }
+    return 'unavailable';
   }
 
   private mapLKQuality(quality?: LKConnectionQuality): ConnectionQualityRating {

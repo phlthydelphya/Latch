@@ -7,11 +7,26 @@
 
 export type ConnectionQualityRating = 'excellent' | 'good' | 'fair' | 'poor' | 'disconnected';
 
+/**
+ * Canonical three-value media state (M4A-MEDIA fix).
+ * Distinguishes between:
+ *   'on'          — publication exists and is NOT muted
+ *   'muted'       — publication exists but IS muted (audio) or disabled (video)
+ *   'unavailable' — no publication exists (device not shared / track unpublished)
+ */
+export type TrackMediaState = 'on' | 'muted' | 'unavailable';
+
 export interface ParticipantPresence {
   id: string;
   name: string;
   isLocal: boolean;
+  /** Canonical three-value microphone state. Drives audioEnabled. */
+  microphoneState: TrackMediaState;
+  /** Canonical three-value camera state. Drives videoEnabled. */
+  cameraState: TrackMediaState;
+  /** Derived: true iff microphoneState === 'on' */
   audioEnabled: boolean;
+  /** Derived: true iff cameraState === 'on' */
   videoEnabled: boolean;
   screenSharing: boolean;
   isSpeaking: boolean;
@@ -60,7 +75,9 @@ export interface PresenceActions {
   setLocalParticipant: (participant: Omit<ParticipantPresence, 'isLocal'>) => void;
   upsertParticipant: (participant: ParticipantPresence) => void;
   removeParticipant: (participantId: string) => void;
-  updateParticipantTracks: (participantId: string, updates: Partial<Pick<ParticipantPresence, 'audioEnabled' | 'videoEnabled' | 'screenSharing'>>) => void;
+  updateParticipantTracks: (participantId: string, updates: Partial<Pick<ParticipantPresence, 'microphoneState' | 'cameraState' | 'screenSharing'>>) => void;
+  /** Set the canonical three-value media state for a participant (called by TrackPublished/Unpublished). */
+  setParticipantMediaState: (participantId: string, microphoneState: TrackMediaState, cameraState: TrackMediaState) => void;
   
   setHostId: (hostId: string | null) => void;
   setAuthoritativeHost: (hostId: string | null) => void;

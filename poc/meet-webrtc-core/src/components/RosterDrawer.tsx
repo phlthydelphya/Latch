@@ -421,22 +421,50 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   <SpeakingIndicator isSpeaking={p.isSpeaking} size="sm" />
 
-                  {/* Mic Icon */}
+                  {/* Mic Icon — three-state: on | muted | unavailable */}
                   <span
-                    title={p.audioEnabled ? 'Microphone on' : 'Microphone muted'}
-                    aria-label={p.audioEnabled ? 'Microphone on' : 'Microphone muted'}
-                    style={{ fontSize: '0.8rem', color: p.audioEnabled ? 'var(--fg, #eaeaea)' : 'var(--danger, #ff4757)' }}
+                    title={
+                      p.microphoneState === 'on' ? 'Microphone on'
+                      : p.microphoneState === 'muted' ? 'Microphone muted'
+                      : 'Microphone unavailable'
+                    }
+                    aria-label={
+                      p.microphoneState === 'on' ? 'Microphone on'
+                      : p.microphoneState === 'muted' ? 'Microphone muted'
+                      : 'Microphone unavailable'
+                    }
+                    style={{
+                      fontSize: '0.8rem',
+                      color: p.microphoneState === 'on'
+                        ? 'var(--fg, #eaeaea)'
+                        : p.microphoneState === 'muted'
+                          ? 'var(--danger, #ff4757)'
+                          : 'var(--fg-muted, #888899)',
+                    }}
                   >
-                    {p.audioEnabled ? '🎤' : '🔇'}
+                    {p.microphoneState === 'on' ? '🎤' : p.microphoneState === 'muted' ? '🔇' : '🎙️'}
                   </span>
 
-                  {/* Camera Icon */}
+                  {/* Camera Icon — three-state: on | muted | unavailable */}
                   <span
-                    title={p.videoEnabled ? 'Camera on' : 'Camera off'}
-                    aria-label={p.videoEnabled ? 'Camera on' : 'Camera off'}
-                    style={{ fontSize: '0.8rem', color: p.videoEnabled ? 'var(--fg, #eaeaea)' : 'var(--fg-muted, #888899)' }}
+                    title={
+                      p.cameraState === 'on' ? 'Camera on'
+                      : p.cameraState === 'muted' ? 'Camera off'
+                      : 'Camera unavailable'
+                    }
+                    aria-label={
+                      p.cameraState === 'on' ? 'Camera on'
+                      : p.cameraState === 'muted' ? 'Camera off'
+                      : 'Camera unavailable'
+                    }
+                    style={{
+                      fontSize: '0.8rem',
+                      color: p.cameraState === 'on'
+                        ? 'var(--fg, #eaeaea)'
+                        : 'var(--fg-muted, #888899)',
+                    }}
                   >
-                    {p.videoEnabled ? '📹' : '🚫'}
+                    {p.cameraState === 'on' ? '📹' : p.cameraState === 'muted' ? '🚫' : '📷'}
                   </span>
 
                   {/* Connection Quality */}
