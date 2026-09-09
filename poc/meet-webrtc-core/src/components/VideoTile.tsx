@@ -1,4 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { usePresenceStore } from '../presence/presenceStore';
+import { useLayoutStore } from '../layout/layoutStore';
+import { ConnectionBadge } from './ConnectionBadge';
 
 interface VideoTileProps {
   id: string;
@@ -9,6 +12,8 @@ interface VideoTileProps {
   videoEnabled: boolean;
   audioEnabled: boolean;
   speaking: boolean;
+  onPin?: (id: string) => void;
+  onSpotlight?: (id: string) => void;
 }
 
 export function VideoTile({
@@ -20,8 +25,26 @@ export function VideoTile({
   videoEnabled,
   audioEnabled,
   speaking,
+  onPin,
+  onSpotlight,
 }: VideoTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Read Presence Domain state for this participant
+  const presence = usePresenceStore((s) => s.participants.get(id));
+  const isHost = usePresenceStore((s) => s.hostId !== null && s.hostId === id);
+  const isHandRaised = presence?.isHandRaised;
+  const connectionQuality = presence?.connectionQuality;
+
+  // Local user host state for spotlight permission
+  const localId = usePresenceStore((s) => s.localParticipantId);
+  const isLocalHost = usePresenceStore((s) => s.hostId !== null && s.hostId === localId);
+
+  // Read Layout state
+  const isPinned = useLayoutStore((s) => s.pinnedParticipantId === id);
+  const isSpotlighted = useLayoutStore((s) => s.spotlightParticipantId === id);
+  const pinParticipant = useLayoutStore((s) => s.pinParticipant);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -42,6 +65,18 @@ export function VideoTile({
       data-participant-id={id}
       role="group"
       aria-label={name}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        boxShadow: speaking
+          ? '0 0 0 2px var(--accent, #00d4aa), 0 0 16px rgba(0, 212, 170, 0.3)'
+          : isSpotlighted
+          ? '0 0 0 2px #eab308, 0 0 12px rgba(234, 179, 8, 0.4)'
+          : isPinned
+          ? '0 0 0 2px #3b82f6, 0 0 12px rgba(59, 130, 246, 0.4)'
+          : undefined,
+        transition: 'box-shadow 150ms ease',
+      }}
     >
       <video
         ref={videoRef}
@@ -69,7 +104,126 @@ export function VideoTile({
         </div>
       )}
 
-      <div className="video-tile__label">{name}{isLocal && ' (you)'}</div>
+      {/* Badges in Top Left */}
+      <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '4px', zIndex: 2, flexWrap: 'wrap' }}>
+        {isHost && (
+          <span
+            style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.85)',
+              color: '#000',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            👑 Host
+          </span>
+        )}
+        {isHandRaised && (
+          <span
+            style={{
+              backgroundColor: 'rgba(255, 165, 2, 0.9)',
+              color: '#000',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              animation: 'bounceHand 1s infinite alternate',
+            }}
+          >
+            ✋ Raised
+          </span>
+        )}
+        {isPinned && (
+          <span
+            style={{
+              backgroundColor: 'rgba(59, 130, 246, 0.9)',
+              color: '#fff',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            📌 Pinned
+          </span>
+        )}
+        {isSpotlighted && (
+          <span
+            style={{
+              backgroundColor: 'rgba(234, 179, 8, 0.9)',
+              color: '#000',
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            ⭐ Spotlight
+          </span>
+        )}
+      </div>
+
+      {/* Action buttons on Hover in Top Right */}
+      {(isHovered || isPinned || isSpotlighted) && (
+        <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '4px', zIndex: 3 }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onPin) onPin(id);
+              else pinParticipant(id);
+            }}
+            title={isPinned ? 'Unpin' : 'Pin to stage'}
+            aria-label={isPinned ? 'Unpin participant' : 'Pin participant'}
+            style={{
+              background: isPinned ? 'rgba(59, 130, 246, 0.9)' : 'rgba(0, 0, 0, 0.65)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '4px 6px',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            📌
+          </button>
+
+          {isLocalHost && onSpotlight && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSpotlight(isSpotlighted ? '' : id);
+              }}
+              title={isSpotlighted ? 'Remove Spotlight' : 'Spotlight for all'}
+              aria-label={isSpotlighted ? 'Remove spotlight' : 'Spotlight participant for all'}
+              style={{
+                background: isSpotlighted ? 'rgba(234, 179, 8, 0.9)' : 'rgba(0, 0, 0, 0.65)',
+                color: isSpotlighted ? '#000' : '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '4px 6px',
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              ⭐
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Participant Label & Connection in Bottom Left */}
+      <div className="video-tile__label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <span>{name}{isLocal && ' (you)'}</span>
+        {connectionQuality && <ConnectionBadge quality={connectionQuality} />}
+      </div>
 
       <div className="video-tile__indicators">
         {speaking && !isLocal && (
@@ -86,6 +240,13 @@ export function VideoTile({
           </svg>
         )}
       </div>
+
+      <style>{`
+        @keyframes bounceHand {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-3px); }
+        }
+      `}</style>
     </div>
   );
 }

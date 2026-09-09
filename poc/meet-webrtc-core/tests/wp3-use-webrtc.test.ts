@@ -140,6 +140,9 @@ const { MockRoom, mockRoomInstances } = vi.hoisted(() => {
 vi.mock('livekit-client', () => {
   return {
     Room: MockRoom,
+    ParticipantEvent: {
+      LocalSenderCreated: 'localSenderCreated',
+    },
     RoomEvent: {
       Connected: 'connected',
       Disconnected: 'disconnected',
@@ -168,6 +171,17 @@ vi.mock('livekit-client', () => {
         Audio: 'audio',
         Video: 'video',
       },
+    },
+    VideoQuality: {
+      LOW: 0,
+      MEDIUM: 1,
+      HIGH: 2,
+      OFF: 3,
+    },
+    VideoPresets: {
+      h180: { width: 320, height: 180, encoding: { maxBitrate: 160000, maxFramerate: 15 } },
+      h360: { width: 640, height: 360, encoding: { maxBitrate: 450000, maxFramerate: 30 } },
+      h720: { width: 1280, height: 720, encoding: { maxBitrate: 1500000, maxFramerate: 30 } },
     },
   };
 });
@@ -323,6 +337,59 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
 
     expect(mockReceiver.createEncodedStreams).toHaveBeenCalled();
     expect((mockReceiver as any)._sframeTransformer).toBe(sframe);
+
+    unmount();
+  });
+
+  it('LocalSenderCreated installs SFrame transform early and avoids redundant installation on LocalTrackPublished', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const room = mockRoomInstances[mockRoomInstances.length - 1];
+    const sframe = getGlobalSFrame()!;
+
+    const mockSenderStream = {
+      readable: { pipeThrough: vi.fn().mockReturnThis() },
+      writable: {},
+    };
+    (mockSenderStream.readable.pipeThrough as any).mockReturnValue({
+      pipeTo: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const mockSender = {
+      createEncodedStreams: vi.fn().mockReturnValue(mockSenderStream),
+    };
+
+    const mockTrack = {
+      kind: 'video',
+      sender: mockSender,
+    };
+
+    // 1. LocalSenderCreated fires synchronously when sender is created
+    await act(async () => {
+      room.localParticipant.emit('localSenderCreated', mockSender, mockTrack);
+    });
+
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
+    expect((mockSender as any)._sframeTransformer).toBe(sframe);
+
+    // 2. LocalTrackPublished fires later after negotiation
+    const pub = {
+      trackSid: 'TR_video_early_1',
+      kind: 'video',
+      source: 'camera',
+      track: mockTrack,
+    };
+
+    await act(async () => {
+      room.emit('localTrackPublished', pub, room.localParticipant);
+    });
+
+    // Should NOT call createEncodedStreams a second time
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
 
     unmount();
   });

@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
-import { VideoTile } from './VideoTile';
-import { useAppStore } from '../store/appStore';
+import { useLayoutStore } from '../layout/layoutStore';
+import { usePresenceStore } from '../presence/presenceStore';
+import { useHostControlStore } from '../host/hostControlStore';
+import { LayoutParticipantTile } from '../layout/types';
+import { GalleryView } from './layout/GalleryView';
+import { SpeakerView } from './layout/SpeakerView';
+import { ContentView } from './layout/ContentView';
 
 interface VideoGridProps {
   localStream: MediaStream | null;
@@ -9,7 +14,8 @@ interface VideoGridProps {
   localVideoEnabled: boolean;
   localAudioEnabled: boolean;
   screenSharing: boolean;
-  maxTiles?: number;
+  onPin?: (id: string) => void;
+  onSpotlight?: (id: string) => void;
 }
 
 export function VideoGrid({
@@ -19,81 +25,111 @@ export function VideoGrid({
   localVideoEnabled,
   localAudioEnabled,
   screenSharing,
-  maxTiles = 9,
+  onPin,
+  onSpotlight,
 }: VideoGridProps) {
-  const lastN = useAppStore((s) => s.lastN);
+  const mode = useLayoutStore((s) => s.mode);
+  const presenceParticipants = usePresenceStore((s) => s.participants);
+  const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const localPresence = presenceParticipants.get(localParticipantId || '');
+  const activeSpeakers = usePresenceStore((s) => s.activeSpeakers);
+  const waitingQueue = useHostControlStore((s) => s.waitingQueue);
 
-  // Build participant list for grid: local first, then remotes up to Last-N
+  // Construct LayoutParticipantTiles from streams + presence store
   const tiles = useMemo(() => {
-    const result: Array<{
-      id: string;
-      stream: MediaStream | null;
-      name: string;
-      isLocal: boolean;
-      isScreen: boolean;
-      videoEnabled: boolean;
-      audioEnabled: boolean;
-      speaking: boolean;
-    }> = [];
+    const result: LayoutParticipantTile[] = [];
 
-    // Local tile (always included)
+    // Local participant tile
+    const localId = localParticipantId || 'local';
     result.push({
-      id: 'local',
+      id: localId,
+      name: localPresence?.name || 'You',
       stream: screenSharing ? screenStream : localStream,
-      name: 'You',
       isLocal: true,
       isScreen: screenSharing,
       videoEnabled: localVideoEnabled,
       audioEnabled: localAudioEnabled,
-      speaking: false,
+      speaking: activeSpeakers.has(localId),
     });
 
-    // Remote tiles (up to Last-N)
-    const remotes = remoteStreams.slice(0, lastN - 1);
-    remotes.forEach((stream, idx) => {
-      result.push({
-        id: `remote-${idx}`,
-        stream,
-        name: `Participant ${idx + 1}`,
-        isLocal: false,
-        isScreen: false,
-        videoEnabled: true,
-        audioEnabled: true,
-        speaking: false,
+    // Remote participant tiles
+    // Exclude participants who are still in the waiting room queue
+    const waitingIds = new Set(waitingQueue.map((w) => w.participantId));
+    const remotePresenceList = Array.from(presenceParticipants.values()).filter((p) => !p.isLocal);
+    const remoteList = remotePresenceList.filter((p) => !waitingIds.has(p.id));
+
+    if (remoteList.length > 0) {
+      remoteList.forEach((p, idx) => {
+        const stream = remoteStreams[idx] || null;
+        result.push({
+          id: p.id,
+          name: p.name,
+          stream,
+          isLocal: false,
+          isScreen: p.screenSharing,
+          videoEnabled: p.videoEnabled,
+          audioEnabled: p.audioEnabled,
+          speaking: activeSpeakers.has(p.id),
+        });
       });
-    });
+    } else if (remotePresenceList.length === 0) {
+      // Fallback for mock/test runs without full presence roster
+      remoteStreams.forEach((stream, idx) => {
+        const id = `remote-${idx}`;
+        result.push({
+          id,
+          name: `Participant ${idx + 1}`,
+          stream,
+          isLocal: false,
+          isScreen: false,
+          videoEnabled: true,
+          audioEnabled: true,
+          speaking: false,
+        });
+      });
+    }
 
     return result;
-  }, [localStream, remoteStreams, screenStream, localVideoEnabled, localAudioEnabled, screenSharing, lastN]);
+  }, [
+    localStream,
+    remoteStreams,
+    screenStream,
+    localVideoEnabled,
+    localAudioEnabled,
+    screenSharing,
+    presenceParticipants,
+    localPresence,
+    activeSpeakers,
+    waitingQueue,
+  ]);
 
-  const gridClass = `video-grid video-grid--${Math.min(tiles.length, 9)}`;
+  if (mode === 'content') {
+    return (
+      <ContentView
+        screenStream={screenStream}
+        tiles={tiles}
+        onPin={onPin}
+        onSpotlight={onSpotlight}
+      />
+    );
+  }
 
+  if (mode === 'speaker') {
+    return (
+      <SpeakerView
+        tiles={tiles}
+        onPin={onPin}
+        onSpotlight={onSpotlight}
+      />
+    );
+  }
+
+  // Default: Gallery View
   return (
-    <div className={gridClass} role="region" aria-label="Meeting participants" style={{ height: '100%', minHeight: 0 }}>
-      {tiles.map((tile) => (
-        <VideoTile
-          key={tile.id}
-          id={tile.id}
-          stream={tile.stream}
-          name={tile.name}
-          isLocal={tile.isLocal}
-          isScreen={tile.isScreen}
-          videoEnabled={tile.videoEnabled}
-          audioEnabled={tile.audioEnabled}
-          speaking={tile.speaking}
-        />
-      ))}
-      {tiles.length === 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--fg-muted)', gap: '1rem' }}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg>
-          <span>Waiting for participants…</span>
-        </div>
-      )}
-    </div>
+    <GalleryView
+      tiles={tiles}
+      onPin={onPin}
+      onSpotlight={onSpotlight}
+    />
   );
 }

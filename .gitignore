@@ -10,3 +10,4 @@ infra/pgdata/
 *.log
 .env
 backups/
+*.exe

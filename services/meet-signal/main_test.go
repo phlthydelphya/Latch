@@ -2,6 +2,9 @@
 package main
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -262,5 +265,169 @@ func TestLIVEKITAPISecretValidation(t *testing.T) {
 	longSecret := "this-is-a-valid-livekit-secret-32-chars-min"
 	if len(longSecret) >= 32 {
 		t.Log("Long LiveKit secret accepted")
+	}
+}
+
+func TestM4AAuthorityManagerAssignRole(t *testing.T) {
+	am := newAuthorityManager()
+	roomID := "m4a-room-test"
+
+	// 1. Creator creates room -> designates p-alice as host
+	auth, err := am.createRoom(roomID, "p-alice")
+	if err != nil || auth.HostID != "p-alice" {
+		t.Fatalf("createRoom failed: %v, auth: %+v", err, auth)
+	}
+
+	// 2. Second joiner receives "participant"
+	role2, isNew2 := am.assignRole(roomID, "p-bob")
+	if role2 != "participant" || isNew2 {
+		t.Fatalf("second joiner should be participant, got role=%s isNew=%v", role2, isNew2)
+	}
+
+	// 3. Reconnecting host retains "host"
+	roleReconn, _ := am.assignRole(roomID, "p-alice")
+	if roleReconn != "host" {
+		t.Fatalf("reconnecting host should retain host role, got %s", roleReconn)
+	}
+}
+
+func TestM4ACreatorClaimForgeryRejection(t *testing.T) {
+	am := newAuthorityManager()
+	roomID := "m4a-forgery-test"
+
+	// M4A-SEC-09: Attacker tries to join uncreated room via assignRole
+	// Client self-assertion never grants host authority
+	role, _ := am.assignRole(roomID, "p-attacker")
+	if role == "host" {
+		t.Fatalf("M4A-SEC-09 FAILED: client assertion granted host authority! got role=%s", role)
+	}
+	if role != "participant" {
+		t.Fatalf("expected participant, got %s", role)
+	}
+}
+
+func TestM4AAuthorityManagerTransfer(t *testing.T) {
+	am := newAuthorityManager()
+	roomID := "m4a-transfer-room"
+
+	am.createRoom(roomID, "p-alice")
+	am.assignRole(roomID, "p-bob")
+
+	// 1. Non-host attempts transfer -> fails
+	errUnauthorized := am.transferHost(roomID, "p-charlie", "p-bob")
+	if errUnauthorized == nil {
+		t.Fatal("non-host transfer should be rejected")
+	}
+
+	// 2. Host transfers to bob -> succeeds
+	errOk := am.transferHost(roomID, "p-alice", "p-bob")
+	if errOk != nil {
+		t.Fatalf("valid host transfer failed: %v", errOk)
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	if !ok || auth.HostID != "p-bob" {
+		t.Fatalf("expected host to be p-bob, got %v (ok=%v)", auth, ok)
+	}
+}
+
+func TestM4AMintHostTokenES256(t *testing.T) {
+	if hostPrivateKey == nil {
+		initHostSigning()
+	}
+
+	participantID := "p-host-123"
+	roomID := "room-secure-456"
+
+	tokenStr, err := mintHostToken(participantID, roomID, 5*time.Minute)
+	if err != nil {
+		t.Fatalf("mintHostToken failed: %v", err)
+	}
+	if tokenStr == "" {
+		t.Fatal("mintHostToken returned empty string")
+	}
+
+	// Verify using public key
+	parsed, err := jwt.ParseWithClaims(tokenStr, &HostClaims{}, func(tok *jwt.Token) (interface{}, error) {
+		if _, ok := tok.Method.(*jwt.SigningMethodECDSA); !ok {
+			t.Fatalf("expected ES256 signing, got %v", tok.Header["alg"])
+		}
+		return &hostPrivateKey.PublicKey, nil
+	})
+	if err != nil {
+		t.Fatalf("failed to parse/verify host token: %v", err)
+	}
+
+	claims, ok := parsed.Claims.(*HostClaims)
+	if !ok || !parsed.Valid {
+		t.Fatal("invalid claims in host token")
+	}
+
+	if claims.ParticipantID != participantID || claims.Role != "host" || claims.RoomID != roomID {
+		t.Errorf("claims mismatch: got %+v", claims)
+	}
+}
+
+func TestM4A1RoomStatusEndpoint(t *testing.T) {
+	am := newAuthorityManager()
+
+	// 1. Check non-existent room
+	reqNotFound := httptest.NewRequest(http.MethodGet, "/room/status?roomId=non-existent-room", nil)
+	wNotFound := httptest.NewRecorder()
+	handleRoomStatus(am, wNotFound, reqNotFound)
+
+	if wNotFound.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for status probe, got %d", wNotFound.Code)
+	}
+	var resNotFound map[string]any
+	if err := json.NewDecoder(wNotFound.Body).Decode(&resNotFound); err != nil {
+		t.Fatalf("decode failed: %v", err)
+	}
+	if resNotFound["exists"] != false || resNotFound["joinable"] != false {
+		t.Errorf("expected non-existent room to have exists=false, joinable=false, got %+v", resNotFound)
+	}
+
+	// 2. Register active room
+	roomID := "active-meeting-123"
+	_, _ = am.createRoom(roomID, "host-user")
+
+	reqActive := httptest.NewRequest(http.MethodGet, "/room/status?roomId="+roomID, nil)
+	wActive := httptest.NewRecorder()
+	handleRoomStatus(am, wActive, reqActive)
+
+	if wActive.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for active room, got %d", wActive.Code)
+	}
+	var resActive map[string]any
+	if err := json.NewDecoder(wActive.Body).Decode(&resActive); err != nil {
+		t.Fatalf("decode failed: %v", err)
+	}
+	if resActive["exists"] != true || resActive["joinable"] != true || resActive["locked"] != false {
+		t.Errorf("expected active room to have exists=true, joinable=true, locked=false, got %+v", resActive)
+	}
+
+	// Verify NO host metadata or keys leaked to unauthenticated caller
+	if _, hasHostID := resActive["hostId"]; hasHostID {
+		t.Errorf("security violation: hostId leaked in /room/status response: %+v", resActive)
+	}
+	if _, hasHostKey := resActive["hostKey"]; hasHostKey {
+		t.Errorf("security violation: hostKey leaked in /room/status response: %+v", resActive)
+	}
+
+	// 3. Lock room and check status
+	am.mu.Lock()
+	am.rooms[roomID].Locked = true
+	am.mu.Unlock()
+
+	reqLocked := httptest.NewRequest(http.MethodGet, "/room/status?roomId="+roomID, nil)
+	wLocked := httptest.NewRecorder()
+	handleRoomStatus(am, wLocked, reqLocked)
+
+	var resLocked map[string]any
+	if err := json.NewDecoder(wLocked.Body).Decode(&resLocked); err != nil {
+		t.Fatalf("decode failed: %v", err)
+	}
+	if resLocked["exists"] != true || resLocked["joinable"] != false || resLocked["locked"] != true {
+		t.Errorf("expected locked room to have exists=true, joinable=false, locked=true, got %+v", resLocked)
 	}
 }

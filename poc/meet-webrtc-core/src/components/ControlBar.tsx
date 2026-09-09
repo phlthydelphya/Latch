@@ -1,9 +1,23 @@
+import { useState, useMemo } from 'react';
 import { useAppStore } from '../store/appStore';
 import { ShieldBadge } from './ShieldBadge';
 import { ConnectionIndicator } from './ConnectionIndicator';
 import { downloadDiagnosticBundle } from '../utils/diagnostics';
+import { HandRaiseButton } from './HandRaiseButton';
+import { usePresenceStore } from '../presence/presenceStore';
+import { useCollaborationStore } from '../collaboration/collaborationStore';
+import { useDeviceStore } from '../devices/deviceStore';
+import { useHostControlStore } from '../host/hostControlStore';
+import { HostControlManager } from '../host/hostControlManager';
+import { LeaveConfirmationModal } from './LeaveConfirmationModal';
+import { InviteModal } from './InviteModal';
 
-export function ControlBar() {
+interface ControlBarProps {
+  onToggleHand?: (raised: boolean) => Promise<void> | void;
+  onLeave?: () => Promise<void> | void;
+}
+
+export function ControlBar({ onToggleHand, onLeave }: ControlBarProps = {}) {
   const {
     localParticipant,
     toggleLocalAudio,
@@ -14,9 +28,80 @@ export function ControlBar() {
     isReconnecting,
   } = useAppStore();
 
+  const isRosterOpen = usePresenceStore((s) => s.isRosterOpen);
+  const toggleRoster = usePresenceStore((s) => s.toggleRoster);
+  const participantsMap = usePresenceStore((s) => s.participants);
+  const waitingQueue = useHostControlStore((s) => s.waitingQueue);
+
+  const participantCount = useMemo(() => {
+    const waitingIds = new Set(waitingQueue.map((w) => w.participantId));
+    let count = 0;
+    for (const p of participantsMap.values()) {
+      if (!waitingIds.has(p.id)) count++;
+    }
+    return count;
+  }, [participantsMap, waitingQueue]);
+
+  const hostId = usePresenceStore((s) => s.hostId);
+  const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const isLocalHost = hostId !== null && hostId === localParticipantId;
+
+  const permissions = useHostControlStore((s) => s.permissions);
+  const setHostModalOpen = useHostControlStore((s) => s.setHostModalOpen);
+
+  const isChatOpen = useCollaborationStore((s) => s.isChatOpen);
+  const toggleChat = useCollaborationStore((s) => s.toggleChat);
+  const unreadCount = useCollaborationStore((s) => s.unreadCount);
+  const isReactionsBarOpen = useCollaborationStore((s) => s.isReactionsBarOpen);
+  const toggleReactionsBar = useCollaborationStore((s) => s.toggleReactionsBar);
+
   const audioEnabled = localParticipant?.audioEnabled ?? true;
   const videoEnabled = localParticipant?.videoEnabled ?? true;
   const screenSharing = localParticipant?.screenSharing ?? false;
+
+  const isMuteLocked = !audioEnabled && !permissions.canUnmuteSelf && !isLocalHost;
+  const isScreenShareLocked = !permissions.canShareScreen && !isLocalHost;
+  const isReactionsLocked = !permissions.canReact && !isLocalHost;
+  const isChatLocked = !permissions.canChat && !isLocalHost;
+
+  const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [isInviteModalOpen, setInviteModalOpen] = useState(false);
+
+  const handleLeaveClick = () => {
+    // If host is the final participant, leave directly without modal
+    if (isLocalHost && participantCount <= 1) {
+      if (onLeave) {
+        onLeave();
+      } else {
+        leave();
+      }
+      return;
+    }
+    setLeaveModalOpen(true);
+  };
+
+  const handleConfirmLeave = async () => {
+    setLeaveModalOpen(false);
+    if (onLeave) {
+      await onLeave();
+    } else {
+      leave();
+    }
+  };
+
+  const handleTransferAndLeave = async (targetId: string) => {
+    try {
+      await HostControlManager.getInstance().transferHost(targetId);
+    } catch (err) {
+      console.error('Host transfer before leave failed:', err);
+    }
+    setLeaveModalOpen(false);
+    if (onLeave) {
+      await onLeave();
+    } else {
+      leave();
+    }
+  };
 
   const handleScreenShare = async () => {
     if (screenSharing) {
@@ -38,8 +123,9 @@ export function ControlBar() {
           className={`media-toggle ${audioEnabled ? 'active' : 'muted'}`}
           onClick={toggleLocalAudio}
           aria-pressed={audioEnabled}
-          aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
-          disabled={!isConnected || isReconnecting}
+          aria-label={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
+          title={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
+          disabled={!isConnected || isReconnecting || isMuteLocked}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             {audioEnabled ? (
@@ -84,8 +170,9 @@ export function ControlBar() {
           className={`media-toggle ${screenSharing ? 'active' : ''}`}
           onClick={handleScreenShare}
           aria-pressed={screenSharing}
-          aria-label={screenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
-          disabled={!isConnected || isReconnecting}
+          aria-label={isScreenShareLocked ? 'Screen sharing restricted by host' : (screenSharing ? 'Stop screen sharing' : 'Start screen sharing')}
+          title={isScreenShareLocked ? 'Screen sharing restricted by host' : (screenSharing ? 'Stop screen sharing' : 'Start screen sharing')}
+          disabled={!isConnected || isReconnecting || isScreenShareLocked}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -94,14 +181,118 @@ export function ControlBar() {
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </button>
+
+        <HandRaiseButton onToggleHand={onToggleHand} disabled={!isConnected || isReconnecting} />
+
+        <button
+          className={`media-toggle ${isReactionsBarOpen ? 'active' : ''}`}
+          onClick={() => toggleReactionsBar()}
+          aria-pressed={isReactionsBarOpen}
+          aria-label={isReactionsLocked ? 'Reactions restricted by host' : 'Reactions'}
+          title={isReactionsLocked ? 'Reactions restricted by host' : 'Send Reaction'}
+          disabled={!isConnected || isReconnecting || isReactionsLocked}
+          style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <span>😊</span>
+        </button>
       </div>
 
       <div className="control-bar__group" style={{ marginLeft: 'auto' }}>
         <button
+          className={`btn ${isChatOpen ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => toggleChat()}
+          aria-pressed={isChatOpen}
+          aria-label={isChatLocked ? 'Chat restricted by host' : 'Toggle In-Call Chat'}
+          title={isChatLocked ? 'Chat restricted by host' : 'Toggle In-Call Chat'}
+          disabled={isChatLocked}
+          style={{
+            marginRight: '8px',
+            fontSize: '0.85rem',
+            padding: '6px 10px',
+            backgroundColor: isChatOpen ? 'var(--accent, #00d4aa)' : undefined,
+            color: isChatOpen ? '#000' : undefined,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            opacity: isChatLocked ? 0.5 : 1,
+            cursor: isChatLocked ? 'not-allowed' : 'pointer',
+          }}
+        >
+          <span>💬</span>
+          <span>Chat</span>
+          {unreadCount > 0 && !isChatOpen && (
+            <span
+              style={{
+                marginLeft: '4px',
+                background: '#ff4757',
+                color: '#fff',
+                borderRadius: '10px',
+                padding: '1px 6px',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          className={`btn ${isRosterOpen ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={toggleRoster}
+          aria-label="Toggle Participants Roster"
+          title="Toggle Participants Roster"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px', backgroundColor: isRosterOpen ? 'var(--accent, #00d4aa)' : undefined, color: isRosterOpen ? '#000' : undefined }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginRight: '4px', verticalAlign: 'text-bottom' }}>
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          Participants ({participantCount})
+        </button>
+
+        <button
           className="btn btn-secondary"
-          onClick={() => downloadDiagnosticBundle()}
-          aria-label="Download Sanitized Diagnostics"
-          title="Export Privacy-Preserving Diagnostic Bundle"
+          onClick={() => setInviteModalOpen(true)}
+          aria-label="Invite Participants"
+          title="Share meeting link and QR code"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+        >
+          <span style={{ marginRight: '4px' }}>🔗</span>
+          Invite
+        </button>
+
+        {isLocalHost && (
+          <button
+            className="btn btn-secondary"
+            onClick={() => setHostModalOpen(true)}
+            aria-label="Host Controls & Moderation"
+            title="Room lock, waiting room, and attendee permissions"
+            style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+          >
+            <span style={{ marginRight: '4px' }}>🛡️</span>
+            Host Tools
+          </button>
+        )}
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => useDeviceStore.getState().setSettingsOpen(true, 'audio')}
+          aria-label="Device and Hardware Settings"
+          title="Microphone, Speaker, and Camera Settings"
+          style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
+        >
+          <span style={{ marginRight: '4px' }}>⚙️</span>
+          Settings
+        </button>
+
+        <button
+          className="btn btn-secondary"
+          onClick={() => useDeviceStore.getState().setSettingsOpen(true, 'diagnostics')}
+          aria-label="Real-Time Network Diagnostics"
+          title="Real-Time WebRTC Diagnostics & Health"
           style={{ marginRight: '8px', fontSize: '0.85rem', padding: '6px 10px' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginRight: '4px', verticalAlign: 'text-bottom' }}>
@@ -113,7 +304,7 @@ export function ControlBar() {
         </button>
         <button
           className="btn btn-danger"
-          onClick={leave}
+          onClick={handleLeaveClick}
           aria-label="Leave meeting"
           disabled={!isConnected || isReconnecting}
         >
@@ -125,6 +316,21 @@ export function ControlBar() {
           Leave
         </button>
       </div>
+
+      <LeaveConfirmationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        onConfirmLeave={handleConfirmLeave}
+        onTransferAndLeave={handleTransferAndLeave}
+        isHost={isLocalHost}
+      />
+
+      <InviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        roomId={useAppStore.getState().roomId || ''}
+        keyParam={useAppStore.getState().keyParam || undefined}
+      />
     </footer>
   );
 }

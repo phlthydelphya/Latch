@@ -180,8 +180,7 @@ export class SFrameTransform {
           const encryptedFrame = await this.encryptFrame(frame);
           controller.enqueue(encryptedFrame);
         } catch (error) {
-          console.error('SFrame encryption failed:', error);
-          controller.error(error);
+          console.error('[SFrame] Sender encryption dropped frame due to internal error.');
         }
       },
     });
@@ -216,10 +215,8 @@ export class SFrameTransform {
     // Combine header + encrypted payload
     const encryptedData = this.combineHeaderAndPayload(header, encryptedPayload);
 
-    return {
-      ...frame,
-      data: encryptedData,
-    };
+    frame.data = encryptedData;
+    return frame;
   }
 
   /**
@@ -314,9 +311,7 @@ export class SFrameTransform {
           const decryptedFrame = await this.decryptFrame(frame, remoteSenderId);
           controller.enqueue(decryptedFrame);
         } catch (error) {
-          console.error('SFrame decryption failed:', error);
-          // Forward undecrypted frame with error flag for debugging
-          controller.enqueue({ ...frame, data: frame.data, decryptError: true });
+          console.error('[SFrame] Receiver decryption dropped frame due to validation/crypto error.');
         }
       },
     });
@@ -355,10 +350,8 @@ export class SFrameTransform {
     // Decrypt payload with AES-GCM, IV=deriveIV(salt, counter), additionalData=header
     const decryptedPayload = await this.decryptPayload(payload, senderKey, salt, counter, header);
 
-    return {
-      ...frame,
-      data: decryptedPayload,
-    };
+    frame.data = decryptedPayload;
+    return frame;
   }
 
   private getSenderIdForKID(kid: number): string {

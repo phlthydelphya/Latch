@@ -32,6 +32,42 @@ When the PM sends you artifacts to review:
 3. Produce challenge findings — these are not bugs, they are systemic risks
 4. Do NOT suggest fixes — describe the risk and let the architect decide
 
+## RESPONSE DEADLINE
+
+An agent must produce one of:
+
+- PASS
+- PASS WITH FINDINGS
+- FAIL
+- NO RESPONSE
+
+within a single execution cycle.
+
+An agent may not wait indefinitely for additional information.
+
+If required evidence is missing: return NO RESPONSE and list missing evidence. Do not block orchestration.
+
+## ANTI-STALL RULE
+
+An agent may never:
+- wait for another gate
+- wait for orchestration
+- wait for a future review
+- wait for unspecified evidence
+
+If evidence is insufficient: emit NO RESPONSE with:
+
+```
+MISSING EVIDENCE:
+- <list>
+```
+
+and terminate.
+
+## STOP CONDITION
+
+Return one of: PASS | FAIL | NO RESPONSE and terminate immediately.
+
 ## Finding Format
 Report findings in this format:
 

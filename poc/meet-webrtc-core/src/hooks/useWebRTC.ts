@@ -3,7 +3,7 @@
  * Implements insertion points I-1 through I-13 per M0-P0 / phase2b-sframe-design-v2.1.
  */
 import { useEffect, useRef, useCallback, useState } from 'react';
-import { Room, RoomEvent, ConnectionState, Track } from 'livekit-client';
+import { Room, RoomEvent, ParticipantEvent, ConnectionState, Track } from 'livekit-client';
 import { fetchToken, resolveSfuUrl } from '../auth/token';
 import { useAppStore } from '../store/appStore';
 import { KeyManager } from '../keys/manager';
@@ -19,10 +19,36 @@ import {
   getGlobalSFrame,
 } from '../sframe/transform';
 import { getGlobalMetricsCollector } from '../metrics/collector';
+import { PresenceAdapter } from '../presence/presenceAdapter';
+import { usePresenceStore } from '../presence/presenceStore';
+import { LayoutAdapter, SPOTLIGHT_TOPIC } from '../layout/layoutAdapter';
+import { useLayoutStore } from '../layout/layoutStore';
+import { CollaborationAdapter } from '../collaboration/collaborationAdapter';
+import { useCollaborationStore } from '../collaboration/collaborationStore';
+import { DeviceManager } from '../devices/deviceManager';
+import { useDeviceStore } from '../devices/deviceStore';
+import { HostControlManager } from '../host/hostControlManager';
+import { useHostControlStore } from '../host/hostControlStore';
+import { SubscriptionManager } from '../webrtc/subscriptionManager';
+import { BandwidthEngine } from '../webrtc/bandwidthEngine';
+import { M3B_PUBLISH_DEFAULTS } from '../webrtc/simulcastConfig';
+import {
+  CHAT_TOPIC,
+  REACTION_TOPIC,
+  ANNOUNCEMENT_TOPIC,
+  HAND_ACTION_TOPIC,
+  ReactionEmoji,
+  ReactionEvent,
+} from '../collaboration/types';
 
 export function useWebRTC() {
   const { roomId, setError } = useAppStore();
   const roomRef = useRef<Room | null>(null);
+  const presenceAdapterRef = useRef<PresenceAdapter | null>(null);
+  const layoutAdapterRef = useRef<LayoutAdapter | null>(null);
+  const collaborationAdapterRef = useRef<CollaborationAdapter | null>(null);
+  const subscriptionManagerRef = useRef<SubscriptionManager | null>(null);
+  const bandwidthEngineRef = useRef<BandwidthEngine | null>(null);
   const isConnectingRef = useRef(false);
   const activeRoomIdRef = useRef<string | null>(null);
 
@@ -74,7 +100,17 @@ export function useWebRTC() {
           // Persist credentials for session reloads / evidence
           if (token && fetched.sfuUrl) {
             store.setCredentials(token, fetched.sfuUrl);
-            console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
+            console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPresent: true });
+          }
+          // M4A: Pass server-signed host credentials to HostControlManager and presence
+          HostControlManager.getInstance().setSessionContext({
+            roomId: targetRoomId,
+            localParticipantId: fetched.participantId,
+            hostToken: fetched.hostToken,
+            hostKey: fetched.hostKey,
+          });
+          if (fetched.role === 'host') {
+            usePresenceStore.getState().setAuthoritativeHost(fetched.participantId);
           }
         }
 
@@ -90,10 +126,7 @@ export function useWebRTC() {
         const room = new Room({
           adaptiveStream: !sframeEnabled,
           dynacast: !sframeEnabled,
-          publishDefaults: {
-            simulcast: true,
-            videoEncoding: { maxBitrate: 1800000 },
-          },
+          publishDefaults: M3B_PUBLISH_DEFAULTS,
         });
         roomRef.current = room;
 
@@ -121,6 +154,21 @@ export function useWebRTC() {
         });
         sframeRef.current = sframe;
         setGlobalSFrame(sframe);
+
+        // Attach SFrame transform synchronously when sender is created, before negotiation / media flow
+        room.localParticipant.on(ParticipantEvent.LocalSenderCreated, async (sender: any, track: any) => {
+          if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
+            try {
+              await installSFrameOnSenderShared(sender, sframe, getGlobalCounterMutex());
+              console.log('[SFrame] sender transform active on LocalSenderCreated', {
+                kid: keyManager.getCurrentEpoch(),
+                media: track?.kind,
+              });
+            } catch (err) {
+              console.warn('[SFrame] Failed to install transform on LocalSenderCreated:', err);
+            }
+          }
+        });
 
         // Deferred publish queue for HPKE public key
         const pendingPublishQueue: Array<{ topic: string; payload: Uint8Array; reliable: boolean }> = [];
@@ -218,6 +266,53 @@ export function useWebRTC() {
           console.log('[LiveKit] room.name', room.name, 'state', room.state, 'localParticipant', room.localParticipant?.identity);
           useAppStore.getState().setConnected(true);
           useAppStore.getState().setShieldMode(true);
+
+          // M2 Phase E / M4A: Initialize Host Control Manager for moderation directives
+          HostControlManager.getInstance().setSessionContext({
+            roomId: targetRoomId,
+          });
+          HostControlManager.getInstance().attach(room);
+
+          // M2 Phase A: Initialize Presence Adapter for presence domain events
+          if (!presenceAdapterRef.current) {
+            presenceAdapterRef.current = new PresenceAdapter(room);
+          } else {
+            presenceAdapterRef.current.attach(room);
+          }
+
+          // M2 Phase B: Initialize Layout Adapter for adaptive visual layouts
+          if (!layoutAdapterRef.current) {
+            layoutAdapterRef.current = new LayoutAdapter(room);
+          } else {
+            layoutAdapterRef.current.attach(room);
+          }
+
+          // M2 Phase C: Initialize Collaboration Adapter for in-call chat, reactions, announcements, hand queue
+          if (!collaborationAdapterRef.current) {
+            collaborationAdapterRef.current = new CollaborationAdapter(room);
+          } else {
+            collaborationAdapterRef.current.attach(room);
+          }
+
+          // M2 Phase D: Enumerate devices and start change listener
+          DeviceManager.getInstance().enumerateAndSyncDevices();
+          DeviceManager.getInstance().startDeviceChangeListener();
+
+          // M3B: Initialize Subscription Manager for dynamic track subscription & Last-N=9 gating
+          if (!subscriptionManagerRef.current) {
+            subscriptionManagerRef.current = new SubscriptionManager(room);
+          } else {
+            subscriptionManagerRef.current.attach(room);
+          }
+
+          // M3B: Initialize Bandwidth Engine for downlink WebRTC congestion adaptation
+          if (!bandwidthEngineRef.current) {
+            bandwidthEngineRef.current = new BandwidthEngine();
+          }
+          bandwidthEngineRef.current.attach(room);
+
+          (window as any).__SUBSCRIPTION_MANAGER__ = subscriptionManagerRef.current;
+          (window as any).__BANDWIDTH_ENGINE__ = bandwidthEngineRef.current;
 
           // Flush HPKE key publish
           if (sframeEnabled) {
@@ -374,7 +469,7 @@ export function useWebRTC() {
 
           if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
             const sender = (publication.track as any)?.sender;
-            if (sender) {
+            if (sender && !(sender as any)._sframeTransformer) {
               await installSFrameOnSenderShared(sender, sframe, getGlobalCounterMutex());
               console.log('[SFrame] sender transform active', {
                 kid: keyManager.getCurrentEpoch(),
@@ -732,10 +827,15 @@ export function useWebRTC() {
           }
         }
 
-        // Connect to LiveKit room — instrumented
-        console.log('[LiveKit] Room.connect start', { sfuUrl: resolvedSfuUrl, tokenPrefix: token.slice(0, 20) + '...' });
+        // Connect to LiveKit room — safe instrumented diagnostic
+        console.log(`[LIVEKIT CONNECT] targetRoomMatchesToken=${Boolean(token && targetRoomId)}`);
         try {
-          await room.connect(resolvedSfuUrl, token);
+          await room.connect(resolvedSfuUrl, token, {
+            autoSubscribe: true,
+            rtcConfig: {
+              encodedInsertableStreams: true,
+            } as any,
+          });
           if (isCancelled) {
             room.disconnect();
             return;
@@ -754,53 +854,62 @@ export function useWebRTC() {
 
         if (isCancelled) return;
 
-        // Auto-publish camera and microphone after successful connection
-        console.log('[LiveKit] setCameraEnabled start');
-        try {
-          await room.localParticipant.setCameraEnabled(true);
-          console.log('[LiveKit] setCameraEnabled success', {
-            trackPublicationsSize: room.localParticipant.trackPublications.size,
-            isCameraEnabled: room.localParticipant.isCameraEnabled,
-          });
-          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
-        } catch (err) {
-          const e = err as Error;
-          console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
-          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            useAppStore.getState().setError('Camera access denied — grant permission and reload.');
-          } else if (e.name === 'NotFoundError') {
-            useAppStore.getState().setError('No camera device found.');
-          } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Camera already in use by another app.');
-          } else {
-            useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
+        // Auto-publish camera and microphone after successful connection (only if not held in lobby)
+        const isWaitingInLobby = useHostControlStore.getState().isWaitingInLobby;
+        if (!isWaitingInLobby) {
+          const shouldPublishVideo = useAppStore.getState().localParticipant?.videoEnabled ?? true;
+          if (shouldPublishVideo) {
+            console.log('[LiveKit] setCameraEnabled start');
+            try {
+              await room.localParticipant.setCameraEnabled(true);
+              console.log('[LiveKit] setCameraEnabled success', {
+                trackPublicationsSize: room.localParticipant.trackPublications.size,
+                isCameraEnabled: room.localParticipant.isCameraEnabled,
+              });
+              console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+            } catch (err) {
+              const e = err as Error;
+              console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
+              if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                useAppStore.getState().setError('Camera access denied — grant permission and reload.');
+              } else if (e.name === 'NotFoundError') {
+                useAppStore.getState().setError('No camera device found.');
+              } else if (e.name === 'NotReadableError') {
+                useAppStore.getState().setError('Camera busy — close other apps using camera, or open Settings to switch device.');
+              } else {
+                useAppStore.getState().setError(`Camera publish failed: ${e.message}`);
+              }
+              console.warn('[LiveKit] Camera publish failed (permission/device):', e.message);
+            }
           }
-          console.warn('[LiveKit] Camera publish failed (permission/device):', e.message);
-        }
 
-        if (isCancelled) return;
+          if (isCancelled) return;
 
-        console.log('[LiveKit] setMicrophoneEnabled start');
-        try {
-          await room.localParticipant.setMicrophoneEnabled(true);
-          console.log('[LiveKit] setMicrophoneEnabled success', {
-            trackPublicationsSize: room.localParticipant.trackPublications.size,
-            isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
-          });
-          console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
-        } catch (err) {
-          const e = err as Error;
-          console.error('[LiveKit] setMicrophoneEnabled failure', { name: e.name, message: e.message });
-          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            useAppStore.getState().setError('Microphone access denied — grant permission and reload.');
-          } else if (e.name === 'NotFoundError') {
-            useAppStore.getState().setError('No microphone device found.');
-          } else if (e.name === 'NotReadableError') {
-            useAppStore.getState().setError('Microphone already in use by another app.');
-          } else {
-            useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
+          const shouldPublishAudio = useAppStore.getState().localParticipant?.audioEnabled ?? true;
+          if (shouldPublishAudio) {
+            console.log('[LiveKit] setMicrophoneEnabled start');
+            try {
+              await room.localParticipant.setMicrophoneEnabled(true);
+              console.log('[LiveKit] setMicrophoneEnabled success', {
+                trackPublicationsSize: room.localParticipant.trackPublications.size,
+                isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
+              });
+              console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
+            } catch (err) {
+              const e = err as Error;
+              console.error('[LiveKit] setMicrophoneEnabled failure', { name: e.name, message: e.message });
+              if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                useAppStore.getState().setError('Microphone access denied — grant permission and reload.');
+              } else if (e.name === 'NotFoundError') {
+                useAppStore.getState().setError('No microphone device found.');
+              } else if (e.name === 'NotReadableError') {
+                useAppStore.getState().setError('Microphone busy — close other apps using microphone, or open Settings to switch device.');
+              } else {
+                useAppStore.getState().setError(`Microphone publish failed: ${e.message}`);
+              }
+              console.warn('[LiveKit] Microphone publish failed (permission/device):', e.message);
+            }
           }
-          console.warn('[LiveKit] Microphone publish failed (permission/device):', e.message);
         }
 
         if (isCancelled) return;
@@ -859,6 +968,43 @@ export function useWebRTC() {
         sframeRef.current = null;
       }
       setGlobalSFrame(null);
+      if (presenceAdapterRef.current) {
+        presenceAdapterRef.current.detach();
+        presenceAdapterRef.current = null;
+      }
+      usePresenceStore.getState().resetPresence();
+
+      if (layoutAdapterRef.current) {
+        layoutAdapterRef.current.detach();
+        layoutAdapterRef.current = null;
+      }
+      useLayoutStore.getState().reset();
+
+      if (collaborationAdapterRef.current) {
+        collaborationAdapterRef.current.detach();
+        collaborationAdapterRef.current = null;
+      }
+      useCollaborationStore.getState().reset();
+
+      DeviceManager.getInstance().destroy();
+      useDeviceStore.getState().reset();
+
+      HostControlManager.getInstance().detach();
+      useHostControlStore.getState().reset();
+
+      if (subscriptionManagerRef.current) {
+        subscriptionManagerRef.current.detach();
+        subscriptionManagerRef.current = null;
+      }
+
+      if (bandwidthEngineRef.current) {
+        bandwidthEngineRef.current.detach();
+        bandwidthEngineRef.current = null;
+      }
+
+      delete (window as any).__SUBSCRIPTION_MANAGER__;
+      delete (window as any).__BANDWIDTH_ENGINE__;
+
       if (roomRef.current) {
         roomRef.current.disconnect();
         roomRef.current = null;
@@ -923,11 +1069,194 @@ export function useWebRTC() {
       sframeRef.current = null;
     }
     setGlobalSFrame(null);
+    if (presenceAdapterRef.current) {
+      presenceAdapterRef.current.detach();
+      presenceAdapterRef.current = null;
+    }
+    usePresenceStore.getState().resetPresence();
+
+    if (layoutAdapterRef.current) {
+      layoutAdapterRef.current.detach();
+      layoutAdapterRef.current = null;
+    }
+    useLayoutStore.getState().reset();
+
+    if (collaborationAdapterRef.current) {
+      collaborationAdapterRef.current.detach();
+      collaborationAdapterRef.current = null;
+    }
+    useCollaborationStore.getState().reset();
+
+    DeviceManager.getInstance().destroy();
+    useDeviceStore.getState().reset();
+
+    HostControlManager.getInstance().detach();
+    useHostControlStore.getState().reset();
+
     if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
       (window as any).__LIVEKIT_ROOM__ = null;
     }
+  }, []);
+
+  const publishHandRaise = useCallback(async (raised: boolean) => {
+    if (presenceAdapterRef.current) {
+      await presenceAdapterRef.current.publishHandRaise(raised);
+    }
+  }, []);
+
+  const publishSpotlight = useCallback(async (targetParticipantId: string | null) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const payload = JSON.stringify({
+        type: 'spotlight',
+        participantId: targetParticipantId,
+        timestamp: Date.now(),
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: SPOTLIGHT_TOPIC,
+      });
+      useLayoutStore.getState().setSpotlight(targetParticipantId);
+    }
+  }, []);
+
+  const publishChatMessage = useCallback(async (text: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const msgId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'chat',
+        id: msgId,
+        text,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: CHAT_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        `You (${senderId.slice(0, 6)})`;
+
+      useCollaborationStore.getState().addMessage({
+        id: msgId,
+        senderId,
+        senderName,
+        text,
+        timestamp,
+        isLocal: true,
+      });
+    }
+  }, []);
+
+  const publishReaction = useCallback(async (emoji: ReactionEmoji) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const rxId = `rx-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'reaction',
+        id: rxId,
+        emoji,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: REACTION_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        `You (${senderId.slice(0, 6)})`;
+
+      const rx: ReactionEvent = {
+        id: rxId,
+        senderId,
+        senderName,
+        emoji,
+        timestamp,
+        xOffset: Math.floor(15 + Math.random() * 70),
+      };
+      useCollaborationStore.getState().addReaction(rx);
+
+      setTimeout(() => {
+        useCollaborationStore.getState().removeReaction(rxId);
+      }, 3500);
+    }
+  }, []);
+
+  const publishAnnouncement = useCallback(async (message: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const annId = `ann-${Date.now()}`;
+      const timestamp = Date.now();
+      const payload = JSON.stringify({
+        type: 'announcement',
+        id: annId,
+        message,
+        timestamp,
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: ANNOUNCEMENT_TOPIC,
+      });
+
+      const senderId = room.localParticipant.identity;
+      const presence = usePresenceStore.getState();
+      const senderName =
+        presence.participants.get(senderId)?.name ||
+        room.localParticipant.name ||
+        'You (Host)';
+
+      useCollaborationStore.getState().setAnnouncement({
+        id: annId,
+        message,
+        senderName,
+        timestamp,
+        active: true,
+      });
+    }
+  }, []);
+
+  const lowerParticipantHand = useCallback(async (targetParticipantId?: string) => {
+    const room = roomRef.current;
+    if (room?.localParticipant) {
+      const payload = JSON.stringify({
+        type: 'hand-action',
+        action: targetParticipantId ? 'lower-hand' : 'lower-all',
+        targetParticipantId,
+        timestamp: Date.now(),
+      });
+      const bytes = new TextEncoder().encode(payload);
+      await room.localParticipant.publishData(bytes, {
+        reliable: true,
+        topic: HAND_ACTION_TOPIC,
+      });
+
+      if (targetParticipantId) {
+        usePresenceStore.getState().setHandRaised(targetParticipantId, false);
+      } else {
+        usePresenceStore.getState().lowerAllHands();
+      }
+    }
+  }, []);
+
+  const switchDevice = useCallback(async (kind: MediaDeviceKind, deviceId: string) => {
+    await DeviceManager.getInstance().switchActiveDevice(roomRef.current, kind, deviceId);
   }, []);
 
   return {
@@ -941,5 +1270,12 @@ export function useWebRTC() {
     startScreenShare,
     stopScreenShare,
     leave,
+    publishHandRaise,
+    publishSpotlight,
+    publishChatMessage,
+    publishReaction,
+    publishAnnouncement,
+    lowerParticipantHand,
+    switchDevice,
   };
 }

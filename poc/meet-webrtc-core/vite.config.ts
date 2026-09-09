@@ -9,7 +9,7 @@ export default defineConfig({
       jsxImportSource: 'react',
     }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'robots.txt'],
       manifest: {
         name: 'meet-secure',
@@ -165,16 +165,31 @@ export default defineConfig({
     chunkSizeWarningLimit: 120, // 120kB gz budget for main bundle
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'zustand', 'livekit-client'],
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'react-router-dom',
+      'zustand',
+      'livekit-client',
+      '@hpke/core',
+      'eventemitter3',
+    ],
     exclude: ['xxhash-wasm'],
   },
   define: {
     'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
   },
   server: {
-    host: process.env.VITE_HOST ?? '0.0.0.0',
+    host: process.env.VITE_HOST ?? '127.0.0.1',
     port: 5173,
     strictPort: true,
+    hmr: {
+      host: '127.0.0.1',
+      protocol: 'ws',
+    },
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
@@ -193,12 +208,35 @@ export default defineConfig({
         target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (_err, _req, res) => {
+            if (res && 'writeHead' in res && !res.headersSent) {
+              res.writeHead(503, { 'Content-Type': 'application/json' });
+              res.end(
+                JSON.stringify({
+                  error: 'Signaling service offline',
+                  message: 'meet-signal backend is not running at http://127.0.0.1:8080. Start backend services via Docker Compose or run meet-signal locally.',
+                })
+              );
+            }
+          });
+        },
+      },
+      '/room': {
+        target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
+        changeOrigin: true,
+        secure: false,
       },
       '/signal': {
         target: process.env.VITE_SIGNAL_TARGET ?? 'http://127.0.0.1:8080',
         changeOrigin: true,
         ws: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', () => {
+            // Suppress unhandled socket error logs when signaling backend is restarting or offline
+          });
+        },
       },
       '/sfu': {
         target: process.env.VITE_SFU_TARGET ?? 'http://127.0.0.1:7880',

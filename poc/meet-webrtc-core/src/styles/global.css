@@ -608,11 +608,144 @@ img {
   }
 }
 
+/* Device Select & Option High-Contrast Styles */
+select.device-select,
+.input-field.device-select {
+  color-scheme: dark;
+  background-color: var(--bg-elevated);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: menulist;
+}
+
+select.device-select option,
+.input-field.device-select option {
+  background-color: #161622;
+  color: #f0f0f5;
+  padding: 0.5rem;
+}
+
+select.device-select:focus,
+.input-field.device-select:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* Audio Level Meter */
+.audio-meter-container {
+  width: 100%;
+  max-width: 360px;
+  margin: 0.25rem auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.audio-meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.audio-meter-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-surface);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.audio-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4aa 0%, #2ed573 70%, #ffa502 90%, #ff4757 100%);
+  transition: width 80ms ease-out;
+}
+
+/* PWA Update Prompt Banner */
+.pwa-update-prompt {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  background: var(--bg-surface);
+  color: var(--fg);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 212, 170, 0.2);
+  animation: pwaSlideUp 0.3s ease-out;
+  max-width: 440px;
+}
+
+@keyframes pwaSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pwa-update-prompt__content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pwa-update-prompt__icon {
+  font-size: 1.5rem;
+}
+
+.pwa-update-prompt__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: 0.8125rem;
+}
+
+.pwa-update-prompt__text strong {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.pwa-update-prompt__text span {
+  color: var(--fg-muted);
+}
+
+.pwa-update-prompt__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.pwa-update-prompt__btn-update {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pwa-update-prompt__btn-dismiss {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
 /* Print */
 @media print {
   .control-bar,
   .media-toggle,
-  .shield-badge {
+  .shield-badge,
+  .pwa-update-prompt {
     display: none !important;
   }
 }
