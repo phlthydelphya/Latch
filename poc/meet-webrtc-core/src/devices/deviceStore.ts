@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { DeviceSettingsTab, MediaDeviceOption } from './types';
 
+export type DeviceAvailability =
+  | 'checking'
+  | 'permission-required'
+  | 'available'
+  | 'disabled'
+  | 'denied'
+  | 'unavailable'
+  | 'unsupported'
+  | 'error';
+
 export interface DeviceState {
   audioInputs: MediaDeviceOption[];
   audioOutputs: MediaDeviceOption[];

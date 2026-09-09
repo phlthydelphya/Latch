@@ -12,31 +12,43 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
     vi.restoreAllMocks();
   });
 
-  it('falls back to audio-only when video allocation fails and renders Retry Camera button', async () => {
-    const mockAudioStream = {
-      getTracks: () => [
-        { kind: 'audio', stop: vi.fn(), enabled: true },
-      ],
-    };
+  it('BHS-001A: Semantic lifecycle - fails camera, succeeds fallback, maintains error, clears on manual retry', async () => {
+    let testPhase: 'CAMERA_FAILURE' | 'RECOVERY_SUCCESS' = 'CAMERA_FAILURE';
 
-    let attempt = 0;
     const mockGetUserMedia = vi.fn().mockImplementation((constraints: MediaStreamConstraints) => {
-      attempt++;
-      if (constraints.video) {
-        if (attempt === 1) {
-          const err = new DOMException('Failed to allocate videosource', 'NotReadableError');
-          return Promise.reject(err);
+      console.log(`[TEST MOCK] getUserMedia called with`, JSON.stringify(constraints), `| phase: ${testPhase}`);
+
+      if (testPhase === 'CAMERA_FAILURE') {
+        // Any request containing video must reject with NotReadableError
+        if (constraints.video) {
+          return Promise.reject(new DOMException('Failed to allocate videosource', 'NotReadableError'));
         }
-        // On retry, succeed with both
+        // Audio-only fallback must succeed
+        if (constraints.audio && constraints.video === false) {
+          return Promise.resolve({
+            getTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
+            getAudioTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
+            getVideoTracks: () => [],
+          });
+        }
+      }
+
+      if (testPhase === 'RECOVERY_SUCCESS') {
         return Promise.resolve({
           getTracks: () => [
-            { kind: 'video', stop: vi.fn(), enabled: true },
-            { kind: 'audio', stop: vi.fn(), enabled: true },
+            { kind: 'video', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) },
+            { kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) },
           ],
+          getAudioTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
+          getVideoTracks: () => [{ kind: 'video', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) }],
         });
       }
-      // Audio-only fallback request
-      return Promise.resolve(mockAudioStream);
+
+      return Promise.resolve({
+        getTracks: () => [],
+        getAudioTracks: () => [],
+        getVideoTracks: () => [],
+      });
     });
 
     Object.defineProperty(navigator, 'mediaDevices', {
@@ -53,7 +65,7 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
       writable: true,
     });
 
-    render(
+    const { unmount } = render(
       <MemoryRouter initialEntries={['/r/test-room']}>
         <Routes>
           <Route path="/r/:roomId" element={<PreJoinPage />} />
@@ -72,6 +84,13 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
     const retryBtn = screen.getByRole('button', { name: /retry camera/i });
     expect(retryBtn).not.toBeNull();
 
+    // Verify video is disabled in the toggle button
+    const cameraToggle = screen.getByLabelText('Turn on camera');
+    expect(cameraToggle.className).toContain('muted');
+
+    // Set test fixture to success phase before clicking retry
+    testPhase = 'RECOVERY_SUCCESS';
+
     // Click Retry Camera
     fireEvent.click(retryBtn);
 
@@ -80,5 +99,8 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
       expect(screen.queryByRole('button', { name: /retry camera/i })).toBeNull();
       expect(screen.queryByText(/Camera is in use by another application/i)).toBeNull();
     });
+
+    // Verify unmount behavior
+    unmount();
   });
 });
