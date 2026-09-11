@@ -14,15 +14,15 @@ import { InviteModal } from './InviteModal';
 
 interface ControlBarProps {
   onToggleHand?: (raised: boolean) => Promise<void> | void;
+  onToggleScreenShare?: (sharing: boolean) => Promise<void> | void;
   onLeave?: () => Promise<void> | void;
 }
 
-export function ControlBar({ onToggleHand, onLeave }: ControlBarProps = {}) {
+export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: ControlBarProps = {}) {
   const {
     localParticipant,
     toggleLocalAudio,
     toggleLocalVideo,
-    setLocalScreenShare,
     leave,
     isConnected,
     isReconnecting,
@@ -104,11 +104,8 @@ export function ControlBar({ onToggleHand, onLeave }: ControlBarProps = {}) {
   };
 
   const handleScreenShare = async () => {
-    if (screenSharing) {
-      await setLocalScreenShare(false);
-    } else {
-      await setLocalScreenShare(true);
-    }
+    if (!onToggleScreenShare) return;
+    await onToggleScreenShare(!screenSharing);
   };
 
   return (

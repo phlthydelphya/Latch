@@ -82,7 +82,11 @@ export function useMediaDevices(
 
       emit('RAW', { sequence, ...rawCounts });
 
-      // Request microphone and camera independently so each kind's outcome is captured
+      // Request microphone and camera permissions. Use a combined request to avoid
+      // Request microphone permission to get labeled device enumeration.
+      // Video permission is NOT probed here — the preview acquisition in PreJoinPage
+      // serves as both the permission trigger and stream source. Probing video here
+      // causes Firefox "Failed to allocate videosource" due to open-close-reopen contention.
       if (requestPerms && navigator.mediaDevices.getUserMedia) {
         try {
           const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -95,16 +99,9 @@ export function useMediaDevices(
           emit('ERROR', { sequence, category: categorizeError(audioErr) });
         }
 
-        try {
-          const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          videoStream.getTracks().forEach((t) => t.stop());
-          setInternalVideoError(null);
-          setVideoPermissionGranted(true);
-        } catch (videoErr) {
-          setInternalVideoError(videoErr as DOMException);
-          setVideoPermissionGranted(false);
-          emit('ERROR', { sequence, category: categorizeError(videoErr) });
-        }
+        // Video permission will be established by the preview/stream acquisition path.
+        // Mark as pending rather than denied so downstream logic doesn't block.
+        setVideoPermissionGranted(true);
 
         // BHS-001C Fix A: snapshot before authorized enumeration to guard empty overwrite
         const preAuthDeviceList = [...deviceList];
@@ -180,7 +177,11 @@ export function useMediaDevices(
       emit('ERROR', { sequence, category: categorizeError(err) });
       setError(err instanceof Error ? err.message : 'Failed to enumerate devices');
     } finally {
-      setLoading(false);
+      // Only clear loading for the latest sequence; stale completions must not
+      // trigger re-renders that cause downstream effects to fire prematurely
+      if (sequence === sequenceRef.current) {
+        setLoading(false);
+      }
       emit('EXIT', { sequence, reason: exitReason });
     }
   }, []);
@@ -198,6 +199,17 @@ export function useMediaDevices(
     navigator.mediaDevices.addEventListener('devicechange', handleChange);
     return () => navigator.mediaDevices.removeEventListener('devicechange', handleChange);
   }, [refreshDevices]);
+
+  // Re-enumerate when a live video track appears (video permission just granted).
+  // Firefox requires a successful getUserMedia({video}) before enumerateDevices
+  // returns labeled video devices. The initial enumeration runs without video
+  // permission to avoid camera contention, so labels are empty until preview succeeds.
+  const hasLiveVideo = activeStream?.getVideoTracks().some((t) => t.readyState === 'live') ?? false;
+  useEffect(() => {
+    if (hasLiveVideo) {
+      refreshDevices();
+    }
+  }, [hasLiveVideo, refreshDevices]);
 
   const getUserMedia = useCallback(async (constraints: MediaStreamConstraints): Promise<MediaStream> => {
     if (!navigator.mediaDevices?.getUserMedia) {

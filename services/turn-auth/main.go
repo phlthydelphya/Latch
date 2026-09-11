@@ -155,9 +155,9 @@ func main() {
 		// Response URLs per ADR-005 §Decision — matches coturn compose ports
 		// coturn listens: 3478 UDP/TCP, 443 TCP/TLS (turns), 5349 TLS
 		urls := []string{
-			"turn:turn.meet-secure.local:3478",
-			"turn:turn.meet-secure.local:443?transport=tcp",
-			"turns:turn.meet-secure.local:443?transport=tcp",
+			"turn:127.0.0.1:3478",
+			"turn:127.0.0.1:443?transport=tcp",
+			"turns:127.0.0.1:443?transport=tcp",
 		}
 
 		resp := turnCredResponse{

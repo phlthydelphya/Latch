@@ -6,7 +6,16 @@ rtc:
   port_range_start: 40000
   port_range_end: 40200
   tcp_port: 7881
+  # Single UDP mux port — Docker Desktop UDP forwarding for a 201-port range is
+  # unreliable (Firefox STUN binding requests to 127.0.0.1:4xxxx never arrive at
+  # the container). Single-port forwarding is the proven local-dev path.
+  udp_port: 7882
   use_external_ip: false
+  # Local dev: advertise loopback so browsers on the Docker host can reach candidates.
+  # Without this, LiveKit advertises its container bridge IP (172.x.x.x) which is
+  # unreachable from the host browser, causing ICE failure (Firefox has no ICE-TCP
+  # fallback like Chromium). Prod/K8s must override with the real node IP.
+  node_ip: 127.0.0.1
   # Single-host P0; K8s uses hostNetwork or NodePort via Helm
 redis:
   address: redis:6379
@@ -26,10 +35,21 @@ room:
   empty_timeout: 300 # 5min
   departure_timeout: 20
 turn:
-  enabled: false # coturn external (infra/coturn), not LiveKit embedded TURN
-  domain: turn.meet-secure.local
-  tls_port: 5349
-  udp_port: 3478
+  # Local dev: embedded TURN ON. coturn (network_mode: host) is unreachable from
+  # the Windows host browser (isolated in WSL2 VM), so clients got NO relay
+  # candidates and Firefox (no ICE-TCP active fallback) had no viable path.
+  # Embedded TURN advertises turn:<node_ip>:3478 with per-participant ephemeral
+  # creds in the join response; relay ports reuse the mapped 40000-40200 range.
+  # Prod topology keeps external coturn per architecture-brief §7.
+  enabled: true
+  # Use 127.0.0.1 instead of turn.meet-secure.local so the Windows host can resolve it
+  domain: 127.0.0.1
+  tls_port: 0
+  # 3478 + 3479 are held by coturn (host networking: listening + alt ports) inside
+  # the same VM as Docker's port proxy — use 3480 for embedded TURN.
+  udp_port: 3480
+  relay_range_start: 40000
+  relay_range_end: 40200
 logging:
   level: info
   json: true

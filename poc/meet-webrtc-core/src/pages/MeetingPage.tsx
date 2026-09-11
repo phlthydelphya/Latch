@@ -228,7 +228,17 @@ export function MeetingPage() {
 
       <HostAnnouncementBanner />
       <ReactionsOverlay />
-      <ControlBar onToggleHand={publishHandRaise} onLeave={handleLeave} />
+      <ControlBar
+        onToggleHand={publishHandRaise}
+        onToggleScreenShare={async (sharing) => {
+          if (sharing) {
+            await startScreenShare();
+          } else {
+            await stopScreenShare();
+          }
+        }}
+        onLeave={handleLeave}
+      />
       <ReactionsBar onSendReaction={publishReaction} />
       <RosterDrawer onLowerHand={lowerParticipantHand} />
       <Suspense fallback={null}>

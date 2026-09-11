@@ -431,3 +431,112 @@ func TestM4A1RoomStatusEndpoint(t *testing.T) {
 		t.Errorf("expected locked room to have exists=true, joinable=false, locked=true, got %+v", resLocked)
 	}
 }
+
+func TestCanonicalRoomIDMixedCaseStatusLookup(t *testing.T) {
+	am := newAuthorityManager()
+	mixedCase := "Room-ABC123Def"
+	_, err := am.createRoom(canonicalRoomID(mixedCase), "host-1")
+	if err != nil {
+		t.Fatalf("createRoom failed: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/room/status?roomId="+mixedCase, nil)
+	w := httptest.NewRecorder()
+	handleRoomStatus(am, w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+	var res map[string]any
+	json.NewDecoder(w.Body).Decode(&res)
+	if res["exists"] != true {
+		t.Errorf("expected exists=true for mixed-case lookup of canonical room, got %+v", res)
+	}
+}
+
+func TestCanonicalRoomIDAuthorityLookupCaseInsensitive(t *testing.T) {
+	am := newAuthorityManager()
+	_, _ = am.createRoom(canonicalRoomID("MyRoom-XyZ"), "host-1")
+
+	for _, variant := range []string{"myroom-xyz", "MYROOM-XYZ", "MyRoom-XyZ", " myroom-xyz "} {
+		auth, ok := am.getAuthority(canonicalRoomID(variant))
+		if !ok {
+			t.Errorf("getAuthority(%q) returned not found, expected match", variant)
+			continue
+		}
+		if auth.HostID != "host-1" {
+			t.Errorf("getAuthority(%q) hostId=%s, want host-1", variant, auth.HostID)
+		}
+	}
+}
+
+func TestCanonicalRoomIDDuplicateCaseConflict(t *testing.T) {
+	am := newAuthorityManager()
+	_, err := am.createRoom(canonicalRoomID("Room-Dup"), "host-1")
+	if err != nil {
+		t.Fatalf("first createRoom failed: %v", err)
+	}
+
+	_, err = am.createRoom(canonicalRoomID("ROOM-DUP"), "host-2")
+	if err == nil {
+		t.Error("expected 409-equivalent error for case-variant duplicate room, got nil")
+	}
+}
+
+func TestCanonicalRoomIDTransferHostAcrossCaseVariants(t *testing.T) {
+	am := newAuthorityManager()
+	canonical := canonicalRoomID("Transfer-Room-Abc")
+	_, _ = am.createRoom(canonical, "host-original")
+
+	err := am.transferHost(canonicalRoomID("TRANSFER-ROOM-ABC"), "host-original", "host-new")
+	if err != nil {
+		t.Fatalf("transferHost across case variants failed: %v", err)
+	}
+
+	auth, ok := am.getAuthority(canonical)
+	if !ok {
+		t.Fatal("room not found after transfer")
+	}
+	if auth.HostID != "host-new" {
+		t.Errorf("expected hostId=host-new after transfer, got %s", auth.HostID)
+	}
+}
+
+func TestCanonicalRoomIDWhitespaceAndCaseNormalization(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected string
+	}{
+		{" Room-ABC ", "room-abc"},
+		{"ROOM-123", "room-123"},
+		{"  MixedCase-Room  ", "mixedcase-room"},
+		{"already-lower", "already-lower"},
+		{"", ""},
+	}
+	for _, tc := range cases {
+		got := canonicalRoomID(tc.input)
+		if got != tc.expected {
+			t.Errorf("canonicalRoomID(%q) = %q, want %q", tc.input, got, tc.expected)
+		}
+	}
+}
+
+func TestCanonicalRoomIDGuestTokenAgainstMixedCaseRoom(t *testing.T) {
+	am := newAuthorityManager()
+	mixedCase := "Guest-Room-Mix789"
+	canonical := canonicalRoomID(mixedCase)
+	_, _ = am.createRoom(canonical, "host-1")
+
+	role, _ := am.assignRole(canonicalRoomID(mixedCase), "guest-p1")
+	if role != "participant" {
+		t.Errorf("expected participant role for guest on mixed-case room, got %s", role)
+	}
+
+	auth, ok := am.getAuthority(canonical)
+	if !ok {
+		t.Fatal("room not found after guest assignRole")
+	}
+	if auth.HostID != "host-1" {
+		t.Errorf("host displaced by guest join: hostId=%s", auth.HostID)
+	}
+}

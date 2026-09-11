@@ -33,6 +33,10 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+func canonicalRoomID(id string) string {
+	return strings.ToLower(strings.TrimSpace(id))
+}
+
 type healthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
@@ -558,7 +562,7 @@ func handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomID := strings.TrimSpace(req.RoomID)
+	roomID := canonicalRoomID(req.RoomID)
 	if roomID == "" {
 		roomID = "room-" + uuid.New().String()[:12]
 	}
@@ -605,7 +609,7 @@ func handleToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
-	req.RoomID = strings.TrimSpace(req.RoomID)
+	req.RoomID = canonicalRoomID(req.RoomID)
 	name := strings.TrimSpace(req.Name)
 	if req.RoomID == "" {
 		atomic.AddInt64(&metricSignalErrors, 1)
@@ -629,7 +633,7 @@ func handleToken(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(authHeader, "Bearer ") {
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 		claims, err := validateJWT(tokenStr)
-		if err == nil && claims.RoomID == req.RoomID && claims.Role == "host" {
+		if err == nil && canonicalRoomID(claims.RoomID) == req.RoomID && claims.Role == "host" {
 			isHostReconnection = true
 		}
 	}
@@ -902,6 +906,7 @@ func handleTransferHost(h *hub, am *authorityManager, w http.ResponseWriter, r *
 		http.Error(w, "roomId and targetParticipantId required", http.StatusBadRequest)
 		return
 	}
+	req.RoomID = canonicalRoomID(req.RoomID)
 
 	// Verify requester is host
 	if err := am.transferHost(req.RoomID, claims.ParticipantID, req.TargetParticipantID); err != nil {
@@ -953,7 +958,7 @@ func handleRoomAuthority(am *authorityManager, w http.ResponseWriter, r *http.Re
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	roomID := r.URL.Query().Get("roomId")
+	roomID := canonicalRoomID(r.URL.Query().Get("roomId"))
 	if roomID == "" {
 		http.Error(w, "roomId is required", http.StatusBadRequest)
 		return
@@ -980,11 +985,11 @@ func handleRoomStatus(am *authorityManager, w http.ResponseWriter, r *http.Reque
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	roomID := strings.TrimSpace(r.URL.Query().Get("roomId"))
+	roomID := canonicalRoomID(r.URL.Query().Get("roomId"))
 	if roomID == "" {
 		pathParts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 		if len(pathParts) >= 2 && pathParts[0] == "room" && pathParts[len(pathParts)-1] == "status" {
-			roomID = pathParts[1]
+			roomID = canonicalRoomID(pathParts[1])
 		}
 	}
 	if roomID == "" {
@@ -1030,11 +1035,11 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roomID := r.URL.Query().Get("room")
+	roomID := canonicalRoomID(r.URL.Query().Get("room"))
 	if roomID == "" {
-		roomID = claims.RoomID
+		roomID = canonicalRoomID(claims.RoomID)
 	}
-	if roomID != claims.RoomID {
+	if roomID != canonicalRoomID(claims.RoomID) {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "room mismatch", http.StatusForbidden)
 		return

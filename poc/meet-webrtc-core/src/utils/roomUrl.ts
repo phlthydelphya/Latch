@@ -142,6 +142,6 @@ export function formatInvitationText(
 Join Meeting:
 ${meetingUrl}
 
-Meeting ID: ${roomId}
+Meeting ID: ${roomId.trim().toLowerCase()}
 Security: End-to-end encrypted (SFrame RFC 9605). No server recording or logs.`;
 }

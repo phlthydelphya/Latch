@@ -7,6 +7,7 @@ import { usePresenceStore } from '../presence/presenceStore';
 import { useHostControlStore } from '../host/hostControlStore';
 import { HostControlManager } from '../host/hostControlManager';
 import { fetchToken } from '../auth/token';
+import { useDeviceStore } from '../devices/deviceStore';
 
 function generateKeyParam(): string {
   const array = new Uint8Array(32);
@@ -81,6 +82,7 @@ export function PreJoinPage() {
   // Track acquisition generations and active streams
   const previewGeneration = useRef(0);
   const activeStreamRef = useRef<MediaStream | null>(null);
+  const previewAcquiring = useRef(false);
 
   // Initialize selected devices from enumerated devices if empty
   useEffect(() => {
@@ -109,12 +111,28 @@ export function PreJoinPage() {
     }
   }, [permissionsRequested, refreshDevices]);
 
+  // Defer preview acquisition until permission-requesting enumeration completes
+  const [permissionsResolved, setPermissionsResolved] = useState(false);
+  useEffect(() => {
+    if (permissionsRequested && !deviceLoading) {
+      setPermissionsResolved(true);
+    }
+  }, [permissionsRequested, deviceLoading]);
+
   // The actual acquisition function with generation ownership
   const requestPreview = useCallback(async (
     videoReq: boolean | { deviceId: { exact: string } },
     audioReq: boolean | { deviceId: { exact: string } }
   ) => {
     const generation = ++previewGeneration.current;
+
+    // Serialize concurrent acquisitions to prevent Firefox "Failed to allocate videosource"
+    if (previewAcquiring.current) {
+      return;
+    }
+    previewAcquiring.current = true;
+
+    try {
 
     // Fast-path for turning both off cleanly
     if (!videoReq && !audioReq) {
@@ -127,6 +145,7 @@ export function PreJoinPage() {
     }
 
     try {
+      console.log('[PreJoin] getUserMedia request', { video: videoReq, audio: audioReq, generation });
       const stream = await getUserMedia({ video: videoReq, audio: audioReq });
 
       // Generation Commit Gate
@@ -148,7 +167,34 @@ export function PreJoinPage() {
     } catch (err) {
       if (generation !== previewGeneration.current) return;
 
+      const errName = (err as { name?: string })?.name;
       console.warn('[PreJoin] Full media stream request failed:', err);
+
+      // Firefox hardware-release race: retry once after delay to allow device unlock
+      if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+        await new Promise((r) => setTimeout(r, 500));
+        if (generation !== previewGeneration.current) return;
+        try {
+          const retryStream = await getUserMedia({ video: videoReq, audio: audioReq });
+          if (generation !== previewGeneration.current) {
+            retryStream.getTracks().forEach((t) => t.stop());
+            return;
+          }
+          if (activeStreamRef.current) {
+            activeStreamRef.current.getTracks().forEach(t => t.stop());
+          }
+          activeStreamRef.current = retryStream;
+          setPreviewStream(retryStream);
+          if (videoReq) setCameraError(null);
+          if (audioReq) setAudioError(null);
+          setError(null);
+          console.log('[PreJoin] Retry after NotReadableError succeeded');
+          return;
+        } catch (retryErr) {
+          console.warn('[PreJoin] Retry also failed:', retryErr);
+          if (generation !== previewGeneration.current) return;
+        }
+      }
 
       // Audio-only fallback path
       if (videoReq && audioReq) {
@@ -213,12 +259,16 @@ export function PreJoinPage() {
         setCameraError('Camera and microphone access denied. You can still join in listen-only mode.');
       }
     }
+    } finally {
+      previewAcquiring.current = false;
+    }
   }, [getUserMedia, setError]);
 
   // Unified dependency observer for triggering acquisition
   useEffect(() => {
     if (!roomId) return;
     if (deviceLoading) return; // Wait for initial population to finish
+    if (!permissionsResolved) return; // Wait for permission-requesting enumeration to complete
 
     // Determine current active stream state
     const currentVideoId = activeStreamRef.current?.getVideoTracks()[0]?.getSettings().deviceId;
@@ -259,7 +309,7 @@ export function PreJoinPage() {
     if (needsUpdate || !activeStreamRef.current) {
       requestPreview(requestedVideo, requestedAudio);
     }
-  }, [roomId, deviceLoading, videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, requestPreview]);
+  }, [roomId, deviceLoading, permissionsResolved, videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, requestPreview]);
 
   // Component cleanup
   useEffect(() => {
@@ -355,6 +405,17 @@ export function PreJoinPage() {
       };
 
       setLocalParticipant(localParticipant);
+
+      // Persist device selection to DeviceStore so useWebRTC publishes the chosen devices
+      if (selectedVideoDevice) {
+        useDeviceStore.getState().selectVideoInput(selectedVideoDevice);
+      }
+      if (selectedAudioDevice) {
+        useDeviceStore.getState().selectAudioInput(selectedAudioDevice);
+      }
+      if (selectedSpeakerDevice) {
+        useDeviceStore.getState().selectAudioOutput(selectedSpeakerDevice);
+      }
 
       // Stop preview tracks so LiveKit can allocate the hardware cleanly
       if (previewStream) {

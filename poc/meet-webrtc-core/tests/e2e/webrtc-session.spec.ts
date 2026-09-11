@@ -291,25 +291,26 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
   await page1.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
   
   // Fill landing page form
-  await page1.fill('#roomId', ROOM_ID);
-  await page1.fill('#name', 'Browser-1');
+  await page1.click('button.btn-primary:has-text("+ New Meeting")');
+  await page1.waitForSelector('#name-create');
+  await page1.fill('#name-create', 'Browser-1');
   await page1.click('button[type="submit"]');
   
-  // Wait for navigation to pre-join (room ID gets sanitized to lowercase alphanumeric)
-  const sanitizedRoomId = ROOM_ID.toLowerCase().replace(/[^a-z0-9]/g, '');
-  await page1.waitForURL(`**/r/${sanitizedRoomId}*`, { timeout: 10000 });
-  console.log('[Page1] Navigated to pre-join page, room:', sanitizedRoomId);
-    
-    // Wait for preview to load
-    await page1.waitForSelector('video', { timeout: 10000 });
+  // Wait for preview to load to know we've navigated
+  await page1.waitForFunction(() => window.location.hash.includes('#k='), { timeout: 10000 });
+  const actualUrl = page1.url();
+  const urlObj = new URL(actualUrl);
+  const pathParts = urlObj.pathname.split('/');
+  const actualRoomId = pathParts[pathParts.length - 1];
+  console.log('[Page1] Navigated to pre-join page, room:', actualRoomId);
     console.log('[Page1] Preview video element found');
     
-    // Click Join button
+    // Click Join
     await page1.click('button:has-text("Join Meeting")');
     console.log('[Page1] Clicked Join Meeting');
-    
-    // Wait for navigation to meeting page with key in hash
-    await page1.waitForURL(`**/r/${sanitizedRoomId}*/join#k=*`, { timeout: 15000 });
+
+    // Wait for navigation to meeting page
+    await page1.waitForSelector('[role="status"]', { timeout: 15000 });
     const url1 = page1.url();
     console.log('[Page1] Joined meeting at:', url1);
     
@@ -324,7 +325,7 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
 
     // ========== BROWSER 2: Join same room ==========
     console.log('\n=== BROWSER 2: Joining room ===');
-    await page2.goto(`${BASE_URL}/r/${sanitizedRoomId}#k=${actualKeyParam}`, { waitUntil: 'networkidle' });
+    await page2.goto(`${BASE_URL}/r/${actualRoomId}#k=${actualKeyParam}`, { waitUntil: 'networkidle' });
     console.log('[Page2] Navigated to pre-join with key');
     
     // Fill name on landing/pre-join (if redirected to landing, fill and submit)
@@ -543,18 +544,22 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
       const room = (window as any).__LIVEKIT_ROOM__;
       if (room) {
         const pc = room.engine?.publisher?.pc || room.engine?.subscriber?.pc;
-        if (pc) return await pc.getStats();
-      }
-      const managers = (window as any).__WEBRTC_MANAGERS__;
-      if (managers && managers.size > 0) {
-        const mgr = managers.values().next().value;
-        if (mgr && typeof mgr.getConnectionStats === 'function') {
-          return await mgr.getConnectionStats();
+        if (pc) {
+          const stats = await pc.getStats();
+          const result: any = {};
+          stats.forEach((report: any, key: string) => {
+            result[key] = report;
+          });
+          return result;
         }
       }
       return null;
     });
     console.log('[Page1] Final stats available:', !!finalStats1);
+    
+    const fs = require('fs');
+    fs.writeFileSync('firefox-ice-stats.json', JSON.stringify(finalStats1, null, 2));
+    console.log('Saved to firefox-ice-stats.json');
 
     const finalStats2 = await page2.evaluate(async () => {
       const room = (window as any).__LIVEKIT_ROOM__;

@@ -355,6 +355,8 @@ export function useWebRTC() {
         room.on(RoomEvent.Disconnected, (reason) => {
           useAppStore.getState().setConnected(false);
           useAppStore.getState().setShieldMode(false);
+          setScreenStream(null);
+          useLayoutStore.getState().setScreenShareOwner(null);
           if (reason) {
             useAppStore.getState().setError(`Disconnected: ${reason}`);
           }
@@ -362,6 +364,49 @@ export function useWebRTC() {
 
         room.on(RoomEvent.Reconnecting, () => useAppStore.getState().setReconnecting(true));
         room.on(RoomEvent.Reconnected, () => useAppStore.getState().setReconnecting(false));
+
+        // ICE diagnostics: capture transport state changes and candidate info
+        room.on(RoomEvent.ConnectionStateChanged, (state) => {
+          console.log('[ICE DIAG] Connection state:', state);
+          if (state === 'failed' || state === 'disconnected') {
+            const engine = (room as any).engine;
+            const pcManager = engine?.pcManager;
+            const publisher = pcManager?.publisher;
+            const subscriber = pcManager?.subscriber;
+            if (publisher?.pc) {
+              const pc = publisher.pc as RTCPeerConnection;
+              console.log('[ICE DIAG] Publisher PC state', {
+                iceConnectionState: pc.iceConnectionState,
+                iceGatheringState: pc.iceGatheringState,
+                connectionState: pc.connectionState,
+                signalingState: pc.signalingState,
+              });
+              pc.getStats().then((stats) => {
+                const candidates: Array<{type: string, protocol: string, address: string}> = [];
+                const pairs: Array<{state: string, nominated: boolean, localCandidateId: string, remoteCandidateId: string}> = [];
+                stats.forEach((report) => {
+                  if (report.type === 'local-candidate') {
+                    candidates.push({ type: report.candidateType, protocol: report.protocol, address: report.address });
+                  }
+                  if (report.type === 'candidate-pair') {
+                    pairs.push({ state: report.state, nominated: report.nominated, localCandidateId: report.localCandidateId, remoteCandidateId: report.remoteCandidateId });
+                  }
+                });
+                console.log('[ICE DIAG] Local candidates:', candidates);
+                console.log('[ICE DIAG] Candidate pairs:', pairs);
+              });
+            }
+            if (subscriber?.pc) {
+              const pc = subscriber.pc as RTCPeerConnection;
+              console.log('[ICE DIAG] Subscriber PC state', {
+                iceConnectionState: pc.iceConnectionState,
+                iceGatheringState: pc.iceGatheringState,
+                connectionState: pc.connectionState,
+                signalingState: pc.signalingState,
+              });
+            }
+          }
+        });
 
         // I-10: ParticipantConnected & Join Rekey
         room.on(RoomEvent.ParticipantConnected, (participant) => {
@@ -467,6 +512,9 @@ export function useWebRTC() {
           });
           console.log('[LiveKit] trackPublications.size', room.localParticipant?.trackPublications.size ?? 0);
 
+          const pubSource = (publication as any)?.source;
+          const isScreenShare = pubSource === Track.Source.ScreenShare;
+
           if (sframeEnabled && (hasCreateEncodedStreams() || hasScriptTransform())) {
             const sender = (publication.track as any)?.sender;
             if (sender && !(sender as any)._sframeTransformer) {
@@ -480,18 +528,47 @@ export function useWebRTC() {
             }
           }
 
-          // Local track published - get stream from participant
+          // Local track published - handle camera/mic and screen share separately
           if (participant === room.localParticipant) {
-            const stream = new MediaStream();
-            room.localParticipant?.trackPublications.forEach((pub) => {
-              const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+            if (isScreenShare) {
+              // Screen share: create dedicated screenStream, keep localStream camera-only
+              const mst = (publication.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
               if (mst) {
-                stream.addTrack(mst);
+                const stream = new MediaStream([mst]);
+                setScreenStream(stream);
+                console.log('[Screen] screenStream hydrated from LocalTrackPublished', { trackSid: publication.trackSid });
+
+                // Browser chrome stop: listen for track ended to atomically clear stream + owner
+                mst.addEventListener('ended', () => {
+                  console.log('[Screen] track ended (browser chrome stop) — atomic cleanup');
+                  setScreenStream(null);
+                  useLayoutStore.getState().setScreenShareOwner(null);
+                }, { once: true });
               }
-            });
-            if (stream.getTracks().length > 0) {
-              setLocalStream(stream);
+            } else {
+              // Camera/mic: rebuild localStream from non-screen publications
+              const stream = new MediaStream();
+              room.localParticipant?.trackPublications.forEach((pub) => {
+                const pubSrc = (pub as any)?.source;
+                if (pubSrc === Track.Source.ScreenShare) return; // exclude screen from localStream
+                const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+                if (mst) {
+                  stream.addTrack(mst);
+                }
+              });
+              if (stream.getTracks().length > 0) {
+                setLocalStream(stream);
+              }
             }
+          }
+        });
+
+        // Screen share lifecycle: sync store when browser stops sharing or track is unpublished
+        room.on(RoomEvent.LocalTrackUnpublished, (publication) => {
+          if ((publication as any)?.source === Track.Source.ScreenShare) {
+            useAppStore.getState().setLocalScreenShare(false);
+            setScreenStream(null);
+            useLayoutStore.getState().setScreenShareOwner(null);
           }
         });
 
@@ -829,12 +906,24 @@ export function useWebRTC() {
 
         // Connect to LiveKit room — safe instrumented diagnostic
         console.log(`[LIVEKIT CONNECT] targetRoomMatchesToken=${Boolean(token && targetRoomId)}`);
+
+        const supportsEncodedStreams = typeof RTCRtpSender !== 'undefined' &&
+          'createEncodedStreams' in RTCRtpSender.prototype;
+
         try {
+          const rtcConfig: Record<string, unknown> = {};
+          if (supportsEncodedStreams) {
+            rtcConfig.encodedInsertableStreams = true;
+          }
+
+          console.log('[ICE DIAG] Configuration', {
+            browser: navigator.userAgent,
+            supportsEncodedStreams,
+          });
+
           await room.connect(resolvedSfuUrl, token, {
             autoSubscribe: true,
-            rtcConfig: {
-              encodedInsertableStreams: true,
-            } as any,
+            rtcConfig: rtcConfig as any,
           });
           if (isCancelled) {
             room.disconnect();
@@ -860,17 +949,38 @@ export function useWebRTC() {
           const shouldPublishVideo = useAppStore.getState().localParticipant?.videoEnabled ?? true;
           if (shouldPublishVideo) {
             console.log('[LiveKit] setCameraEnabled start');
+            const videoDeviceId = useDeviceStore.getState().selectedVideoInputId;
+            const videoOptions = videoDeviceId ? { deviceId: { exact: videoDeviceId } } : undefined;
             try {
-              await room.localParticipant.setCameraEnabled(true);
+              await room.localParticipant.setCameraEnabled(true, videoOptions);
               console.log('[LiveKit] setCameraEnabled success', {
                 trackPublicationsSize: room.localParticipant.trackPublications.size,
                 isCameraEnabled: room.localParticipant.isCameraEnabled,
+                deviceId: videoDeviceId || 'default',
               });
               console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
             } catch (err) {
               const e = err as Error;
               console.error('[LiveKit] setCameraEnabled failure', { name: e.name, message: e.message });
-              if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+              if (e.name === 'NotReadableError' && videoDeviceId) {
+                console.warn('[LiveKit] NotReadableError — retrying after hardware release delay');
+                await new Promise((r) => setTimeout(r, 300));
+                try {
+                  await room.localParticipant.setCameraEnabled(true, videoOptions);
+                  console.log('[LiveKit] setCameraEnabled retry succeeded');
+                } catch (retryErr) {
+                  const re = retryErr as Error;
+                  console.warn('[LiveKit] Retry failed, falling back to default device', { name: re.name, message: re.message });
+                  try {
+                    await room.localParticipant.setCameraEnabled(true);
+                    console.log('[LiveKit] setCameraEnabled fallback to default succeeded');
+                  } catch (fallbackErr) {
+                    const fe = fallbackErr as Error;
+                    console.error('[LiveKit] Fallback also failed', { name: fe.name, message: fe.message });
+                    useAppStore.getState().setError('Camera busy — close other apps using camera, or open Settings to switch device.');
+                  }
+                }
+              } else if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
                 useAppStore.getState().setError('Camera access denied — grant permission and reload.');
               } else if (e.name === 'NotFoundError') {
                 useAppStore.getState().setError('No camera device found.');
@@ -888,11 +998,14 @@ export function useWebRTC() {
           const shouldPublishAudio = useAppStore.getState().localParticipant?.audioEnabled ?? true;
           if (shouldPublishAudio) {
             console.log('[LiveKit] setMicrophoneEnabled start');
+            const audioDeviceId = useDeviceStore.getState().selectedAudioInputId;
+            const audioOptions = audioDeviceId ? { deviceId: { exact: audioDeviceId } } : undefined;
             try {
-              await room.localParticipant.setMicrophoneEnabled(true);
+              await room.localParticipant.setMicrophoneEnabled(true, audioOptions);
               console.log('[LiveKit] setMicrophoneEnabled success', {
                 trackPublicationsSize: room.localParticipant.trackPublications.size,
                 isMicrophoneEnabled: room.localParticipant.isMicrophoneEnabled,
+                deviceId: audioDeviceId || 'default',
               });
               console.log('[LiveKit] trackPublications.size', room.localParticipant.trackPublications.size);
             } catch (err) {
@@ -1033,12 +1146,18 @@ export function useWebRTC() {
     if (roomRef.current?.localParticipant) {
       try {
         await roomRef.current.localParticipant.setScreenShareEnabled(true);
+        useAppStore.getState().setLocalScreenShare(true);
+
+        // SFrame transform will be installed via LocalTrackPublished event handler
+        // screenStream hydration also happens there to ensure publication is ready
+
         if (sframeRef.current && keyManagerRef.current) {
+          // Fallback: attempt install if publication already exists (race condition guard)
           const screenPub = roomRef.current.localParticipant.getTrackPublication(Track.Source.ScreenShare);
           const sender = (screenPub?.track as any)?.sender;
-          if (sender) {
+          if (sender && !(sender as any)._sframeTransformer) {
             await installSFrameOnSenderShared(sender, sframeRef.current, getGlobalCounterMutex());
-            console.log('[SFrame] Screen share transform installed', {
+            console.log('[SFrame] Screen share transform installed (fallback)', {
               kid: keyManagerRef.current.getCurrentEpoch(),
               trackId: screenPub!.trackSid,
               globalCounter: sframeRef.current.getEncryptCounter(keyManagerRef.current.getCurrentEpoch())?.toString(),
@@ -1054,6 +1173,9 @@ export function useWebRTC() {
   const stopScreenShare = useCallback(async () => {
     if (roomRef.current?.localParticipant) {
       await roomRef.current.localParticipant.setScreenShareEnabled(false);
+      useAppStore.getState().setLocalScreenShare(false);
+      setScreenStream(null);
+      useLayoutStore.getState().setScreenShareOwner(null);
     }
   }, []);
 
@@ -1090,10 +1212,12 @@ export function useWebRTC() {
     DeviceManager.getInstance().destroy();
     useDeviceStore.getState().reset();
 
-    HostControlManager.getInstance().detach();
-    useHostControlStore.getState().reset();
+HostControlManager.getInstance().detach();
+      useHostControlStore.getState().reset();
+      setScreenStream(null);
+      useLayoutStore.getState().setScreenShareOwner(null);
 
-    if (roomRef.current) {
+      if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
       (window as any).__LIVEKIT_ROOM__ = null;

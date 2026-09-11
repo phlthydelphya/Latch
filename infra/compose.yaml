@@ -56,7 +56,7 @@ services:
     image: livekit/livekit-server:v1.13.6
     cpus: '2.0'
     mem_limit: 4g
-    ports: ["7880:7880","7881:7881","7881:7881/udp","9600:9600"]
+    ports: ["7880:7880","7881:7881","7881:7881/udp","9600:9600","7882:7882/udp","3480:3480/udp","40000-40200:40000-40200/udp"]
     environment:
       LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-dev}: ${LIVEKIT_API_SECRET:-p0-dev-pass-32chars-0123456789abcdef012345}"
       LIVEKIT_E2EE_ENABLED: "true"

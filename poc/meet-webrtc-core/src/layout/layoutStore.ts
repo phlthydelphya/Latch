@@ -156,10 +156,13 @@ export const useLayoutStore = create<LayoutState>((set) => ({
         userLockedMode: state.userLockedMode,
         totalParticipants: 2,
       });
+      // Clear user lock if we were locked to 'content' but screen share ended
+      const shouldUnlock = state.userLockedMode === 'content' && !id && scores.resolvedMode !== 'content';
       return {
         screenShareOwnerId: id,
         mode: scores.resolvedMode,
         previousMode: scores.resolvedMode !== state.mode ? state.mode : state.previousMode,
+        userLockedMode: shouldUnlock ? null : state.userLockedMode,
       };
     }),
 

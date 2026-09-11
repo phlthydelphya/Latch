@@ -47,7 +47,22 @@ export class LayoutEngine {
    */
   public evaluate(input: LayoutEngineInput): LayoutScores {
     // If user explicitly locked a mode and screen share is NOT active, respect user preference
-    if (input.userLockedMode && (!input.hasScreenShare || input.userLockedMode === 'content')) {
+    // Exception: if user locked 'content' but there's no screen share, force unlock and re-evaluate
+    if (input.userLockedMode && input.userLockedMode !== 'content' && !input.hasScreenShare) {
+      const isManual = true;
+      return {
+        presentationScore: input.hasScreenShare ? this.weights.weightScreenShare : 0,
+        spotlightScore: (input.spotlightParticipantId || input.pinnedParticipantId) ? this.weights.weightSpotlight : 0,
+        speakerScore: input.activeSpeakerId ? this.weights.weightSpeaker * input.speakerConfidence : 0,
+        galleryScore: this.weights.baseGalleryScore,
+        resolvedMode: input.userLockedMode,
+      };
+    }
+
+    // Force unlock if user locked 'content' but screen share is gone
+    if (input.userLockedMode === 'content' && !input.hasScreenShare) {
+      // Fall through to normal evaluation (will resolve to gallery/speaker)
+    } else if (input.userLockedMode && (!input.hasScreenShare || input.userLockedMode === 'content')) {
       const isManual = true;
       return {
         presentationScore: input.hasScreenShare ? this.weights.weightScreenShare : 0,
