@@ -368,7 +368,7 @@ export function useWebRTC() {
         // ICE diagnostics: capture transport state changes and candidate info
         room.on(RoomEvent.ConnectionStateChanged, (state) => {
           console.log('[ICE DIAG] Connection state:', state);
-          if (state === 'failed' || state === 'disconnected') {
+          if ((state as any) === 'failed' || (state as any) === 'disconnected') {
             const engine = (room as any).engine;
             const pcManager = engine?.pcManager;
             const publisher = pcManager?.publisher;
@@ -914,6 +914,29 @@ export function useWebRTC() {
           const rtcConfig: Record<string, unknown> = {};
           if (supportsEncodedStreams) {
             rtcConfig.encodedInsertableStreams = true;
+          }
+
+          // Fetch TURN credentials
+          let iceServers: RTCIceServer[] = [];
+          try {
+            const turnRes = await fetch('/turn/credentials', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ roomId: targetRoomId })
+            });
+            if (turnRes.ok) {
+              const creds = await turnRes.json();
+              iceServers = [{
+                urls: creds.urls,
+                username: creds.username,
+                credential: creds.credential
+              }];
+              rtcConfig.iceServers = iceServers;
+            } else {
+              console.warn('[TURN] Failed to fetch credentials, fallback to defaults');
+            }
+          } catch (e) {
+            console.warn('[TURN] Error fetching credentials', e);
           }
 
           console.log('[ICE DIAG] Configuration', {

@@ -26,11 +26,11 @@ export function resolveSfuUrl(sfuUrl: string | undefined): string {
     return envUrl;
   }
   if (!sfuUrl) {
-    return 'ws://127.0.0.1:7880';
+    return 'ws://127.0.0.1:5173';
   }
-  // Translate docker-internal wss://livekit/rtc -> ws://127.0.0.1:7880 for browser dev
+  // Translate docker-internal wss://livekit/rtc -> ws://127.0.0.1:5173 for browser dev
   if (sfuUrl.includes('livekit')) {
-    return 'ws://127.0.0.1:7880';
+    return 'ws://127.0.0.1:5173';
   }
   return sfuUrl;
 }

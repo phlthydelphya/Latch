@@ -11,6 +11,7 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -148,16 +149,15 @@ func main() {
 		username := strconv.FormatInt(expiry, 10) + ":" + userHash
 
 		// Credential = base64(HMAC-SHA256(TURN_SECRET, username))
-		mac := hmac.New(sha256.New, []byte(turnSecret))
+		mac := hmac.New(sha1.New, []byte(turnSecret))
 		mac.Write([]byte(username))
 		credential := base64.StdEncoding.EncodeToString(mac.Sum(nil))
 
 		// Response URLs per ADR-005 §Decision — matches coturn compose ports
 		// coturn listens: 3478 UDP/TCP, 443 TCP/TLS (turns), 5349 TLS
 		urls := []string{
-			"turn:127.0.0.1:3478",
-			"turn:127.0.0.1:443?transport=tcp",
-			"turns:127.0.0.1:443?transport=tcp",
+			"turn:turn.meet-secure.local:3478",
+			"turn:turn.meet-secure.local:3478?transport=tcp",
 		}
 
 		resp := turnCredResponse{

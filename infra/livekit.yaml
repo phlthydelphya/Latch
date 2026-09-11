@@ -15,7 +15,7 @@ rtc:
   # Without this, LiveKit advertises its container bridge IP (172.x.x.x) which is
   # unreachable from the host browser, causing ICE failure (Firefox has no ICE-TCP
   # fallback like Chromium). Prod/K8s must override with the real node IP.
-  node_ip: 127.0.0.1
+  node_ip: 192.168.1.253
   # Single-host P0; K8s uses hostNetwork or NodePort via Helm
 redis:
   address: redis:6379
@@ -42,9 +42,7 @@ turn:
   # creds in the join response; relay ports reuse the mapped 40000-40200 range.
   # Prod topology keeps external coturn per architecture-brief §7.
   enabled: true
-  # Use 127.0.0.1 instead of turn.meet-secure.local so the Windows host can resolve it
-  domain: 127.0.0.1
-  tls_port: 0
+  domain: turn.meet-secure.local
   # 3478 + 3479 are held by coturn (host networking: listening + alt ports) inside
   # the same VM as Docker's port proxy — use 3480 for embedded TURN.
   udp_port: 3480

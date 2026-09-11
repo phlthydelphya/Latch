@@ -4,8 +4,7 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\node_modules\\@playwright\\test\\cli.js",
       "test",
-      "tests/e2e/webrtc-session.spec.ts",
-      "--project=chromium"
+      "--project=firefox"
     ],
     "configFile": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\playwright.config.ts",
     "rootDir": "C:/Users/joshu/meet-secure-core/poc/meet-webrtc-core/tests/e2e",
@@ -19,7 +18,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 1
+      "actualWorkers": 2
     },
     "preserveOutput": "always",
     "projects": [
@@ -28,7 +27,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "chromium",
         "name": "chromium",
@@ -44,7 +43,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "firefox",
         "name": "firefox",
@@ -60,7 +59,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "webkit",
         "name": "webkit",
@@ -76,7 +75,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "msedge",
         "name": "msedge",
@@ -92,7 +91,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
@@ -108,7 +107,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 2
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
@@ -144,7 +143,7 @@
     "tags": [],
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
-    "version": "1.62.1",
+    "version": "1.63.0",
     "workers": 6,
     "webServer": {
       "command": "npm run dev",
@@ -155,6 +154,768 @@
   },
   "suites": [
     {
+      "title": "phase2a-localtrackpublished.spec.ts",
+      "file": "phase2a-localtrackpublished.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Phase 2A: 5 granted + 5 denied runs collect LocalTrackPublished evidence",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 120088,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "[Run 1 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-1-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"7+HLbTrmj9vBzMtt1lOSoXIuNtoI2JhsQKtQb5UyP+4=\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio,video\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
+                    },
+                    {
+                      "text": "[Granted 1] result trackPublicationsSize=null LocalTrackPublished=0\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"5jLJVtDNMJQyD9F0yjUZlDouzuE4p5lar2OUpwc2sNs=\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [Test] getUserMedia granted success audio,video\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 2 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-2-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 2 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
+                    },
+                    {
+                      "text": "[Granted 2] result trackPublicationsSize=null LocalTrackPublished=0\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"ANj2dMkl5h5IHeERcyBf0tqGR3Gn2QkvvJgKJPxKhic=\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [Test] getUserMedia granted success audio,video\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 3 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-3-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 3 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
+                    },
+                    {
+                      "text": "[Granted 3] result trackPublicationsSize=null LocalTrackPublished=0\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"/AYbgb/IbGmX+L95H1gyYgUqyHfOsnuYHcvfq8tFI6c=\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [Test] getUserMedia granted success audio,video\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 4 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-4-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 4 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
+                    },
+                    {
+                      "text": "[Granted 4] result trackPublicationsSize=null LocalTrackPublished=0\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [Test] getUserMedia granted success audio\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"ZHjDE9bcQ9Trk06ZDh9kfvjrqAZzl5x6JbA5kn7GfZc=\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [Test] getUserMedia granted success audio,video\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 5 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-5-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 5 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
+                    },
+                    {
+                      "text": "[Granted 5] result trackPublicationsSize=null LocalTrackPublished=0\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"exact\":\"fake-video\"}},\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] Full media stream request failed: JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [vite] connecting...\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [vite] connected.\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"audio\":true}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [SW] Registered: http://127.0.0.1:5173/\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"exact\":\"fake-video\"}},\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] Full media stream request failed: JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
+                    },
+                    {
+                      "text": "[Run 1 denied] initial url http://127.0.0.1:5173/r/phase2a-denied-1-mtx#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    },
+                    {
+                      "text": "[Run 1 denied error] locator.waitFor: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-whRWxZ -juggler-pipe -silent\n<launched> pid=29860\n[pid=29860][err] *** You are running in headless mode.\n[pid=29860][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=29860][out] \n[pid=29860][out] Juggler listening to the pipe\n[pid=29860][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=1.58593) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=29860][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=29860][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=29860][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860] <gracefully close start>\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-whRWxZ -juggler-pipe -silent\n<launched> pid=29860\n[pid=29860][err] *** You are running in headless mode.\n[pid=29860][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=29860][out] \n[pid=29860][out] Juggler listening to the pipe\n[pid=29860][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=1.58593) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=29860][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=29860][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=29860][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860] <gracefully close start>\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:438:15\n"
+                    },
+                    {
+                      "text": "[Denied 1] result trackPublicationsSize=null alertVisible=false cameraFailure=null\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-11T15:57:53.624Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-3.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-4.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-5.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-6.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "e23419f7c7e3df6464ac-408fe855b41dc030a250",
+          "file": "phase2a-localtrackpublished.spec.ts",
+          "line": 108,
+          "column": 1
+        }
+      ]
+    },
+    {
       "title": "webrtc-session.spec.ts",
       "file": "webrtc-session.spec.ts",
       "column": 0,
@@ -162,22 +923,38 @@
       "specs": [
         {
           "title": "LIVE WebRTC session: 2 browsers join same room with fake media",
-          "ok": true,
+          "ok": false,
           "tags": [],
           "tests": [
             {
               "timeout": 300000,
               "annotations": [],
               "expectedStatus": "passed",
-              "projectId": "chromium",
-              "projectName": "chromium",
+              "projectId": "firefox",
+              "projectName": "firefox",
               "results": [
                 {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 16852,
-                  "errors": [],
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "timedOut",
+                  "duration": 300083,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs",
+                        "column": 5,
+                        "line": 19
+                      },
+                      "message": "Error: page.waitForFunction: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-lK37zH -juggler-pipe -silent\n<launched> pid=26820\n[pid=26820][err] *** You are running in headless mode.\n[pid=26820][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=26820][out] \n[pid=26820][out] Juggler listening to the pipe\n[pid=26820][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=0.80732) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=26820][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=26820][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=26820][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=26820][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=26820][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=26820][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=26820][out] console.error: services.settings: \n[pid=26820][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=26820][out]   Stack:\n[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=26820][out] \n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][out] console.error: services.settings: \n[pid=26820][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=26820][out]   Stack:\n[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=26820][out] \n[pid=26820][out] console.error: \"Could not download new icon\" (new ServerInfoError(\"Server response is invalid SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\", \"resource://services-settings/Attachments.sys.mjs\", 40))\n[pid=26820] <gracefully close start>\n[pid=26820][out] \n[pid=26820][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n[pid=26820][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n[pid=26820][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=26820][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n[pid=26820][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n[pid=26820][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n[pid=26820][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n[pid=26820][out] \n    at [pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=26820][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n    at [pid=26820][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n    at [pid=26820][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=26820][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n    at [pid=26820][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n    at [pid=26820][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n    at [pid=26820][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\webrtc-session.spec.ts:300:15"
+                    }
+                  ],
                   "stdout": [
                     {
                       "text": "\n=== BROWSER 1: Creating room ===\n"
@@ -189,475 +966,25 @@
                       "text": "[Page1 Console] [vite] connected.\n"
                     },
                     {
-                      "text": "[Page1 Console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
+                      "text": "[Page1 Console] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
                     },
                     {
                       "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
                     },
                     {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-334c89ec, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
+                      "text": "[Page1 Console] [vite] connecting...\n"
                     },
                     {
-                      "text": "[Page1] Navigated to pre-join page, room: testroommto2eojt\n"
+                      "text": "[Page1 Console] [vite] connected.\n"
                     },
                     {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {audio: true, video: true}\n"
+                      "text": "[Page1 Console] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
                     },
                     {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
+                      "text": "[Page1 Console] [SW] Registered: http://127.0.0.1:5173/\n"
                     },
                     {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-5080c63b, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page1] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESmREfiwgAAAAAAAAK7Vzbbtw4EoUD7GBgwA-Tp3kksM9ys3jRhUE_-JbZLJLAGDsZzNvKErutTesCiW235wP2B_aH5tMGlNqW3CQ9SZwFBgs-GLAPi3VY1VWlFg_g_R--33v5HTkk5BB-_OFfL_699-Lli-_3yH9_39v_W71YyPblf37fu5njg_16HqAQx4TTJA5xSJOYJTFPEEFv3qM35wwBiQ7xIT6Eg_1uHhzsqzlG-GA_ncuNKtMmSFer-jYoi43MNVp2RR50skwrVWQCoV_eXWh42dbrRhx_eH_69gxhBIggihjiKDzYL-fpOi9qlKAPp-ezy7cXs58vz2cXRx_PXyMAQCFFCcIoRkARAEZAwoP9bL49H-5P15-oVU2ZNkLvqZt1N2MxxnhGJkshRa3MLQsJ-ikiZKbxCYrR-cm7D7torNGjXRQoOnlvgICRkivZXNeVDOSNrNRAPrUhoWFzb7Io1RBPWVSNKko5B_xq3cmiukqrfCGzOTyYhTo7MAOAwXmmo7IlKWuCxVXvtW1VO8V0enagxECwgcQGAqYjnQoDI6HFDpBq06pr6lYFWTaWmgC0bitRSLUQTdqmZSda1QTXeSs3SnRdmwV9IQUreSNXk30EXSvViNns9vb28FZetSo7rNvlTG4a2RalrFQ3Gz3N0qsu6GSVBzrhEzd06kafondS5LO8TRcquK5XpWyDtsxSFYwR3Ba5DLIskBslq66oqy7AMPHKngwql50oi76zOqnWjUgz1aRd17dakYvhI5XZTV2t7vTvRSaD9aJNlyJJFpf3SHObi18u3l2-uwv_-etP-Fd4vcrevL2sqzdS9QVUVEvZNm1RKdFdpwHhISIn4uy1iI9EdCL4qTgmgh0LysTxmWAn4oiLkyNBmOBngoDAJwJTcZaIJBY0Fq_PRHQsolBER-LsTMTHAo4EDUV4Jk6xODoRjN8frW6UTopQbZF9WsmHUijXm4ff2674bVzZtKLNbtqgVWqerlZ-gPgB4gfI1w4Q8APEDxA_QPwA-doBQvwA0QPkpsilfYAkIUoilMQoSRBgjAADohzRENEI0RgBJggwRYAZAhwhwBpLEABDABwBhAggQjRBDCMGiBHEKGIMMY5YiFiEWIwA9E-CgOjxBIgliGPEAXGCgOgfioAwxOmTkysJ0cfzeJbgxxMiiVCrNiYco4_niQknVmsdvM1cJ8RmT7nVnIZ268huHTvOQtA_SMgsC9Sxgbk22HOjP0bHBkd6wMUA3LEhdG2wH4kmdnuGreYMHObEbk4d5sxuztHRRzBh-6fLIru149MFV-7BkXuCHRuIvTZZn0pu4NyeSg4Oc3sqdcPqbwkm7ihOwtB61SxkZjJQtFjJzUJmAabjav-8TiKUNmqehCMSo6atF8VKBkU-n1gmg2U8fiXAeGpKJgvQ28KEiPKp7fiFgYa9KeUjEk0t6YjHg2U04SGof8wGaXdXllK1d8NdlMzn8KpJs09SFb-lerQHZZ1LDW49D9uKfM4IxrCYuKTbo0_DYV9Ggz-DJtrSsAkWf4No5GOaZEsz-dTgW0TzmAb4QAOTaCB8fjT546TBNmkwVitNnh_MYxaGhzJLRgSeHcmCPeYgPQcb24DRZ8exy8EGjrGBGEf3xps5v3cwx69UIdtJp7OhJdnYkiyy7gRj59CibNKi8PyiDtlOGWyLGiZFTfCz87dLQ7ZDjEziSx7yMId49KH_7HMRLFbpUmd0M9Bc_Hxx-bCbD5XFxsri4PRHPsPfUEUcJmfeTi8yTi-u3zabtGiD26LK61s9lfH4hPiTF7TEfDfSXwR3IfPlKzHf2fTzwsTMF0DKTcg8BjWPQS3vgJhYMMuLIWYWzKTQQ9rELLGCxR-YgekxaWKW0EwKZmaTmclkZvzMDJ-Zp2XmYZl5VmYelVkyBDbMkjViez23BGVu5eZObm7klmogNsxSIcTMEbdcVYRoWdfLoJXl1Q6-e6EwWcqyEi2KXUdVmn2yQKhZFTvdZ6eM3ZSxlTI2KWMrpW5lK6decJHqNQurhndp77FdXsrttJQ7WSm3kVJucG4hgzJyUEZuyshKGZmUkSO7xJVd8kR2iT27xJJd4uBlLl72BC-z8zILL3PwOipYL7h5rTWsYZPXUcXgiheeiBfs8YIlXnDEC44hoRfcvNYxoWGT1z4oaOIo5cRdyom1lBOzlBMrJQM7JTPvVydLFkoGBuUWMiipg5K6KamVkpqU1E7pGEvMPZaYdSwxcywx-1hijrHE3GOJWccSM8cSc4wlcLUpPNGmYG9TsLQpONqUuB425ImHDbE_bIjlYUPsDxvmaBfmbhdmbRdmtguztwt3tAt3twu3tgs324Xb24U72oWb7XKvgDypFqh6seiGC_1vq3wA7WnpsmlEf9Ue1G0hK9W_1R38rxUS_mVBNKv0rl6rIJer9G7iJvwyN0OcWV0pWalA3TXThERf40sVZVEtJ17iL_OS1au6DbomzaZH-Wz96P6zxH-6Qf_dqVamZfB469MCXL-1f9-VeeD0MZRkJ2aztC5lXqRZncvscFmo6_XVYVHP0hsYdjcym_09l42scllld0Euu6wtGlW3_fq1THPZjlVz4NLI-msYr5F5jWwCe43Ma2Qj7jUyr5F5jcxrZF4j8xqZ18hGxGtkXiPzGtmj2yqvkT2gXiPzGpnXyLxG9rDmNTIL5DWyHdxrZF4j8xqZ18i8RvYX0sj6mzGvkXmNbAJ7jcxrZCPuNTKvkXmNzGtkXiPzGpnXyEbEa2ReI_Ma2aPbKq-RPaBeI_MamdfIvEb2sOY1MgvkNbId3GtkXiPzGpnXyLxG9hfSyPrLFK-RpU2zKrK-ZbdK2amWyi5OLs_RUHxBnqo0u06rSv8bTptOZc1v-P-S0y5TTaBHkuDbS5oy3QSl7Lp0KQOdX0FCAowd7P-49wdHSKDELmAAAA%3D%3D {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page1] Joined meeting at: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
-                    },
-                    {
-                      "text": "[Page1] Key param: 42d22f40...\n"
-                    },
-                    {
-                      "text": "[Page1 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_jPBwXXQe2vQ5, debugInfo: , agentProtocol: 1 {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf}\n"
-                    },
-                    {
-                      "text": "[Page1] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== BROWSER 2: Joining room ===\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:1205229217 1 udp 2122260223 172.28.96.1 53053 typ host generation 0 ufrag 99fT network-id 5\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:823187956 1 udp 2121998079 192.168.1.253 58950 typ host generation 0 ufrag 99fT network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:164864580 1 udp 2122197247 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 58951 typ host generation 0 ufrag 99fT network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:2381220899 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 58952 typ host generation 0 ufrag 99fT network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] candidate:644914926 1 udp 2122066175 2600:382:af78:21c3::b06 58953 typ host generation 0 ufrag 99fT network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Page1 Console] connection state changed: connecting -> connected {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, localIdentity: p-5080c63b, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] room.name testroommto2eojt state connected localParticipant p-5080c63b\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: Object, audio: false}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCN77EUTiVm53k, kind: video, source: camera, participantIdentity: p-5080c63b, trackPublicationsSize: 1}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCN77EUTiVm53k, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] getUserMedia called with: {video: false, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [Browser 1] Created fake stream with tracks: [audio]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-5080c63b, participantID: PA_svgJAiwZ2YHf, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMu59FwGzpF2Dd, kind: audio, source: microphone, participantIdentity: p-5080c63b, trackPublicationsSize: 2}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMu59FwGzpF2Dd, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {audio: true, video: true}\n"
-                    },
-                    {
-                      "text": "[Page2] Navigated to pre-join with key\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Token] fetched {roomId: testroommto2eojt, participantId: p-75e7bb7e, livekitTokenPrefix: eyJhbGciOiJIUzI1NiIs..., sfuUrl: wss://livekit/rtc}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: Object, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio, video]\n"
-                    },
-                    {
-                      "text": "[Page2] Already on pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] On pre-join page\n"
-                    },
-                    {
-                      "text": "[Page2] Preview video element found\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect start {sfuUrl: ws://127.0.0.1:7880, tokenPrefix: eyJhbGciOiJIUzI1NiIs...}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: disconnected -> connecting {room: , roomID: undefined, participant: , participantID: }\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connecting to ws://127.0.0.1:7880/rtc/v1?access_token=%3Credacted%3E&join_request=CAESlREfiwgAAAAAAAAK7VzNbtw4EoYD7GJgwIfJaY4E9iw3iz_6YdAHx8nsBshkPOMke11aYreVtH5GYtvtPMC-wL7QPNqC6rYlN0lPEmeBwYIHA_bHYn2s6qpSUx_gw--_O3j6V3JMyDH88P2_nnw4ePL0yXcH5D-_Hxz-pVksVPf0378fXM3x0WEzj1Ac0wQSQmOcpCxLEpJQRNCrN-jVGUNAkmN8jI_h6LCfR0eHeo4RPjqUc7XRlWwjuVo111FVblRh0Kovi6hXlax1mQuE_vnTuYGXXbNuxfN3b168fokwAkQQRQxxFB8dVnO5LsoGZejdi7PZ29fns1_fns3OT96f_YgAAMUUZQijFAFFABgBiY8O8_nufHg43XCiTreVbIXZ07TrfsZSjPGMTJZiijpVOBYy9PeEkJnBJyhGZ6c_vdtHU4Oe7KNA0ekbCwSMtFqp9rKpVaSuVK235FMbEls2tyaLSm_jqcq61WWl5oCfrXtV1heyLhYqn8OdWWyyAzMA2DrPTVSuJOVttLgYvHad7qaYSc8elFkItpDUQsB2ZFJhYSR22AHSnaz7tul0lOdjqQlA664WpdIL0cpOVr3odBtdFp3aaNH3XR4NhRSt1JVaTfYRdKl1K2az6-vr42t10en8uOmWM7VpVVdWqtb9bPQ0kxd91Ku6iEzCJ27o1I05xeCkLGZFJxc6umxWleqirsqljsYIrstCRXkeqY1WdV82dR9hmHhlDwZVqF5U5dBZvdLrVshct7Lvh1YrC7H9SFV-1dSrG_N7matovejkUrz67UN9i7TXhbi4Xv6Wlz_LN5_ku1_eXCzwKtusT15_GAqorJeqa7uy1qK_lBHhMTrBAqggWMQvRXYqXp4Ilgn8XMSn4oQIDoKciCQVgMWPL8TJc8ETkVIRPxenqUiZYERQLPhzkXIBXJwygV-KjAtORJYJxm-P1rTaJEXorsw_rtRdKVTrzd3vXV9-Glc2nejyqy7qtJ7L1SoMkDBAwgD52gECYYCEARIGSBggXztASBggZoBclYVyD5AsRlmCshRlGQKMEWBAlCMaI5ogmiLABAGmCDBDgBME2GAZAmAIgCOAGAEkiGaIYcQAMYIYRYwhxhGLEUsQSxGA-ckQEDOeALEMcYw4IE4QEPNDERCGOH1wcmUxen-WzjJ8f0JkCer0xoZT9P4ss-HMaW2Cd5mbhLjsKXea09htnbitU89ZCPoHiZljgXo2MN8Gd27Mx-jZ4EkP-BiAezbEvg3uI9HMbc-w05yBx5y4zanHnLnNOTp5Dzbs_nRZ4rb2fLrgyz14ck-wZwNx1yYbUsktnLtTycFj7k6laVjzLcHGPcVJGFqv2oXKbQaKFiu1Wag8wnRcHZ7XWYJkq-dZPCIpartmUa5UVBbziWW2tUzHrwQYT03JZAEGW5gQUT61Hb8w0HgwpXxEkqklHfF0a5lMeAgaHrOR7G-qSunuZvsuShVzeNbK_KPS5SdpRntUNYUy4M7zdltZzBnBGBYTl3R39Gk47Mto8GfQJDsaNsHSbxCNuk-T7Wgmnxp8i2ju0wDf0sAkGogfH01xP2mwSxqM1Uqzxwdzn4XhbZllIwKPjmTB7nOQgYONbcDoo-PY52BbjrGBGEe3xps5v3Uwx890qbpJp7NtS7KxJVni3AnWzm2LskmLwuOLOmZ7ZbArapgUNcGPzt8-DdkNMTKJL7vLwxzS0Yf5c8hFtFjJpcnoZktz_uv527vdfFtZbKwsDl5_5DP8bauIw-TMu-lFxunFzW2zlWUXXZd10VybqYzHJ8QfXNAy-25kvgjuQ_blK7PvbOZ5YWP2BZByG7KPQe1jUMcdEBMH5rgYYubAbAozpG3MESs4_IEdmBmTNuYIzaZgdjaZnUxmx8_s8Jl9WmYfltlnZfZRmSND4MIcWSOu67kjKHsrt3dyeyN3VANxYY4KIXaOuONVRYyWTbOMOlVd7OH7LxQmS3leoUW576iW-UcHhNpVudd9bsrUT5k6KVObMnVSmlZ2cpoFH6lZc7AaeJ_2FtvnpdxNS7mXlXIXKeUW5w6yKBMPZeKnTJyUiU2ZeLJLfNklD2SXuLNLHNklHl7m42UP8DI3L3PwMg-vp4LNgp_XWcMGtnk9VQy-eOGBeMEdLzjiBU-84BkSZsHP6xwTBrZ53YOCZp5SzvylnDlLObNLOXNSMnBTMvv96mTJQcnAotxBFiX1UFI_JXVSUpuSuik9Y4n5xxJzjiVmjyXmHkvMM5aYfywx51hi9lhinrEEvjaFB9oU3G0KjjYFT5sS38OGPPCwIe6HDXE8bIj7YcM87cL87cKc7cLsdmHuduGeduH-duHOduF2u3B3u3BPu3C7XW4VkAfVAt0sFr3SR99c-QA60NJl24rhVXvUdKWq9XCrO_pfKyT8y4JoV_KmWeuoUCt5M3ETf5mbbZx5U2tV60jftNOEJF_jS5dVWS8nXtIv85I3q6aL-lbm06N8tn50-1niP9xg_u51p2QV3d_6sAA3bB3uu6qIvD62JdmL2Uw2lSpKmTeFyo-Xpb5cXxyXzUxewXZ3q_LZ3wrVqrpQdX4TFarPu7LVTTesXypZqG6smiOfRja8hgkaWdDIJnDQyIJGNuJBIwsaWdDIgkYWNLKgkQWNbESCRhY0sqCR3XtbFTSyOzRoZEEjCxpZ0Mju1oJG5oCCRraHB40saGRBIwsaWdDI_kQa2fBmLGhkQSObwEEjCxrZiAeNLGhkQSMLGlnQyIJGFjSyEQkaWdDIgkZ2721V0Mju0KCRBY0saGRBI7tbCxqZAwoa2R4eNLKgkQWNLGhkQSP7E2lkw8uUoJHJtl2V-dCyO6XshZHKzk_fnqFt8UWF1DK_lHVt_g2nS6dy5jf-f8lpn-s2MiNJ8N1Lmkpuokr1vVyqyORXkJgAY0eHPxz8F2u-ZL4uYAAA {room: undefined, roomID: undefined, participant: undefined, participantID: undefined, reconnect: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2] Clicked Join Meeting\n"
-                    },
-                    {
-                      "text": "[Page2] Joined meeting at: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
-                    },
-                    {
-                      "text": "[Page2 Console] signal connected {room: undefined, roomID: undefined, participant: undefined, participantID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connected to Livekit Server edition: 0, version: 1.13.6, protocol: 17, region: , nodeId: ND_jPBwXXQe2vQ5, debugInfo: , agentProtocol: 1 {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh}\n"
-                    },
-                    {
-                      "text": "[Page2] Connected to meeting\n"
-                    },
-                    {
-                      "text": "\n=== VERIFYING WEBRTC CONNECTION ===\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1850290095 1 udp 2122260223 172.28.96.1 53180 typ host generation 0 ufrag Iqjn network-id 5\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1967017051 1 udp 2121998079 192.168.1.253 53181 typ host generation 0 ufrag Iqjn network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:3194436780 1 udp 2122197247 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 53182 typ host generation 0 ufrag Iqjn network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1832252793 1 udp 2122131711 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 53183 typ host generation 0 ufrag Iqjn network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2286671206 1 udp 2122066175 2600:382:af78:21c3::b06 53184 typ host generation 0 ufrag Iqjn network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] checking\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate error] 701 STUN host lookup received error. stun:global.stun.twilio.com:3478\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2430860091 1 tcp 1518280447 172.28.96.1 9 typ host tcptype active generation 0 ufrag Iqjn network-id 5\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2341771471 1 tcp 1518018303 192.168.1.253 9 typ host tcptype active generation 0 ufrag Iqjn network-id 1 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1087236152 1 tcp 1518217471 2600:382:af78:21c3:480f:ff4a:ff8e:30a9 9 typ host tcptype active generation 0 ufrag Iqjn network-id 2 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:2476679661 1 tcp 1518151935 2600:382:af78:21c3:c3fa:9f16:fa6a:5bba 9 typ host tcptype active generation 0 ufrag Iqjn network-id 3 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] candidate:1994457586 1 tcp 1518086399 2600:382:af78:21c3::b06 9 typ host tcptype active generation 0 ufrag Iqjn network-id 4 network-cost 10\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE state] connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2 ICE candidate] null (complete)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] connection state changed: connecting -> connected {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, localIdentity: p-75e7bb7e, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] room.name testroommto2eojt state connected localParticipant p-75e7bb7e\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-5080c6, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] receiver transform active {sender: p-5080c6, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] Room.connect success {roomName: testroommto2eojt, state: connected, trackPublicationsSize: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: Object, audio: false}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [video]\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from undefined topic: hpke-pubkey\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Published hpke-pubkey on Connected\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_VCP6X2caUUySa4, kind: video, source: camera, participantIdentity: p-75e7bb7e, trackPublicationsSize: 1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: video, trackId: TR_VCP6X2caUUySa4, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setCameraEnabled success {trackPublicationsSize: 1, isCameraEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 1\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled start\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] getUserMedia called with: {video: false, audio: Object}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [Browser 2] Created fake stream with tracks: [audio]\n"
-                    },
-                    {
-                      "text": "[Page2 Console] publishing track {room: testroommto2eojt, roomID: RM_AkTSvU8nX5gE, participant: p-75e7bb7e, participantID: PA_YF7PPE8ohVmh, trackID: undefined}\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-75e7bb, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=1 backoffMs=500\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
-                    },
-                    {
-                      "text": "[Page1] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2] PeerConnection state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page1] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Connection stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-75e7bb7e'\u001b[39m,\n      name: \u001b[32m'Participant p-75e7'\u001b[39m,\n      audio: \u001b[33mfalse\u001b[39m,\n      video: \u001b[33mfalse\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "[Page2] Remote streams/participants: {\n  remoteCount: \u001b[33m0\u001b[39m,\n  participants: [\n    {\n      id: \u001b[32m'p-5080c63b'\u001b[39m,\n      name: \u001b[32m'Participant p-5080'\u001b[39m,\n      audio: \u001b[33mtrue\u001b[39m,\n      video: \u001b[33mtrue\u001b[39m\n    }\n  ]\n}\n"
-                    },
-                    {
-                      "text": "\n=== KEEPING BROWSERS ALIVE FOR MEDIA CAPTURE ===\n"
-                    },
-                    {
-                      "text": "Room ID: testroommto2eojt\n"
-                    },
-                    {
-                      "text": "Key Param: 42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
-                    },
-                    {
-                      "text": "Page1 URL: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
-                    },
-                    {
-                      "text": "Page2 URL: http://127.0.0.1:5173/r/testroommto2eojt/join#k=42d22f40a1addbedca9d78dab3bd9000b2b897eb0fd407e023e5ad88ed52c4a7\n"
-                    },
-                    {
-                      "text": "Both browsers streaming... (will keep alive for 5 seconds)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] LocalTrackPublished {trackSid: TR_AMvrSnj9588GkB, kind: audio, source: microphone, participantIdentity: p-75e7bb7e, trackPublicationsSize: 2}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] Failed to create or pipe encoded sender streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpSender': Too late to create encoded streams\n    at installSFrameOnSenderShared (http://127.0.0.1:5173/src/sframe/transform.ts:359:45)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:361:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30327:12)\n    at Generator.next (<anonymous>)\n    at http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7689:67\n    at new Promise (<anonymous>)\n    at __awaiter (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7671:10)\n    at LocalParticipant.onLocalTrackPublished (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:30322:43)\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] sender transform active {kid: 0, media: audio, trackId: TR_AMvrSnj9588GkB, globalCounter: 0}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] setMicrophoneEnabled success {trackPublicationsSize: 2, isMicrophoneEnabled: true}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [LiveKit] trackPublications.size 2\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] Failed to create or pipe encoded receiver streams: InvalidStateError: Failed to execute 'createEncodedStreams' on 'RTCRtpReceiver': Too late to create encoded streams\n    at installSFrameOnReceiverShared (http://127.0.0.1:5173/src/sframe/transform.ts:372:47)\n    at _Room.<anonymous> (http://127.0.0.1:5173/src/hooks/useWebRTC.ts:323:21)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7878:37)\n    at _Room.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31690:18)\n    at _Room.emitWhenConnected (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31559:19)\n    at _RemoteParticipant.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:31387:12)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n    at _RemoteParticipant.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29624:18)\n    at RemoteTrackPublication.<anonymous> (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:29411:12)\n    at RemoteTrackPublication.emit (http://127.0.0.1:5173/node_modules/.vite/deps/livekit-client.js?v=438db222:7874:7)\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [SFrame] receiver transform active {sender: p-75e7bb, kid: 0, lastCounter: -1}\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=2 backoffMs=1000\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
-                    },
-                    {
-                      "text": "[Page2 Console] [SFrame] welcome request sent attempt=3 backoffMs=2000\n"
-                    },
-                    {
-                      "text": "[Page1 Console] [LiveKit] Data received from p-75e7bb7e topic: sframe-welcome-request\n"
-                    },
-                    {
-                      "text": "[Page1] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page2] Final stats available: \u001b[33mfalse\u001b[39m\n"
-                    },
-                    {
-                      "text": "[Page1] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "[Page2] Final PC state: { connectionState: \u001b[32m'connected'\u001b[39m, iceConnectionState: \u001b[32m'connected'\u001b[39m }\n"
-                    },
-                    {
-                      "text": "\n✅ LIVE WebRTC session established and sustained for media capture!\n"
+                      "text": "[Page1 Console] [Token] room created with authoritative host JSHandle@object\n"
                     },
                     {
                       "text": "\n⚠️ Test ending - browsers will be closed by test runner\n"
@@ -668,15 +995,31 @@
                   ],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-05T07:32:10.337Z",
+                  "startTime": "2026-09-11T15:57:53.645Z",
                   "annotations": [],
-                  "attachments": []
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\webrtc-session-LIVE-WebRTC-97e28-n-same-room-with-fake-media-firefox\\test-failed-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\webrtc-session-LIVE-WebRTC-97e28-n-same-room-with-fake-media-firefox\\test-failed-2.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\webrtc-session-LIVE-WebRTC-97e28-n-same-room-with-fake-media-firefox\\error-context.md"
+                    }
+                  ]
                 }
               ],
-              "status": "expected"
+              "status": "unexpected"
             }
           ],
-          "id": "303db5f3e175c9a4b995-2326f64b5c0f1e1e1f85",
+          "id": "303db5f3e175c9a4b995-82d0f68ad5fdfba09378",
           "file": "webrtc-session.spec.ts",
           "line": 13,
           "column": 1
@@ -686,11 +1029,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-05T07:32:08.878Z",
-    "duration": 20906.017,
-    "expected": 1,
+    "startTime": "2026-09-11T15:57:52.660Z",
+    "duration": 302196.713,
+    "expected": 0,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 2,
     "flaky": 0
   }
 }
