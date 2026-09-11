@@ -4,6 +4,7 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\node_modules\\@playwright\\test\\cli.js",
       "test",
+      "tests/e2e/webrtc-session.spec.ts",
       "--project=firefox"
     ],
     "configFile": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\playwright.config.ts",
@@ -18,7 +19,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "projects": [
@@ -27,7 +28,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -43,7 +44,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "firefox",
         "name": "firefox",
@@ -59,7 +60,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "webkit",
         "name": "webkit",
@@ -75,7 +76,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "msedge",
         "name": "msedge",
@@ -91,7 +92,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
@@ -107,7 +108,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
@@ -154,768 +155,6 @@
   },
   "suites": [
     {
-      "title": "phase2a-localtrackpublished.spec.ts",
-      "file": "phase2a-localtrackpublished.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [
-        {
-          "title": "Phase 2A: 5 granted + 5 denied runs collect LocalTrackPublished evidence",
-          "ok": false,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 120000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "firefox",
-              "projectName": "firefox",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "timedOut",
-                  "duration": 120088,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "[Run 1 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-1-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"7+HLbTrmj9vBzMtt1lOSoXIuNtoI2JhsQKtQb5UyP+4=\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [Test] getUserMedia granted success audio,video\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
-                    },
-                    {
-                      "text": "[Granted 1] result trackPublicationsSize=null LocalTrackPublished=0\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"5jLJVtDNMJQyD9F0yjUZlDouzuE4p5lar2OUpwc2sNs=\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [Test] getUserMedia granted success audio,video\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 2 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-2-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 2 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
-                    },
-                    {
-                      "text": "[Granted 2] result trackPublicationsSize=null LocalTrackPublished=0\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"ANj2dMkl5h5IHeERcyBf0tqGR3Gn2QkvvJgKJPxKhic=\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [Test] getUserMedia granted success audio,video\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 3 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-3-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 3 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
-                    },
-                    {
-                      "text": "[Granted 3] result trackPublicationsSize=null LocalTrackPublished=0\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"/AYbgb/IbGmX+L95H1gyYgUqyHfOsnuYHcvfq8tFI6c=\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [Test] getUserMedia granted success audio,video\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 4 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-4-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 4 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
-                    },
-                    {
-                      "text": "[Granted 4] result trackPublicationsSize=null LocalTrackPublished=0\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [Test] getUserMedia called granted {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [Test] getUserMedia granted success audio\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [Test] getUserMedia called granted {\"video\":true,\"audio\":{\"deviceId\":{\"exact\":\"ZHjDE9bcQ9Trk06ZDh9kfvjrqAZzl5x6JbA5kn7GfZc=\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [Test] getUserMedia granted success audio,video\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 5 granted] initial url http://127.0.0.1:5173/r/phase2a-granted-5-mt#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 5 granted error] locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:432:15\n"
-                    },
-                    {
-                      "text": "[Granted 5] result trackPublicationsSize=null LocalTrackPublished=0\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"exact\":\"fake-video\"}},\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] Full media stream request failed: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [vite] connecting...\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [vite] connected.\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM START] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM RAW] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"audio\":true}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM COMMIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [MEDIA ENUM EXIT] JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [SW] Registered: http://127.0.0.1:5173/\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":{\"deviceId\":{\"exact\":\"fake-video\"}},\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] Full media stream request failed: JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [PreJoin] getUserMedia request JSHandle@object\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim called {\"video\":false,\"audio\":{\"deviceId\":{\"exact\":\"fake-audio\"}}}\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [Test] getUserMedia denied shim audio success\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"debugger eval code\" line: 15}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 22}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] [JavaScript Warning: \"An AudioContext was prevented from starting automatically. It must be created or resumed after a user gesture on the page.\" {file: \"http://127.0.0.1:5173/src/hooks/useAudioMeter.ts\" line: 30}]\n"
-                    },
-                    {
-                      "text": "[Run 1 denied] initial url http://127.0.0.1:5173/r/phase2a-denied-1-mtx#k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
-                    },
-                    {
-                      "text": "[Run 1 denied error] locator.waitFor: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-whRWxZ -juggler-pipe -silent\n<launched> pid=29860\n[pid=29860][err] *** You are running in headless mode.\n[pid=29860][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=29860][out] \n[pid=29860][out] Juggler listening to the pipe\n[pid=29860][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=1.58593) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=29860][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=29860][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=29860][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860] <gracefully close start>\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n locator.waitFor: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-whRWxZ -juggler-pipe -silent\n<launched> pid=29860\n[pid=29860][err] *** You are running in headless mode.\n[pid=29860][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=29860][out] \n[pid=29860][out] Juggler listening to the pipe\n[pid=29860][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=1.58593) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=29860][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=29860][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=29860][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][out] console.error: services.settings: \n[pid=29860][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=29860][out]   Stack:\n[pid=29860][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=29860][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=29860][out] \n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: resource:///actors/WebRTCChild.sys.mjs, line 502: InvalidStateError: JSWindowActorChild.sendAsyncMessage: JSWindowActorChild cannot send at the moment\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=29860] <gracefully close start>\n[pid=29860][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\nCall log:\n\u001b[2m  - waiting for locator('button:has-text(\"Join Meeting\")') to be visible\u001b[22m\n\n    at runTrial (C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:248:21)\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\phase2a-localtrackpublished.spec.ts:438:15\n"
-                    },
-                    {
-                      "text": "[Denied 1] result trackPublicationsSize=null alertVisible=false cameraFailure=null\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-09-11T15:57:53.624Z",
-                  "annotations": [],
-                  "attachments": [
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-1.png"
-                    },
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-2.png"
-                    },
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-3.png"
-                    },
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-4.png"
-                    },
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-5.png"
-                    },
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\test-failed-6.png"
-                    },
-                    {
-                      "name": "error-context",
-                      "contentType": "text/markdown",
-                      "path": "C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\test-results\\phase2a-localtrackpublishe-2867c-ocalTrackPublished-evidence-firefox\\error-context.md"
-                    }
-                  ]
-                }
-              ],
-              "status": "unexpected"
-            }
-          ],
-          "id": "e23419f7c7e3df6464ac-408fe855b41dc030a250",
-          "file": "phase2a-localtrackpublished.spec.ts",
-          "line": 108,
-          "column": 1
-        }
-      ]
-    },
-    {
       "title": "webrtc-session.spec.ts",
       "file": "webrtc-session.spec.ts",
       "column": 0,
@@ -934,10 +173,10 @@
               "projectName": "firefox",
               "results": [
                 {
-                  "workerIndex": 1,
-                  "parallelIndex": 1,
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
                   "status": "timedOut",
-                  "duration": 300083,
+                  "duration": 300072,
                   "error": {
                     "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m",
                     "stack": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m"
@@ -948,11 +187,11 @@
                     },
                     {
                       "location": {
-                        "file": "[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs",
+                        "file": "[pid=39812][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs",
                         "column": 5,
                         "line": 19
                       },
-                      "message": "Error: page.waitForFunction: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-lK37zH -juggler-pipe -silent\n<launched> pid=26820\n[pid=26820][err] *** You are running in headless mode.\n[pid=26820][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=26820][out] \n[pid=26820][out] Juggler listening to the pipe\n[pid=26820][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=0.80732) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=26820][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=26820][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=26820][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=26820][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=26820][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=26820][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=26820][out] console.error: services.settings: \n[pid=26820][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=26820][out]   Stack:\n[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=26820][out] \n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=26820][out] console.error: services.settings: \n[pid=26820][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=26820][out]   Stack:\n[pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=26820][out] \n[pid=26820][out] console.error: \"Could not download new icon\" (new ServerInfoError(\"Server response is invalid SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\", \"resource://services-settings/Attachments.sys.mjs\", 40))\n[pid=26820] <gracefully close start>\n[pid=26820][out] \n[pid=26820][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n[pid=26820][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n[pid=26820][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=26820][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n[pid=26820][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n[pid=26820][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n[pid=26820][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n[pid=26820][out] \n    at [pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=26820][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=26820][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=26820][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n    at [pid=26820][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n    at [pid=26820][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=26820][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n    at [pid=26820][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=26820][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n    at [pid=26820][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n    at [pid=26820][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\webrtc-session.spec.ts:300:15"
+                      "message": "Error: page.waitForFunction: Test ended.\nBrowser logs:\n\n<launching> C:\\Users\\joshu\\AppData\\Local\\ms-playwright\\firefox-1543\\firefox\\firefox.exe -no-remote -headless -profile C:\\Users\\joshu\\AppData\\Local\\Temp\\playwright_firefoxdev_profile-QxIuaZ -juggler-pipe -silent\n<launched> pid=39812\n[pid=39812][err] *** You are running in headless mode.\n[pid=39812][err] JavaScript warning: resource://services-settings/Utils.sys.mjs, line 125: unreachable code after return statement\n[pid=39812][out] \n[pid=39812][out] Juggler listening to the pipe\n[pid=39812][out] Crash Annotation GraphicsCriticalError: |[0][GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt (t=1.05371) [GFX1-]: RenderCompositorSWGL failed mapping default framebuffer, no dt\n[pid=39812][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=39812][out] console.warn: services.settings: #fetchAttachment: Forcing fallbackToDump to false due to Utils.LOAD_DUMPS being false\n[pid=39812][out] console.error: (new NotFoundError(\"Could not find fa0fc42c-d91d-fca7-34eb-806ff46062dc in cache or dump\", \"resource://services-settings/Attachments.sys.mjs\", 48))\n[pid=39812][out] console.warn: \"Unable to find the attachment for\" \"fa0fc42c-d91d-fca7-34eb-806ff46062dc\"\n[pid=39812][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=39812][err] [ERROR shell_windows::limited_access_features] Error generating feature token: NS_ERROR_FAILURE\n[pid=39812][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=39812][err] JavaScript error: , line 0: SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\n[pid=39812][out] console.error: services.settings: \n[pid=39812][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=39812][out]   Stack:\n[pid=39812][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=39812][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=39812][out] \n[pid=39812][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=39812][err] [ERROR shell_windows::taskbar::shortcut] Error matching shortcut: Error { code: HRESULT(0x80004005), message: \"Unspecified error\" }\n[pid=39812][out] console.error: services.settings: \n[pid=39812][out]   Message: EmptyDatabaseError: \"main/nimbus-desktop-experiments\" has not been synced yet\n[pid=39812][out]   Stack:\n[pid=39812][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n[pid=39812][out] list@resource://services-settings/Database.sys.mjs:96:13\n[pid=39812][out] \n[pid=39812][out] console.error: \"Could not download new icon\" (new ServerInfoError(\"Server response is invalid SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data\", \"resource://services-settings/Attachments.sys.mjs\", 40))\n[pid=39812] <gracefully close start>\n[pid=39812][out] \n[pid=39812][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n[pid=39812][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n[pid=39812][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n[pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=39812][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n[pid=39812][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n[pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n[pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n[pid=39812][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n[pid=39812][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n[pid=39812][out] \n[pid=39812][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=39812][err] JavaScript error: chrome://juggler/content/Helper.js, line 82: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIWebProgress.removeProgressListener]\n[pid=39812][err] JavaScript error: chrome://juggler/content/components/Juggler.js, line 135: NS_ERROR_FAILURE: Component returned failure code: 0x80004005 (NS_ERROR_FAILURE) [nsIRemoteDebuggingPipe.sendMessage]\n[pid=39812][out]       \n    at [pid=39812][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=39812][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=39812][out]     EmptyDatabaseError@resource://services-settings/Database.sys.mjs:19:5\n    at [pid=39812][out] list@resource://services-settings/Database.sys.mjs:96:13\n    at [pid=39812][out]         ERROR: Failed \"callFunction\": connector for namespace \"page\" in channel \"undefined\" is disposed. _rejectCallbacksFromConnector@chrome://juggler/content/SimpleChannel.js:108:25\n    at [pid=39812][out] dispose@chrome://juggler/content/SimpleChannel.js:119:27\n    at [pid=39812][out] dispose@chrome://juggler/content/protocol/PageHandler.js:152:23\n    at [pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=39812][out] destroySession@chrome://juggler/content/protocol/Dispatcher.js:35:13\n    at [pid=39812][out] dispose@chrome://juggler/content/protocol/BrowserHandler.js:77:24\n    at [pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:117:21\n    at [pid=39812][out] _dispose@chrome://juggler/content/protocol/Dispatcher.js:41:23\n    at [pid=39812][out] observe/browserHandler<@chrome://juggler/content/components/Juggler.js:143:22\n    at [pid=39812][out] Browser.close@chrome://juggler/content/protocol/BrowserHandler.js:156:10\n    at C:\\Users\\joshu\\meet-secure-core\\poc\\meet-webrtc-core\\tests\\e2e\\webrtc-session.spec.ts:300:15"
                     }
                   ],
                   "stdout": [
@@ -995,7 +234,7 @@
                   ],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-11T15:57:53.645Z",
+                  "startTime": "2026-09-11T16:00:04.840Z",
                   "annotations": [],
                   "attachments": [
                     {
@@ -1029,11 +268,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-11T15:57:52.660Z",
-    "duration": 302196.713,
+    "startTime": "2026-09-11T16:00:03.975Z",
+    "duration": 302433,
     "expected": 0,
     "skipped": 0,
-    "unexpected": 2,
+    "unexpected": 1,
     "flaky": 0
   }
 }

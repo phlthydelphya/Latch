@@ -60,6 +60,57 @@ export function useWebRTC() {
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [stats, setStats] = useState<RTCStatsReport | null>(null);
 
+  // Track the previous camera track ID for switch detection
+  const prevCameraTrackIdRef = useRef<string | null>(null);
+
+  // Single authoritative camera hydration path
+  const rebuildLocalStream = useCallback(() => {
+    const room = roomRef.current;
+    if (!room?.localParticipant) {
+      setLocalStream(null);
+      return;
+    }
+
+    const cameraTracks: MediaStreamTrack[] = [];
+    const trackIds: string[] = [];
+
+    room.localParticipant.trackPublications.forEach((pub) => {
+      const pubSource = (pub as any)?.source;
+      // Only include camera tracks — exclude screen share and screen share audio
+      if (pubSource === Track.Source.ScreenShare || pubSource === Track.Source.ScreenShareAudio) {
+        return;
+      }
+      const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+      if (mst && mst.readyState === 'live') {
+        cameraTracks.push(mst);
+        trackIds.push(mst.id);
+      }
+    });
+
+    const newTrackId = cameraTracks[0]?.id ?? null;
+    const oldTrackId = prevCameraTrackIdRef.current;
+
+    if (oldTrackId !== newTrackId) {
+      console.log('[LOCAL STREAM REBUILD]', {
+        cameraTracks: cameraTracks.length,
+        trackIds,
+        oldTrackId,
+        newTrackId,
+      });
+      prevCameraTrackIdRef.current = newTrackId;
+    }
+
+    // Always build fresh MediaStream from current LiveKit truth
+    const stream = new MediaStream();
+    cameraTracks.forEach((track) => stream.addTrack(track));
+
+    if (stream.getTracks().length > 0) {
+      setLocalStream(stream);
+    } else {
+      setLocalStream(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (!roomId) return;
     const targetRoomId = roomId;
@@ -356,6 +407,7 @@ export function useWebRTC() {
           useAppStore.getState().setConnected(false);
           useAppStore.getState().setShieldMode(false);
           setScreenStream(null);
+          setLocalStream(null);
           useLayoutStore.getState().setScreenShareOwner(null);
           if (reason) {
             useAppStore.getState().setError(`Disconnected: ${reason}`);
@@ -546,29 +598,29 @@ export function useWebRTC() {
                 }, { once: true });
               }
             } else {
-              // Camera/mic: rebuild localStream from non-screen publications
-              const stream = new MediaStream();
-              room.localParticipant?.trackPublications.forEach((pub) => {
-                const pubSrc = (pub as any)?.source;
-                if (pubSrc === Track.Source.ScreenShare) return; // exclude screen from localStream
-                const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
-                if (mst) {
-                  stream.addTrack(mst);
-                }
-              });
-              if (stream.getTracks().length > 0) {
-                setLocalStream(stream);
-              }
+              // Camera/mic: use authoritative rebuild path
+              rebuildLocalStream();
             }
           }
         });
 
         // Screen share lifecycle: sync store when browser stops sharing or track is unpublished
         room.on(RoomEvent.LocalTrackUnpublished, (publication) => {
-          if ((publication as any)?.source === Track.Source.ScreenShare) {
+          const pubSource = (publication as any)?.source;
+          if (pubSource === Track.Source.ScreenShare) {
             useAppStore.getState().setLocalScreenShare(false);
             setScreenStream(null);
             useLayoutStore.getState().setScreenShareOwner(null);
+          } else {
+            // Camera/mic unpublished: rebuild localStream from remaining publications
+            rebuildLocalStream();
+          }
+        });
+
+        // ActiveDeviceChanged: covers replaceTrack() in-place mutation where Published never fires
+        room.on(RoomEvent.ActiveDeviceChanged, (track, participant) => {
+          if (participant === room.localParticipant) {
+            rebuildLocalStream();
           }
         });
 

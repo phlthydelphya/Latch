@@ -26,7 +26,7 @@ Test timeout of 300000ms exceeded.
       - generic [ref=f1e6]:
         - heading "Meeting ready" [level=2] [ref=f1e10]
         - paragraph [ref=f1e11]: Share the link with participants before starting.
-      - generic "Meeting link" [ref=f1e12]: http://127.0.0.1:5173/r/57dpzbyyvmzaolip#k=068423b3ec8f462e9d563e0031459bde2d71ba2bce4dcd95cdffba1b4470a9cc
+      - generic "Meeting link" [ref=f1e12]: http://127.0.0.1:5173/r/3xmbkkdyy6onr57d#k=e77d5b9e5d5a22c7ba830cbd76ff48d45109fdba2c26eee5fbfb33549d40b814
       - generic [ref=f1e13]:
         - button "🔗 Copy link" [ref=f1e14] [cursor=pointer]
         - button "✉ Copy invitation" [ref=f1e15] [cursor=pointer]
