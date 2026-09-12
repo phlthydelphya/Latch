@@ -349,10 +349,10 @@ describe('M2 Phase E: HostControlManager', () => {
       hostId: null,
     });
 
-    emitDirective({ action: 'lock-room', isLocked: true }, 'remote-attacker', true);
+    emitDirective({ action: 'lock-room', isLocked: true }, 'remote-attacker', false);
     expect(useHostControlStore.getState().isRoomLocked).toBe(false);
 
-    emitDirective({ action: 'mute-participant', targetParticipantId: 'local-host' }, 'remote-attacker', true);
+    emitDirective({ action: 'mute-participant', targetParticipantId: 'local-host' }, 'remote-attacker', false);
     expect(mockRoom.localParticipant.setMicrophoneEnabled).not.toHaveBeenCalled();
   });
 

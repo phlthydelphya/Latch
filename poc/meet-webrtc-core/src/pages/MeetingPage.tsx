@@ -87,8 +87,8 @@ export function MeetingPage() {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          backgroundColor: 'var(--bg, #0a0a0f)',
-          color: 'var(--fg, #eaeaea)',
+          backgroundColor: 'var(--bg, #070807)',
+          color: 'var(--fg, #f3f5ec)',
           padding: '24px',
           textAlign: 'center',
         }}
@@ -97,7 +97,7 @@ export function MeetingPage() {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
           Removed from Meeting
         </h2>
-        <p style={{ color: 'var(--fg-muted, #888899)', maxWidth: '400px', marginBottom: '24px' }}>
+        <p style={{ color: 'var(--fg-muted, #8b9182)', maxWidth: '400px', marginBottom: '24px' }}>
           You have been removed from this meeting by the host.
         </p>
         <button
@@ -127,8 +127,8 @@ export function MeetingPage() {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          backgroundColor: 'var(--bg, #0a0a0f)',
-          color: 'var(--fg, #eaeaea)',
+          backgroundColor: 'var(--bg, #070807)',
+          color: 'var(--fg, #f3f5ec)',
           padding: '24px',
           textAlign: 'center',
         }}
@@ -137,11 +137,11 @@ export function MeetingPage() {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
           Waiting for the host to let you in
         </h2>
-        <p style={{ color: 'var(--fg-muted, #888899)', maxWidth: '440px', marginBottom: '24px', lineHeight: 1.5 }}>
+        <p style={{ color: 'var(--fg-muted, #8b9182)', maxWidth: '440px', marginBottom: '24px', lineHeight: 1.5 }}>
           The host has enabled a waiting room for this meeting. You will join the call automatically once admitted.
         </p>
-        <div style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--border, #28283c)', marginBottom: '24px' }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted, #888899)' }}>Meeting ID: </span>
+        <div style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', border: '1px solid var(--border, #20231c)', marginBottom: '24px' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted, #8b9182)' }}>Meeting ID: </span>
           <span style={{ fontSize: '0.9rem', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{roomId}</span>
         </div>
         <button

@@ -1,23 +1,36 @@
 /* Global Styles — meet-secure PWA Shell */
 
 :root {
-  --bg: #0a0a0f;
-  --bg-elevated: #11111a;
-  --fg: #eaeaea;
-  --fg-muted: #888899;
-  --accent: #00d4aa;
-  --accent-hover: #00e8bb;
-  --danger: #ff4757;
-  --danger-hover: #ff6b7a;
-  --warning: #ffa502;
-  --border: #222233;
-  --border-focus: #00d4aa;
+  /* Latch brand kit v1.3 — authoritative: updatecss/styles.css */
+  --latch-ink: #070807;
+  --latch-ink-soft: #101210;
+  --latch-paper: #f4f5ee;
+  --latch-lime: #b7ff2a;
+  --latch-lime-hot: #d5ff78;
+  --latch-signal: #a79bff;
+  --latch-muted: #a4aa9f;
+  --latch-rule: rgba(244, 245, 238, 0.2);
+  --latch-rule-strong: rgba(244, 245, 238, 0.42);
+  --latch-danger: #ff5b45;
+
+  --bg: var(--latch-ink);
+  --bg-elevated: #171a16;
+  --fg: var(--latch-paper);
+  --fg-muted: var(--latch-muted);
+  --accent: var(--latch-lime);
+  --accent-hover: var(--latch-lime-hot);
+  --accent-iris: var(--latch-signal);
+  --danger: var(--latch-danger);
+  --danger-hover: #ff7c6a;
+  --warning: #ffb020;
+  --border: var(--latch-rule);
+  --border-focus: var(--latch-lime);
   --shadow: rgba(0, 0, 0, 0.5);
   --radius: 12px;
   --radius-sm: 8px;
   --transition: 150ms ease;
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }
 
 *,
@@ -661,7 +674,7 @@ select.device-select:focus,
 
 .audio-meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, #00d4aa 0%, #2ed573 70%, #ffa502 90%, #ff4757 100%);
+  background: linear-gradient(90deg, #b7ff2a 0%, #7fdc8a 55%, #ffb020 80%, #ff5c6c 100%);
   transition: width 80ms ease-out;
 }
 

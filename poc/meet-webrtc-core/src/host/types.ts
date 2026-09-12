@@ -31,6 +31,7 @@ export interface HostDirectiveMessage {
   targetParticipantId?: string;
   senderId?: string;
   hostToken?: string;          // M4A: Server-signed ES256 host claim
+  newHostToken?: string;       // Carries new host token for host transfer
   newHostId?: string;          // For host-changed events (announcement only)
   hostKey?: string;            // Public host verification key (not secret)
   isLocked?: boolean;

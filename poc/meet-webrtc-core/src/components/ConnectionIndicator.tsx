@@ -12,10 +12,10 @@ export function ConnectionIndicator() {
   };
 
   const colors = {
-    excellent: '#00d4aa',
-    good: '#74b9ff',
-    poor: '#ffa502',
-    disconnected: '#ff4757',
+    excellent: '#b7ff2a', // LIME (brand kit v1.3)
+    good: '#7fdc8a',
+    poor: '#ffb020',
+    disconnected: '#ff5c6c',
   };
 
   const color = colors[quality];
