@@ -1,5 +1,5 @@
-go: downloading github.com/golang-jwt/jwt/v5 v5.2.1
 go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/golang-jwt/jwt/v5 v5.2.1
 go: downloading github.com/gorilla/websocket v1.5.3
 === RUN   TestLiveKitClaimsStructure
     main_test.go:107: LiveKit token verified successfully: <redacted>
@@ -26,7 +26,7 @@ go: downloading github.com/gorilla/websocket v1.5.3
 === RUN   TestM4AAuthorityManagerTransfer
 --- PASS: TestM4AAuthorityManagerTransfer (0.00s)
 === RUN   TestM4AMintHostTokenES256
-2026/09/12 21:12:18 host_auth: ECDSA P-256 signing initialized (pubkey_prefix=3059301306072a86...)
+2026/09/12 21:18:18 host_auth: ECDSA P-256 signing initialized (pubkey_prefix=3059301306072a86...)
 --- PASS: TestM4AMintHostTokenES256 (0.00s)
 === RUN   TestM4A1RoomStatusEndpoint
 --- PASS: TestM4A1RoomStatusEndpoint (0.00s)
@@ -84,7 +84,7 @@ go: downloading github.com/gorilla/websocket v1.5.3
 === RUN   TestSEC02ATokenCredentialAttemptsFailClosed/livekit/nil_value_present
 === RUN   TestSEC02ATokenCredentialAttemptsFailClosed/livekit/livekit_HS256_host
 === RUN   TestSEC02ATokenCredentialAttemptsFailClosed/livekit/invalid_body_with_credentials_fails_closed
---- PASS: TestSEC02ATokenCredentialAttemptsFailClosed (0.03s)
+--- PASS: TestSEC02ATokenCredentialAttemptsFailClosed (0.02s)
     --- PASS: TestSEC02ATokenCredentialAttemptsFailClosed/legacy (0.01s)
         --- PASS: TestSEC02ATokenCredentialAttemptsFailClosed/legacy/original_host (0.00s)
         --- PASS: TestSEC02ATokenCredentialAttemptsFailClosed/legacy/captured_B_subject_mismatch (0.00s)
@@ -287,7 +287,7 @@ go: downloading github.com/gorilla/websocket v1.5.3
 === RUN   TestSEC02CResumeAfterTransferRejected
 --- PASS: TestSEC02CResumeAfterTransferRejected (0.00s)
 === RUN   TestSEC02CGraceExpiryAdvancesGeneration
---- PASS: TestSEC02CGraceExpiryAdvancesGeneration (0.02s)
+--- PASS: TestSEC02CGraceExpiryAdvancesGeneration (0.01s)
 === RUN   TestSEC02CSigningFailureDoesNotCorruptAuthority
 --- PASS: TestSEC02CSigningFailureDoesNotCorruptAuthority (0.00s)
 === RUN   TestSEC02CRoomRecreationFreshInstance
@@ -305,4 +305,4 @@ go: downloading github.com/gorilla/websocket v1.5.3
 === RUN   TestSEC02DReplayAndGenerationRejected
 --- PASS: TestSEC02DReplayAndGenerationRejected (0.01s)
 PASS
-ok  	meet-signal	1.177s
+ok  	meet-signal	1.162s

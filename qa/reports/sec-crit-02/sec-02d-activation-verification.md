@@ -2,7 +2,7 @@
 
 Date: 2026-09-12
 Incident: SEC-CRIT-02 (child milestone SEC-02D)
-Candidate: `services/meet-signal/main.go` SHA-256 `d22c5b72f3ee4e0df4d6d9ba5379a1df8a7a41825741e5864f0be04924cbcac8`
+Candidate: `services/meet-signal/main.go` SHA-256 `256c103908f94f4be769b7526a232c149444f5a263d6e5900f40339655b75e0e`
 
 ## Scope
 
@@ -11,7 +11,7 @@ Verifies the wired public endpoints, complementing the primitive-level SEC-02B/C
 ## Commands
 
 - `go test -count=1 ./...` → `ok meet-signal`
-- `go test -race -count=1 -v ./...` (`go1.22.12 linux/amd64`, cgo enabled) → `ok meet-signal 1.177s`, 51 top-level PASS, 0 FAIL
+- `go test -race -count=1 -v ./...` (`go1.22.12 linux/amd64`, cgo enabled) → `ok meet-signal 1.162s`, 51 top-level PASS, 0 FAIL
   - Raw: `sec-02d-go122-race-results.txt` (JWT-like strings redacted)
   - Summary: `sec-02d-go122-race-results.json`
 

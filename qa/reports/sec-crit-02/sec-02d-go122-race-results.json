@@ -1,20 +1,21 @@
 {
   "incident": "SEC-CRIT-02",
   "milestone": "SEC-02D",
-  "evidenceSource": "Docker golang:1.22 container race run captured locally on 2026-09-12 over the wired SEC-02A/B/C activation candidate; raw verbose log in sec-02d-go122-race-results.txt (JWT-like strings redacted)",
+  "revision": "b4ce34a",
+  "evidenceSource": "Docker golang:1.22 container race run captured locally on 2026-09-12 over the final wired SEC-02A/B/C activation candidate; raw verbose log in sec-02d-go122-race-results.txt (JWT-like strings redacted)",
   "goVersion": "go1.22.12 linux/amd64",
   "baseImage": "golang:1.22",
   "cgoEnabled": true,
   "raceDetector": true,
   "commands": [
-    {"command": "go test -race -count=1 -v ./...", "result": "PASS", "output": "ok meet-signal 1.177s", "topLevelPass": 51, "topLevelFail": 0}
+    {"command": "go test -race -count=1 -v ./...", "result": "PASS", "output": "ok meet-signal 1.162s", "topLevelPass": 51, "topLevelFail": 0}
   ],
-  "candidateMainGoSHA256": "d22c5b72f3ee4e0df4d6d9ba5379a1df8a7a41825741e5864f0be04924cbcac8",
+  "candidateMainGoSHA256": "256c103908f94f4be769b7526a232c149444f5a263d6e5900f40339655b75e0e",
   "testSourceSHA256": {
-    "main_test.go": "19cedf0a2cea414b1ac8a4d1d5365829b31927dacc73b1f9cfd458fdc5c3ca67",
-    "sec02a_containment_test.go": "e2365a8baca390f7aad8aac1ec5813d990a9a92ce3d28da39f7f1732de8bfcf4",
-    "sec02b_identity_binding_test.go": "e3a87af85b1a1e0ed1acd6a7658323544e12fe443940bda9ca15209271703a84",
-    "sec02c_authority_generation_test.go": "75a4512715eb20d725fb05c70f9009bd769a4ea953d4456ffbb5190ab0eb0611",
+    "main_test.go": "e51896093f15ba1c7e827f87cf5c8e4cdd745849533c67d1989bf89552850bc2",
+    "sec02a_containment_test.go": "0c1691b9e64b35ed8d061bc563ceaaedb2f0ab966ac3a27c9bf7aa62b238f292",
+    "sec02b_identity_binding_test.go": "4c410cad78ea0858baf0390a7fbf3552bc39ecdbf07aa3587d74ccc512915b36",
+    "sec02c_authority_generation_test.go": "70ec6eab7b8221f3abf699c151f55ed7911fc490417e8508e71cab848c673d8a",
     "sec02d_activation_test.go": "f5936c6b1e6b85fe092cfc1b8c3d5bc6ed911af0b33d3c6305d14bc6fe0273c4"
   },
   "hostLimitation": "Native Windows host cannot run -race (no cgo/gcc); race evidence produced on supported linux/amd64 Go 1.22 container.",
