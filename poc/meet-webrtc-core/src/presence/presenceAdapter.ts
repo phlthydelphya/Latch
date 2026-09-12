@@ -38,12 +38,6 @@ export class PresenceAdapter {
     // 1. Synchronize initial local participant
     let isLocalHost = false;
     if (room.localParticipant) {
-      if (room.localParticipant.metadata) {
-        try {
-          const meta = JSON.parse(room.localParticipant.metadata);
-          if (meta.role === 'host') isLocalHost = true;
-        } catch {}
-      }
       if (store.hostId === room.localParticipant.identity) {
         isLocalHost = true;
       }
@@ -71,12 +65,6 @@ export class PresenceAdapter {
     const hostControl = useHostControlStore.getState();
     for (const remote of room.remoteParticipants.values()) {
       let isRemoteHost = false;
-      if (remote.metadata) {
-        try {
-          const meta = JSON.parse(remote.metadata);
-          if (meta.role === 'host') isRemoteHost = true;
-        } catch {}
-      }
       if (store.hostId === remote.identity) {
         isRemoteHost = true;
       }
@@ -145,12 +133,6 @@ export class PresenceAdapter {
     const onParticipantConnected = (participant: Participant) => {
       const name = participant.name || `User (${participant.identity.slice(0, 6)})`;
       let isRemoteHost = false;
-      if (participant.metadata) {
-        try {
-          const meta = JSON.parse(participant.metadata);
-          if (meta.role === 'host') isRemoteHost = true;
-        } catch {}
-      }
       if (store.hostId === participant.identity) {
         isRemoteHost = true;
       }
@@ -290,17 +272,11 @@ export class PresenceAdapter {
     };
 
     const onDataReceived = (payload: Uint8Array, participant?: Participant, _kind?: any, topic?: string) => {
+      // SEC01: Host control directives are handled exclusively by HostControlManager
+      // which performs cryptographic verification (ECDSA P-256 via HostTokenVerifier).
+      // PresenceAdapter MUST NOT process host-changed/host-announce directly to avoid
+      // unverified host mutation exploit.
       if (topic === HOST_CONTROL_TOPIC) {
-        try {
-          const text = new TextDecoder().decode(payload);
-          const data = JSON.parse(text);
-          if (data.action === 'host-changed' && (data.newHostId || data.targetParticipantId)) {
-            const newHostId = data.newHostId || data.targetParticipantId;
-            usePresenceStore.getState().setAuthoritativeHost(newHostId);
-          }
-        } catch (err) {
-          console.warn('[PresenceAdapter] Failed to parse host-changed directive:', err);
-        }
         return;
       }
 

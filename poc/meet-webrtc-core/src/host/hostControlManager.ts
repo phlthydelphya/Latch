@@ -48,6 +48,12 @@ export class HostControlManager {
     return this.hostPublicKey;
   }
 
+  reset(): void {
+    this.localHostToken = null;
+    this.hostPublicKey = null;
+    this.activeRoomId = null;
+  }
+
   attach(room: Room): void {
     this.detach();
     this.room = room;
@@ -63,7 +69,20 @@ export class HostControlManager {
       try {
         const text = new TextDecoder().decode(payload);
         const msg = JSON.parse(text) as HostDirectiveMessage;
-        const senderId = participant?.identity || msg.senderId || '';
+        // SEC01: Use participant?.identity as primary sender identity
+        // Exception: server-relayed messages come from participant "system" with actual sender in msg.senderId
+        let senderId = participant?.identity || '';
+        if (!senderId) {
+          console.warn('[HostControlManager] Dropped directive - no sender identity from participant');
+          return;
+        }
+        // For server-relayed messages (participant "system"), use msg.senderId but it will be verified against token sub
+        const isServerRelay = senderId === 'system';
+        const verificationSenderId = isServerRelay ? (msg.senderId || '') : senderId;
+        if (isServerRelay && !verificationSenderId) {
+          console.warn('[HostControlManager] Dropped server-relayed directive - missing msg.senderId');
+          return;
+        }
         const presence = usePresenceStore.getState();
         const appState = useAppStore.getState();
         const localId =
@@ -115,66 +134,35 @@ export class HostControlManager {
           return;
         }
 
-        // host-changed event from server or host (announcement only — no credentials)
+        // host-changed event from server or host - require verified hostToken
         if (msg.action === 'host-changed') {
-          const newHostId = msg.newHostId || msg.targetParticipantId;
-          if (newHostId) {
-            usePresenceStore.getState().setAuthoritativeHost(newHostId);
-            if (msg.hostKey) {
-              this.hostPublicKey = msg.hostKey;
-            }
-            if (newHostId !== localId) {
-              // Authority lost: drop the host-operation proof and one-use handle.
-              this.localHostToken = null;
-              useAppStore.getState().clearHostAuthority();
-            }
-            // When newHostId === localId, the target's private credential arrives
-            // separately over the host-credential control channel; it is never
-            // carried inside this announcement.
-
-            const newHostName =
-              presence.participants.get(newHostId)?.name ||
-              (newHostId === localId ? 'You' : 'Participant');
-
-            usePresenceStore.getState().pushToast({
-              type: 'host',
-              title: 'Host Transfer',
-              message:
-                newHostId === localId
-                  ? 'You are now the meeting host'
-                  : `${newHostName} is now the meeting host`,
-              durationMs: 4000,
-            });
+          if (!msg.hostToken) {
+            console.warn('[HostControlManager] Rejected host-changed - missing hostToken (anomaly logged)');
+            return;
           }
-          return;
+          // Fall through to M4A verification pipeline
         }
 
-        // host-announce event: informs new joiners who the current host is without triggering a "Host Transfer" toast
+        // host-announce event: informs new joiners who the current host is without triggering a "Host Transfer" toast - require verified hostToken
         if (msg.action === 'host-announce') {
-          const announcedHostId = msg.newHostId || msg.senderId;
-          if (announcedHostId) {
-            usePresenceStore.getState().setAuthoritativeHost(announcedHostId);
-            if (msg.hostKey) {
-              this.hostPublicKey = msg.hostKey;
-            }
-            // If currently waiting in lobby, re-knock so host receives our presence in queue
-            if (useHostControlStore.getState().isWaitingInLobby && announcedHostId !== localId) {
-              const localName = useAppStore.getState().localParticipant?.name || 'Guest';
-              this.knockWaitingRoom(localName).catch(() => {});
-            }
+          if (!msg.hostToken) {
+            console.warn('[HostControlManager] Rejected host-announce - missing hostToken (anomaly logged)');
+            return;
           }
-          return;
+          // Fall through to M4A verification pipeline
         }
 
-        // host-query event: newcomer asks for current host identity
+        // host-query event: newcomer asks for current host identity - SEC01: only reply if self holds valid host token
         if (msg.action === 'host-query') {
-          if (isLocalHost && localId) {
+          if (isLocalHost && localId && this.localHostToken) {
             this.publishDirective({
               action: 'host-announce',
               newHostId: localId,
+              hostToken: this.localHostToken,
               hostKey: this.hostPublicKey || undefined,
             }).catch(() => {});
           }
+          // SEC01: never broadcast hostPublicKey to unauthenticated queryers
           return;
         }
 
@@ -182,35 +170,15 @@ export class HostControlManager {
         const activeRoomId = (this.activeRoomId || appState.roomId || this.room?.name || '').trim();
         let isAuthorized = false;
 
-        // Auto-learn host public key if included in directive
-        if (msg.hostKey && !this.hostPublicKey) {
-          this.hostPublicKey = msg.hostKey;
-        }
-
         const establishedHostId = usePresenceStore.getState().hostId;
 
         // If an established host is already known, the sender MUST be that host (or local self)
-        if (establishedHostId && senderId !== establishedHostId && !myIdentities.has(senderId)) {
+        // Exception: server-relayed messages (participant "system") are allowed to pass through for verification
+        if (establishedHostId && !isServerRelay && senderId !== establishedHostId && !myIdentities.has(senderId)) {
           console.warn(
             `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Does not match established host ${establishedHostId}`
           );
           return;
-        }
-
-        // If no established host is known yet, only admission/announcement events can establish authority
-        if (!establishedHostId) {
-          const allowedUnestablishedActions = [
-            'waiting-room-admit',
-            'waiting-room-reject',
-            'set-waiting-room',
-            'host-announce',
-          ];
-          if (!allowedUnestablishedActions.includes(msg.action)) {
-            console.warn(
-              `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: No established host in room`
-            );
-            return;
-          }
         }
 
         if (msg.hostToken) {
@@ -218,16 +186,16 @@ export class HostControlManager {
             ? await HostTokenVerifier.verifyDirective(
                 msg,
                 activeRoomId,
-                senderId,
+                verificationSenderId,
                 this.hostPublicKey
               )
-            : HostTokenVerifier.verifyClaimsSync(msg, activeRoomId, senderId);
+            : HostTokenVerifier.verifyClaimsSync(msg, activeRoomId, verificationSenderId);
 
           if (verification.valid) {
             isAuthorized = true;
             // Cryptographically proven host: establish as authoritative host if not already set
             if (!establishedHostId) {
-              usePresenceStore.getState().setAuthoritativeHost(senderId);
+              usePresenceStore.getState().setAuthoritativeHost(verificationSenderId);
             }
           } else {
             console.warn(
@@ -236,9 +204,26 @@ export class HostControlManager {
             return;
           }
         } else {
+          // All directives require verified hostToken (except waiting-room-knock/host-query handled earlier)
+          if (import.meta.env?.PROD || import.meta.env?.TEST) {
+            console.warn(
+              `[HostControlManager] Rejected tokenless directive '${msg.action}' from ${senderId}: No hostToken provided (anomaly logged)`
+            );
+            return;
+          }
           // If no hostToken attached (e.g. dev/test mode without host token), check if senderId is established host
           if (establishedHostId && (senderId === establishedHostId || myIdentities.has(senderId))) {
             isAuthorized = true;
+          } else if (!establishedHostId) {
+            const allowedUnestablishedActions = [
+              'waiting-room-admit',
+              'waiting-room-reject',
+              'set-waiting-room',
+              'host-announce',
+            ];
+            if (allowedUnestablishedActions.includes(msg.action)) {
+              isAuthorized = true;
+            }
           }
         }
 
@@ -412,6 +397,51 @@ export class HostControlManager {
                     durationMs: 4000,
                   });
                 }
+              }
+            }
+            break;
+          }
+
+          case 'host-changed': {
+            // Post-verification host-changed handling (only reaches here after valid hostToken)
+            const newHostId = msg.newHostId || msg.targetParticipantId;
+            if (newHostId) {
+              usePresenceStore.getState().setAuthoritativeHost(newHostId);
+              if (newHostId === localId && msg.newHostToken) {
+                this.setLocalHostToken(msg.newHostToken);
+              } else if (newHostId !== localId && this.localHostToken) {
+                this.localHostToken = null;
+              }
+
+              const newHostName =
+                presence.participants.get(newHostId)?.name ||
+                (newHostId === localId ? 'You' : 'Participant');
+
+              usePresenceStore.getState().pushToast({
+                type: 'host',
+                title: 'Host Transfer',
+                message:
+                  newHostId === localId
+                    ? 'You are now the meeting host'
+                    : `${newHostName} is now the meeting host`,
+                durationMs: 4000,
+              });
+            }
+            break;
+          }
+
+          case 'host-announce': {
+            // Post-verification host-announce handling (only reaches here after valid hostToken)
+            const announcedHostId = msg.newHostId || verificationSenderId;
+            if (announcedHostId) {
+              // Only set authoritative host if not already established
+              if (!establishedHostId) {
+                usePresenceStore.getState().setAuthoritativeHost(announcedHostId);
+              }
+              // If currently waiting in lobby, re-knock so host receives our presence in queue
+              if (useHostControlStore.getState().isWaitingInLobby && announcedHostId !== localId) {
+                const localName = useAppStore.getState().localParticipant?.name || 'Guest';
+                this.knockWaitingRoom(localName).catch(() => {});
               }
             }
             break;

@@ -23,6 +23,8 @@ export interface DecodedHostClaims {
   exp: number;
   iat: number;
   iss?: string;
+  rinst?: string;
+  gen?: number;
 }
 
 export interface VerificationResult {

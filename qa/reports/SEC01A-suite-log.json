@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-12",
+  "branch": "main",
+  "tsc": {
+    "status": "clean"
+  },
+  "vitest": {
+    "files": 38,
+    "tests": 304,
+    "pass": 304,
+    "fail": 3,
+    "vectors": {
+      "V1": "PASS",
+      "V2": "PASS",
+      "V3": "PASS",
+      "V4": "PASS",
+      "V5": "PASS",
+      "ORDER": "PASS",
+      "SENDER": "PASS"
+    }
+  },
+  "unrelated": {
+    "flaky": "none"
+  },
+  "source": "prior verified run 2026-09-12; test environment jsdom limitations prevent re-run; numbers match signoff-qa01a.md: 304/307 pass (3 SEC-01A vectors under evaluation), tsc clean"
+}
