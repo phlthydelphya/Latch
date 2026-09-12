@@ -95,12 +95,14 @@ export function useWebRTC() {
     const oldTrackId = prevCameraTrackIdRef.current;
 
     if (oldTrackId !== newTrackId) {
-      console.log('[LOCAL STREAM REBUILD]', {
-        cameraTracks: cameraTracks.length,
-        trackIds,
-        oldTrackId,
-        newTrackId,
-      });
+      if (import.meta.env.DEV) {
+        console.debug('[LOCAL STREAM REBUILD]', {
+          cameraTracks: cameraTracks.length,
+          trackIds,
+          oldTrackId,
+          newTrackId,
+        });
+      }
       prevCameraTrackIdRef.current = newTrackId;
     }
 

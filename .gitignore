@@ -5,9 +5,15 @@ qa/reports/lighthouse/
 qa/reports/playwright/
 poc/meet-webrtc-core/node_modules/
 poc/meet-webrtc-core/dist/
+poc/meet-webrtc-core/test-results/
+poc/meet-webrtc-core/qa/reports/playwright/
+services/meet-signal/meet-signal
 infra/pgdata/
 .vite/
 *.log
 .env
 backups/
 *.exe
+*.pcapng
+dump-*.ts
+validate*.cjs
