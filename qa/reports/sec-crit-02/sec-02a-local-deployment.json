@@ -1,0 +1,9 @@
+{
+  "resumeStatus": 403,
+  "transferStatus": 503,
+  "resumeError": "host_resume_temporarily_disabled",
+  "passed": true,
+  "transferError": "host_transfer_temporarily_disabled",
+  "health": "ok",
+  "scope": "deployed local service; stateless probes; real signed fixtures verified in isolated image and QA suite"
+}

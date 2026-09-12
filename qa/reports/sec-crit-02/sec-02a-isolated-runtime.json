@@ -1,0 +1,11 @@
+{
+  "createdRole": "host",
+  "guestHostCredentialPresent": false,
+  "guestRole": "participant",
+  "transferError": "host_transfer_temporarily_disabled",
+  "transferStatus": 503,
+  "resumeStatus": 403,
+  "authorityFieldsUnchanged": true,
+  "passed": true,
+  "resumeError": "host_resume_temporarily_disabled"
+}

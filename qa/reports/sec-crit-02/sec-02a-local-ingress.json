@@ -1,0 +1,20 @@
+[
+  {
+    "passed": true,
+    "transferStatus": 503,
+    "resumeStatus": 403,
+    "origin": "http://127.0.0.1"
+  },
+  {
+    "passed": false,
+    "exceptionType": "System.Net.Http.HttpRequestException",
+    "origin": "https://localhost",
+    "error": "TLS/connection failure before an HTTP response; route not verified"
+  },
+  {
+    "passed": false,
+    "exceptionType": "System.Net.Http.HttpRequestException",
+    "origin": "https://127.0.0.1",
+    "error": "TLS/connection failure before an HTTP response; route not verified"
+  }
+]

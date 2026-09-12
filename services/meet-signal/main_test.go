@@ -314,13 +314,13 @@ func TestM4AAuthorityManagerTransfer(t *testing.T) {
 	am.assignRole(roomID, "p-bob")
 
 	// 1. Non-host attempts transfer -> fails
-	errUnauthorized := am.transferHost(roomID, "p-charlie", "p-bob")
+	errUnauthorized := am.transferHost(roomID, "p-charlie", "p-bob", 1)
 	if errUnauthorized == nil {
 		t.Fatal("non-host transfer should be rejected")
 	}
 
 	// 2. Host transfers to bob -> succeeds
-	errOk := am.transferHost(roomID, "p-alice", "p-bob")
+	errOk := am.transferHost(roomID, "p-alice", "p-bob", 1)
 	if errOk != nil {
 		t.Fatalf("valid host transfer failed: %v", errOk)
 	}
@@ -338,8 +338,10 @@ func TestM4AMintHostTokenES256(t *testing.T) {
 
 	participantID := "p-host-123"
 	roomID := "room-secure-456"
+	roomInstanceID := "inst-test-abc"
+	generation := uint64(7)
 
-	tokenStr, err := mintHostToken(participantID, roomID, 5*time.Minute)
+	tokenStr, err := mintHostToken(participantID, roomID, roomInstanceID, generation, 5*time.Minute)
 	if err != nil {
 		t.Fatalf("mintHostToken failed: %v", err)
 	}
@@ -365,6 +367,9 @@ func TestM4AMintHostTokenES256(t *testing.T) {
 
 	if claims.ParticipantID != participantID || claims.Role != "host" || claims.RoomID != roomID {
 		t.Errorf("claims mismatch: got %+v", claims)
+	}
+	if claims.RoomInstanceID != roomInstanceID || claims.Generation != generation {
+		t.Errorf("generation/instance binding mismatch: got rinst=%q gen=%d", claims.RoomInstanceID, claims.Generation)
 	}
 }
 
@@ -488,7 +493,7 @@ func TestCanonicalRoomIDTransferHostAcrossCaseVariants(t *testing.T) {
 	canonical := canonicalRoomID("Transfer-Room-Abc")
 	_, _ = am.createRoom(canonical, "host-original")
 
-	err := am.transferHost(canonicalRoomID("TRANSFER-ROOM-ABC"), "host-original", "host-new")
+	err := am.transferHost(canonicalRoomID("TRANSFER-ROOM-ABC"), "host-original", "host-new", 1)
 	if err != nil {
 		t.Fatalf("transferHost across case variants failed: %v", err)
 	}

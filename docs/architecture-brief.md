@@ -263,6 +263,17 @@ See `docs/adr/ADR-004-livekit-vs-mediasoup.md` §4 for benchmark GO/NO-GO flag a
 
 See full review: `docs/gates/architecture-gate-review-2026-09-01.md`.
 
+### 11.2 Security Remediation ADRs — SEC-CRIT-02 (2026-09-12)
+
+The authoritative ADR series lives in `docs/adr/` (the table above retains legacy numbering and is superseded by the files for any conflict). The SEC-CRIT-02 backend remediation is recorded as:
+
+| ID | Title | Status | Refs |
+|----|-------|--------|------|
+| ADR-008 | Session Identity Binding (private caller authentication) | **ACCEPTED** — SEC-02B | `docs/design/SEC-02-session-identity-contract.md`, `docs/plans/SEC-CRIT-02-remediation-program.md` §3 |
+| ADR-009 | Authority Generation Hardening (atomic tenure-scoped authority) | **ACCEPTED** — SEC-02C | ADR-008, remediation program §4 |
+
+Contract: `docs/design/SEC-02-session-identity-contract.md`. Enforcement: `services/meet-signal/main.go` (`sessionStore`, `resumeHandleStore`, generation-bound `HostClaims`, compare-and-swap `transferHost`, target-only `deliverHostCredential`, wired `handleTokenResume`/`handleTransferHost`). Evidence: `qa/reports/sec-crit-02/`.
+
 ---
 
 ## 12. Validation & Exit (Gate Artifact) — UPDATED 2026-09-01

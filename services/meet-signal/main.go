@@ -12,7 +12,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -74,24 +76,29 @@ type TokenRequest struct {
 }
 
 type TokenResponse struct {
-	Token         string `json:"token"`                  // Legacy mesh token / LiveKit JWT (backward compat)
-	LiveKitToken  string `json:"livekitToken"`           // Alias for token when LiveKit path is used
-	ParticipantID string `json:"participantId"`
-	RoomID        string `json:"roomId"`
-	Role          string `json:"role"`                   // M4A: "host" or "participant"
-	HostToken     string `json:"hostToken,omitempty"`    // M4A: Server-signed ES256 host claim (if role == "host")
-	HostKey       string `json:"hostKey,omitempty"`      // M4A: Public key in hex for peer verification
-	URL           string `json:"url,omitempty"`          // Legacy field (backward compat)
-	SFUUrl        string `json:"sfuUrl,omitempty"`        // Alias for url when LiveKit path is used
+	Token          string `json:"token"`                   // Legacy mesh token / LiveKit JWT (backward compat)
+	LiveKitToken   string `json:"livekitToken"`            // Alias for token when LiveKit path is used
+	ParticipantID  string `json:"participantId"`
+	RoomID         string `json:"roomId"`
+	Role           string `json:"role"`                    // M4A: "host" or "participant"
+	HostToken      string `json:"hostToken,omitempty"`     // M4A: Server-signed ES256 host claim (if role == "host")
+	HostKey        string `json:"hostKey,omitempty"`       // M4A: Public key in hex for peer verification
+	SessionToken   string `json:"sessionToken,omitempty"`  // SEC-02B: private session capability (identity proof)
+	ResumeHandle   string `json:"resumeHandle,omitempty"`  // SEC-02C: one-use host resume handle
+	RoomInstanceID string `json:"roomInstanceId,omitempty"` // SEC-02B: room incarnation binding
+	URL            string `json:"url,omitempty"`           // Legacy field (backward compat)
+	SFUUrl         string `json:"sfuUrl,omitempty"`         // Alias for url when LiveKit path is used
 }
 
 type RoomAuthority struct {
-	RoomID        string    `json:"roomId"`
-	HostID        string    `json:"hostId"`
-	CreatedAt     time.Time `json:"createdAt"`
-	HostUpdatedAt time.Time `json:"hostUpdatedAt"`
-	GraceExpiry   time.Time `json:"graceExpiry,omitempty"`
-	Locked        bool      `json:"locked"`
+	RoomID              string    `json:"roomId"`
+	RoomInstanceID      string    `json:"roomInstanceId"`
+	HostID              string    `json:"hostId"`
+	AuthorityGeneration uint64    `json:"authorityGeneration"`
+	CreatedAt           time.Time `json:"createdAt"`
+	HostUpdatedAt       time.Time `json:"hostUpdatedAt"`
+	GraceExpiry         time.Time `json:"graceExpiry,omitempty"`
+	Locked              bool      `json:"locked"`
 }
 
 type authorityManager struct {
@@ -105,6 +112,16 @@ func newAuthorityManager() *authorityManager {
 	}
 }
 
+// newRoomInstanceID returns an unguessable room-incarnation identifier used to
+// scope private sessions so a recreated room cannot inherit old identity state.
+func newRoomInstanceID() string {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "inst-" + uuid.New().String()
+	}
+	return hex.EncodeToString(raw)
+}
+
 func (am *authorityManager) createRoom(roomID, creatorID string) (*RoomAuthority, error) {
 	am.mu.Lock()
 	defer am.mu.Unlock()
@@ -116,41 +133,39 @@ func (am *authorityManager) createRoom(roomID, creatorID string) (*RoomAuthority
 	}
 
 	auth = &RoomAuthority{
-		RoomID:        roomID,
-		HostID:        creatorID,
-		CreatedAt:     now,
-		HostUpdatedAt: now,
-		Locked:        false,
+		RoomID:              roomID,
+		RoomInstanceID:      newRoomInstanceID(),
+		HostID:              creatorID,
+		AuthorityGeneration: 1,
+		CreatedAt:           now,
+		HostUpdatedAt:       now,
+		Locked:              false,
 	}
 	am.rooms[roomID] = auth
 	return auth, nil
 }
 
-func (am *authorityManager) assignRole(roomID, participantID string, isHostReconn ...bool) (string, bool) {
+func (am *authorityManager) assignRole(roomID, participantID string) (string, bool) {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-
-	isHost := false
-	if len(isHostReconn) > 0 && isHostReconn[0] {
-		isHost = true
-	}
 
 	auth, exists := am.rooms[roomID]
 	now := time.Now()
 	if !exists {
 		// Room not created via /room/create — register unhosted room
 		am.rooms[roomID] = &RoomAuthority{
-			RoomID:        roomID,
-			HostID:        "",
-			CreatedAt:     now,
-			HostUpdatedAt: now,
+			RoomID:              roomID,
+			RoomInstanceID:      newRoomInstanceID(),
+			HostID:              "",
+			AuthorityGeneration: 1,
+			CreatedAt:           now,
+			HostUpdatedAt:       now,
 		}
 		return "participant", false
 	}
 
-	if isHost || (auth.HostID != "" && auth.HostID == participantID) {
-		auth.HostID = participantID
-		auth.GraceExpiry = time.Time{}
+	// Role lookup cannot reassign authority or cancel host grace.
+	if auth.HostID != "" && auth.HostID == participantID {
 		return "host", false
 	}
 
@@ -168,7 +183,7 @@ func (am *authorityManager) getAuthority(roomID string) (*RoomAuthority, bool) {
 	return &copy, true
 }
 
-func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantID string) error {
+func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantID string, expectedGeneration uint64) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
@@ -179,10 +194,45 @@ func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantI
 	if auth.HostID != requesterID {
 		return errors.New("unauthorized: requester is not host")
 	}
+	if auth.AuthorityGeneration != expectedGeneration {
+		return errGenerationConflict
+	}
 	auth.HostID = targetParticipantID
 	auth.HostUpdatedAt = time.Now()
 	auth.GraceExpiry = time.Time{}
+	auth.AuthorityGeneration++
 	return nil
+}
+
+// revokeAuthority clears the host and advances the generation, invalidating all
+// prior host credentials. It is used for explicit revocation/reset and is
+// atomic with respect to other authority transitions.
+func (am *authorityManager) revokeAuthority(roomID string) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	auth, exists := am.rooms[roomID]
+	if !exists {
+		return
+	}
+	auth.HostID = ""
+	auth.GraceExpiry = time.Time{}
+	auth.AuthorityGeneration++
+}
+
+// consumeResumeHandle atomically re-checks that participantID is still the
+// current host and consumes the one-use resume handle bound to the current
+// room instance and generation. It returns the current generation on success.
+func (am *authorityManager) consumeResumeHandle(roomID, participantID string, rh *resumeHandleStore, handle string) (uint64, bool) {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	auth, exists := am.rooms[roomID]
+	if !exists || auth.HostID != participantID {
+		return 0, false
+	}
+	if !rh.consume(handle, participantID, auth.RoomInstanceID, auth.AuthorityGeneration) {
+		return 0, false
+	}
+	return auth.AuthorityGeneration, true
 }
 
 func (am *authorityManager) startHostGrace(roomID, hostID string, graceDuration time.Duration, onTimeout func(string)) {
@@ -209,10 +259,227 @@ func (am *authorityManager) startHostGrace(roomID, hostID string, graceDuration 
 		}
 
 		currentAuth.HostID = ""
+		currentAuth.AuthorityGeneration++
 		if onTimeout != nil {
 			go onTimeout(roomID)
 		}
 	}()
+}
+
+// SEC-02B: private session capability store. The raw capability is a 256-bit
+// unguessable bearer identity proof delivered only in the direct bootstrap
+// response; only its SHA-256 hash is retained in volatile server state.
+type sessionRecord struct {
+	ParticipantID  string
+	RoomInstanceID string
+	Purpose        string // "host" | "participant"
+	SessionVersion uint64
+	ExpiresAt      time.Time
+}
+
+type sessionStore struct {
+	mu       sync.RWMutex
+	sessions map[string]sessionRecord
+}
+
+func newSessionStore() *sessionStore {
+	return &sessionStore{sessions: make(map[string]sessionRecord)}
+}
+
+func sessionCapabilityHash(capability string) string {
+	sum := sha256.Sum256([]byte(capability))
+	return hex.EncodeToString(sum[:])
+}
+
+func (s *sessionStore) issue(participantID, roomInstanceID, purpose string, ttl time.Duration) (string, error) {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	capability := base64.RawURLEncoding.EncodeToString(raw)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sessions[sessionCapabilityHash(capability)] = sessionRecord{
+		ParticipantID:  participantID,
+		RoomInstanceID: roomInstanceID,
+		Purpose:        purpose,
+		SessionVersion: 1,
+		ExpiresAt:      time.Now().Add(ttl),
+	}
+	return capability, nil
+}
+
+func (s *sessionStore) authenticate(capability string) (sessionRecord, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	record, ok := s.sessions[sessionCapabilityHash(capability)]
+	if !ok || time.Now().After(record.ExpiresAt) {
+		return sessionRecord{}, false
+	}
+	return record, true
+}
+
+func (s *sessionStore) rotate(capability string, ttl time.Duration) (string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := sessionCapabilityHash(capability)
+	record, ok := s.sessions[key]
+	if !ok || time.Now().After(record.ExpiresAt) {
+		return "", errPrivateSessionInvalid
+	}
+	delete(s.sessions, key)
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	newCapability := base64.RawURLEncoding.EncodeToString(raw)
+	record.SessionVersion++
+	record.ExpiresAt = time.Now().Add(ttl)
+	s.sessions[sessionCapabilityHash(newCapability)] = record
+	return newCapability, nil
+}
+
+func (s *sessionStore) revoke(capability string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.sessions, sessionCapabilityHash(capability))
+}
+
+func (s *sessionStore) hasActiveSession(participantID, roomInstanceID string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	for _, record := range s.sessions {
+		if record.ParticipantID == participantID && record.RoomInstanceID == roomInstanceID && time.Now().Before(record.ExpiresAt) {
+			return true
+		}
+	}
+	return false
+}
+
+// SEC-02C: one-use resume handle store. A host resume presents a single-use
+// handle bound to (room instance, authority generation, participant, session
+// version). Consumption is atomic: exactly one concurrent call wins.
+type resumeHandleRecord struct {
+	ParticipantID  string
+	RoomInstanceID string
+	Generation     uint64
+	SessionVersion uint64
+	ExpiresAt      time.Time
+	Used           bool
+}
+
+type resumeHandleStore struct {
+	mu      sync.RWMutex
+	handles map[string]resumeHandleRecord
+}
+
+func newResumeHandleStore() *resumeHandleStore {
+	return &resumeHandleStore{handles: make(map[string]resumeHandleRecord)}
+}
+
+func (r *resumeHandleStore) issue(participantID, roomInstanceID string, generation, sessionVersion uint64, ttl time.Duration) (string, error) {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", err
+	}
+	handle := base64.RawURLEncoding.EncodeToString(raw)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.handles[sessionCapabilityHash(handle)] = resumeHandleRecord{
+		ParticipantID:  participantID,
+		RoomInstanceID: roomInstanceID,
+		Generation:     generation,
+		SessionVersion: sessionVersion,
+		ExpiresAt:      time.Now().Add(ttl),
+		Used:           false,
+	}
+	return handle, nil
+}
+
+func (r *resumeHandleStore) consume(handle, participantID, roomInstanceID string, generation uint64) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	key := sessionCapabilityHash(handle)
+	record, ok := r.handles[key]
+	if !ok || record.Used || time.Now().After(record.ExpiresAt) {
+		return false
+	}
+	if record.ParticipantID != participantID || record.RoomInstanceID != roomInstanceID || record.Generation != generation {
+		return false
+	}
+	record.Used = true
+	r.handles[key] = record
+	return true
+}
+
+func (r *resumeHandleStore) revoke(handle string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.handles, sessionCapabilityHash(handle))
+}
+
+// SEC-02B error contracts. These are returned by the identity-binding flows and
+// mapped to HTTP status codes by the (still gated) privileged handlers.
+var (
+	errPrivateSessionRequired       = errors.New("private_session_required")
+	errPrivateSessionInvalid        = errors.New("private_session_invalid")
+	errIdentityMismatch             = errors.New("identity_mismatch")
+	errHostProofRequired            = errors.New("host_proof_required")
+	errTransferTargetUnauthenticated = errors.New("transfer_target_unauthenticated")
+	errGenerationConflict            = errors.New("generation_conflict")
+	errResumeHandleInvalid           = errors.New("resume_handle_invalid")
+)
+
+// bearerToken extracts the credential from an Authorization/X-*-Proof header.
+// A missing or non-Bearer scheme returns the raw value unchanged so downstream
+// validation fails closed rather than treating the header as absent.
+func bearerToken(header string) string {
+	header = strings.TrimSpace(header)
+	if len(header) >= 7 && strings.EqualFold(header[:7], "Bearer ") {
+		return strings.TrimSpace(header[7:])
+	}
+	return header
+}
+
+// writeAuthError maps SEC-02B/C authentication and authority errors to stable
+// HTTP responses. Every mapping fails closed without state mutation.
+func writeAuthError(w http.ResponseWriter, err error) {
+	status := http.StatusBadRequest
+	switch {
+	case errors.Is(err, errPrivateSessionRequired),
+		errors.Is(err, errPrivateSessionInvalid),
+		errors.Is(err, errResumeHandleInvalid):
+		status = http.StatusUnauthorized
+	case errors.Is(err, errIdentityMismatch),
+		errors.Is(err, errHostProofRequired),
+		errors.Is(err, errTransferTargetUnauthenticated):
+		status = http.StatusForbidden
+	case errors.Is(err, errGenerationConflict):
+		status = http.StatusConflict
+	}
+	http.Error(w, err.Error(), status)
+}
+
+// headerPresent reports whether a header key is present, case-insensitively and
+// independent of value. A present-but-empty credential header still selects the
+// resume path so a failed attempt never downgrades to guest issuance.
+func headerPresent(h http.Header, name string) bool {
+	for key := range h {
+		if strings.EqualFold(key, name) {
+			return true
+		}
+	}
+	return false
+}
+
+// headerValue returns the first value for a header key, case-insensitively.
+func headerValue(h http.Header, name string) string {
+	for key, values := range h {
+		if strings.EqualFold(key, name) && len(values) > 0 {
+			return values[0]
+		}
+	}
+	return ""
 }
 
 // SignalMessage mirrors the client signaling frame shape:
@@ -292,6 +559,54 @@ func (h *hub) peers(roomID string, c *client) []*client {
 	return peers
 }
 
+// clientByParticipant returns the live signaling connection owned by the given
+// authenticated participant in the room. It is used to prove a private delivery
+// channel exists before committing an authority transition.
+func (h *hub) clientByParticipant(roomID, participantID string) (*client, bool) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for peer := range h.rooms[roomID] {
+		if peer.participantID == participantID {
+			return peer, true
+		}
+	}
+	return nil, false
+}
+
+// deliverHostCredential writes a private host-credential frame only to the
+// target participant's authenticated signaling connection. It returns false when
+// the target has no active connection so callers can fall back to a private
+// retrieval flow without broadcasting. It must never be substituted for
+// h.peers(roomID, nil) when delivering private credentials.
+func (h *hub) deliverHostCredential(roomID, targetParticipantID string, payload json.RawMessage) bool {
+	h.mu.Lock()
+	room := h.rooms[roomID]
+	var target *client
+	for peer := range room {
+		if peer.participantID == targetParticipantID {
+			target = peer
+			break
+		}
+	}
+	h.mu.Unlock()
+
+	if target == nil {
+		return false
+	}
+	msg := SignalMessage{
+		Type:          "host-credential",
+		Payload:       payload,
+		RoomID:        roomID,
+		ParticipantID: "system",
+		Timestamp:     time.Now().UnixMilli(),
+	}
+	raw, err := json.Marshal(msg)
+	if err != nil {
+		return false
+	}
+	return target.writeRaw(raw) == nil
+}
+
 // stats returns the active room and connection count.
 func (h *hub) stats() (rooms int, clients int) {
 	h.mu.Lock()
@@ -339,6 +654,8 @@ var (
 	hostPrivateKey   *ecdsa.PrivateKey
 	hostPublicKeyHex string
 	authManager      = newAuthorityManager()
+	sessionManager   = newSessionStore()
+	resumeHandles    = newResumeHandleStore()
 )
 
 func initHostSigning() {
@@ -356,18 +673,25 @@ func initHostSigning() {
 }
 
 type HostClaims struct {
-	ParticipantID string `json:"sub"`
-	RoomID        string `json:"room"`
-	Role          string `json:"role"`
+	ParticipantID  string `json:"sub"`
+	RoomID         string `json:"room"`
+	Role           string `json:"role"`
+	RoomInstanceID string `json:"rinst"`
+	Generation     uint64 `json:"gen"`
 	jwt.RegisteredClaims
 }
 
-func mintHostToken(participantID, roomID string, ttl time.Duration) (string, error) {
+func mintHostToken(participantID, roomID, roomInstanceID string, generation uint64, ttl time.Duration) (string, error) {
+	if hostPrivateKey == nil {
+		return "", errors.New("host signing key not initialized")
+	}
 	now := time.Now()
 	claims := HostClaims{
-		ParticipantID: participantID,
-		RoomID:        roomID,
-		Role:          "host",
+		ParticipantID:  participantID,
+		RoomID:         roomID,
+		Role:           "host",
+		RoomInstanceID: roomInstanceID,
+		Generation:     generation,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    jwtIssuer,
 			Subject:   participantID,
@@ -517,7 +841,7 @@ func handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 	}
 	token := strings.TrimPrefix(auth, "Bearer ")
 
-	claims, err := validateJWT(token)
+	claims, err := validateAccessToken(token)
 	if err != nil {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -576,7 +900,7 @@ func handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	atomic.AddInt64(&metricTokensIssued, 1)
 
 	// Authoritative Room Creation & Host Election
-	_, err := authManager.createRoom(roomID, participantID)
+	auth, err := authManager.createRoom(roomID, participantID)
 	if err != nil {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, err.Error(), http.StatusConflict)
@@ -584,16 +908,29 @@ func handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	role := "host"
-	hostToken, err := mintHostToken(participantID, roomID, jwtTTL)
+	hostToken, err := mintHostToken(participantID, roomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
 	if err != nil {
 		log.Printf("create_room: failed to mint host token: %v", err)
 	}
 
+	// SEC-02B: issue the host's private session capability in the direct
+	// bootstrap response. Never broadcast or log the raw capability.
+	sessionToken, err := sessionManager.issue(participantID, auth.RoomInstanceID, "host", jwtTTL)
+	if err != nil {
+		log.Printf("create_room: failed to issue host session: %v", err)
+	}
+	// SEC-02C: issue a one-use, generation-bound host resume handle. The raw
+	// handle is returned only in this direct bootstrap response.
+	resumeHandle, err := resumeHandles.issue(participantID, auth.RoomInstanceID, auth.AuthorityGeneration, 1, jwtTTL)
+	if err != nil {
+		log.Printf("create_room: failed to issue host resume handle: %v", err)
+	}
+
 	if liveKitAPISecret != "" {
-		issueLiveKitToken(w, participantID, roomID, name, role, hostToken)
+		issueLiveKitToken(w, participantID, roomID, name, role, hostToken, sessionToken, auth.RoomInstanceID, resumeHandle)
 		return
 	}
-	issueLegacyToken(w, participantID, roomID, name, role, hostToken)
+	issueLegacyToken(w, participantID, roomID, name, role, hostToken, sessionToken, auth.RoomInstanceID, resumeHandle)
 }
 
 func handleToken(w http.ResponseWriter, r *http.Request) {
@@ -616,52 +953,123 @@ func handleToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "roomId is required", http.StatusBadRequest)
 		return
 	}
+	if len(req.RoomID) > 64 {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "roomId too long", http.StatusBadRequest)
+		return
+	}
+
+	authorization := headerValue(r.Header, "Authorization")
+	sessionCapability := headerValue(r.Header, "X-Session-Capability")
+	hostProof := headerValue(r.Header, "X-Host-Proof")
+	resumeHandle := headerValue(r.Header, "X-Resume-Handle")
+
+	// SEC-02B/C: the presence of any privileged credential header selects the
+	// resume path, even when its value is empty or malformed. A failed
+	// credential attempt fails closed and must never downgrade to guest issuance.
+	if headerPresent(r.Header, "Authorization") || headerPresent(r.Header, "X-Session-Capability") ||
+		headerPresent(r.Header, "X-Host-Proof") || headerPresent(r.Header, "X-Resume-Handle") {
+		handleTokenResume(w, req, name, authorization, sessionCapability, hostProof, resumeHandle)
+		return
+	}
+
 	if name == "" {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "display name is required", http.StatusBadRequest)
 		return
 	}
-	if len(req.RoomID) > 64 || len(name) > 64 {
+	if len(name) > 64 {
 		atomic.AddInt64(&metricSignalErrors, 1)
-		http.Error(w, "roomId/name too long", http.StatusBadRequest)
+		http.Error(w, "name too long", http.StatusBadRequest)
 		return
-	}
-
-	// Check if reconnecting with an existing server-issued host token
-	isHostReconnection := false
-	authHeader := r.Header.Get("Authorization")
-	if strings.HasPrefix(authHeader, "Bearer ") {
-		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		claims, err := validateJWT(tokenStr)
-		if err == nil && canonicalRoomID(claims.RoomID) == req.RoomID && claims.Role == "host" {
-			isHostReconnection = true
-		}
 	}
 
 	participantID := "p-" + uuid.New().String()[:8]
 	atomic.AddInt64(&metricTokensIssued, 1)
 
-	// M4A: Attendees/guests calling /token receive "participant" role.
-	// Only reconnecting hosts (authenticated via server signature) retain "host".
-	role, _ := authManager.assignRole(req.RoomID, participantID, isHostReconnection)
-	var hostToken string
-	if role == "host" {
-		var err error
-		hostToken, err = mintHostToken(participantID, req.RoomID, jwtTTL)
-		if err != nil {
-			log.Printf("token: failed to mint host token: %v", err)
-		}
+	// Register unknown rooms without granting authority. /token always issues a
+	// participant credential, even if a generated ID collides with the host ID.
+	authManager.assignRole(req.RoomID, participantID)
+	role := "participant"
+
+	// SEC-02B: issue a participant-purpose private session in the direct
+	// bootstrap response so the identity can later be proven on privileged paths.
+	auth, _ := authManager.getAuthority(req.RoomID)
+	roomInstanceID := ""
+	if auth != nil {
+		roomInstanceID = auth.RoomInstanceID
+	}
+	sessionToken, err := sessionManager.issue(participantID, roomInstanceID, "participant", jwtTTL)
+	if err != nil {
+		log.Printf("token: failed to issue participant session: %v", err)
 	}
 
 	// Dual-path: LiveKit JWT with VideoGrant if LIVEKIT_API_SECRET is set, else legacy mesh token
 	if liveKitAPISecret != "" {
-		issueLiveKitToken(w, participantID, req.RoomID, name, role, hostToken)
+		issueLiveKitToken(w, participantID, req.RoomID, name, role, "", sessionToken, roomInstanceID, "")
 		return
 	}
-	issueLegacyToken(w, participantID, req.RoomID, name, role, hostToken)
+	issueLegacyToken(w, participantID, req.RoomID, name, role, "", sessionToken, roomInstanceID, "")
 }
 
-func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken string) {
+// handleTokenResume authenticates a credential-bearing /token request. The
+// caller's identity is derived exclusively from the server-validated private
+// session; the host operation proof never substitutes for it. On success it
+// preserves the caller's identity, rotates the session capability, and for a
+// current-generation host mints a fresh host token plus a replacement one-use
+// resume handle.
+func handleTokenResume(w http.ResponseWriter, req TokenRequest, name, authorization, sessionCapability, hostProof, resumeHandle string) {
+	participantID, isHost, err := resumeIdentity(authManager, sessionManager, resumeHandles, req.RoomID, bearerToken(authorization), sessionCapability, bearerToken(hostProof), resumeHandle)
+	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		writeAuthError(w, err)
+		return
+	}
+
+	auth, ok := authManager.getAuthority(req.RoomID)
+	if !ok {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "room not found", http.StatusNotFound)
+		return
+	}
+
+	sessionToken, err := sessionManager.rotate(sessionCapability, jwtTTL)
+	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		writeAuthError(w, err)
+		return
+	}
+
+	atomic.AddInt64(&metricTokensIssued, 1)
+	role := "participant"
+	hostToken := ""
+	newHandle := ""
+	if isHost {
+		role = "host"
+		hostToken, err = mintHostToken(participantID, req.RoomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
+		if err != nil {
+			log.Printf("token: resume host signing failed: %v", err)
+			http.Error(w, "signing failed", http.StatusInternalServerError)
+			return
+		}
+		newHandle, err = resumeHandles.issue(participantID, auth.RoomInstanceID, auth.AuthorityGeneration, 1, jwtTTL)
+		if err != nil {
+			log.Printf("token: resume handle issuance failed: %v", err)
+			http.Error(w, "signing failed", http.StatusInternalServerError)
+			return
+		}
+	}
+	if name == "" {
+		name = "Participant"
+	}
+	if liveKitAPISecret != "" {
+		issueLiveKitToken(w, participantID, req.RoomID, name, role, hostToken, sessionToken, auth.RoomInstanceID, newHandle)
+		return
+	}
+	issueLegacyToken(w, participantID, req.RoomID, name, role, hostToken, sessionToken, auth.RoomInstanceID, newHandle)
+}
+
+func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken, sessionToken, roomInstanceID, resumeHandle string) {
 	now := time.Now()
 	expiresAt := now.Add(liveKitTTL)
 
@@ -711,19 +1119,22 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role,
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
-		Token:         signed,
-		LiveKitToken:  signed,
-		ParticipantID: participantID,
-		RoomID:        roomID,
-		Role:          role,
-		HostToken:     hostToken,
-		HostKey:       hostPublicKeyHex,
-		URL:           wsURL,
-		SFUUrl:        wsURL,
+		Token:          signed,
+		LiveKitToken:   signed,
+		ParticipantID:  participantID,
+		RoomID:         roomID,
+		Role:           role,
+		HostToken:      hostToken,
+		HostKey:        hostPublicKeyHex,
+		SessionToken:   sessionToken,
+		ResumeHandle:   resumeHandle,
+		RoomInstanceID: roomInstanceID,
+		URL:            wsURL,
+		SFUUrl:         wsURL,
 	})
 }
 
-func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken string) {
+func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, hostToken, sessionToken, roomInstanceID, resumeHandle string) {
 	now := time.Now()
 	claims := Claims{
 		ParticipantID: participantID,
@@ -751,15 +1162,18 @@ func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, 
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
-		Token:         signed,
-		LiveKitToken:  "",
-		ParticipantID: participantID,
-		RoomID:        roomID,
-		Role:          role,
-		HostToken:     hostToken,
-		HostKey:       hostPublicKeyHex,
-		URL:           "",
-		SFUUrl:        "",
+		Token:          signed,
+		LiveKitToken:   "",
+		ParticipantID:  participantID,
+		RoomID:         roomID,
+		Role:           role,
+		HostToken:      hostToken,
+		HostKey:        hostPublicKeyHex,
+		SessionToken:   sessionToken,
+		ResumeHandle:   resumeHandle,
+		RoomInstanceID: roomInstanceID,
+		URL:            "",
+		SFUUrl:         "",
 	})
 }
 
@@ -844,22 +1258,21 @@ func fallbackSFUAddr() string {
 	return "livekit:7880"
 }
 
-func validateJWT(tokenString string) (*Claims, error) {
+// validateAccessToken authenticates an identity/signaling credential. Only
+// HS256-signed tokens (legacy JWT_SECRET or LiveKit API secret) are accepted;
+// ES256 host tokens are never valid access credentials.
+func validateAccessToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); ok {
-			return jwtSecret, nil
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
 		}
-		if _, ok := t.Method.(*jwt.SigningMethodECDSA); ok && hostPrivateKey != nil {
-			return &hostPrivateKey.PublicKey, nil
-		}
-		return nil, errors.New("unexpected signing method")
+		return jwtSecret, nil
 	})
 	if err == nil && token.Valid {
 		return claims, nil
 	}
 
-	// Try LiveKit secret if configured
 	if liveKitAPISecret != "" {
 		token, err = jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -872,7 +1285,147 @@ func validateJWT(tokenString string) (*Claims, error) {
 		}
 	}
 
-	return nil, errors.New("invalid token")
+	return nil, errors.New("invalid access token")
+}
+
+// validateHostToken authenticates a server-signed ES256 host-operation proof.
+// It never accepts HS256 access credentials. The returned claims carry the
+// room instance and authority generation used for generation-bound revocation.
+func validateHostToken(tokenString string) (*HostClaims, error) {
+	if hostPrivateKey == nil {
+		return nil, errors.New("host signing not initialized")
+	}
+	claims := &HostClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodECDSA); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return &hostPrivateKey.PublicKey, nil
+	})
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid host token")
+	}
+	return claims, nil
+}
+
+// accessTokenRoom returns the room a token is bound to. Legacy claims carry a
+// top-level "room" claim; LiveKit claims bind the room via the audience field.
+func accessTokenRoom(claims *Claims) string {
+	if claims.RoomID != "" {
+		return claims.RoomID
+	}
+	if len(claims.Audience) > 0 {
+		return claims.Audience[0]
+	}
+	return ""
+}
+
+// resumeIdentity authenticates a /token resume attempt. It proves the caller's
+// identity via an access token plus a private session capability, and reports
+// whether that identity is the current host. A host resume additionally requires
+// a valid ES256 host-operation proof and fails closed if it is missing.
+//
+// This is an SEC-02B identity-binding primitive. The /token handler remains
+// gated by SEC-02A and does not call it until activation.
+func resumeIdentity(am *authorityManager, ss *sessionStore, rh *resumeHandleStore, roomID, accessToken, sessionCapability, hostProof, resumeHandle string) (participantID string, isHost bool, err error) {
+	roomID = canonicalRoomID(roomID)
+	accessClaims, err := validateAccessToken(accessToken)
+	if err != nil {
+		return "", false, errPrivateSessionRequired
+	}
+	if accessTokenRoom(accessClaims) != roomID {
+		return "", false, errIdentityMismatch
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	if !ok {
+		return "", false, errors.New("room not found")
+	}
+
+	record, ok := ss.authenticate(sessionCapability)
+	if !ok {
+		return "", false, errPrivateSessionInvalid
+	}
+	if record.ParticipantID != accessClaims.ParticipantID || record.RoomInstanceID != auth.RoomInstanceID {
+		return "", false, errIdentityMismatch
+	}
+
+	isHost = record.ParticipantID == auth.HostID
+	if isHost {
+		hostClaims, err := validateHostToken(hostProof)
+		if err != nil {
+			return "", false, errHostProofRequired
+		}
+		if hostClaims.ParticipantID != record.ParticipantID || hostClaims.RoomID != roomID || hostClaims.Role != "host" {
+			return "", false, errIdentityMismatch
+		}
+		if hostClaims.Generation != auth.AuthorityGeneration || hostClaims.RoomInstanceID != auth.RoomInstanceID {
+			return "", false, errIdentityMismatch
+		}
+		// Atomically re-check current authority and consume the one-use resume
+		// handle bound to the current room instance and generation. Duplicate or
+		// stale handles fail closed here.
+		if _, ok := am.consumeResumeHandle(roomID, record.ParticipantID, rh, resumeHandle); !ok {
+			return "", false, errResumeHandleInvalid
+		}
+	}
+	return record.ParticipantID, isHost, nil
+}
+
+// transferHostIdentity authenticates a host transfer: the requester must prove
+// it is the current host and the target must be an authenticated participant in
+// the same room instance. On success it commits the transfer. It neither mints
+// nor delivers credentials; the caller performs those steps privately.
+//
+// This is an SEC-02B identity-binding primitive. The /room/transfer-host handler
+// remains gated by SEC-02A and does not call it until activation.
+func transferHostIdentity(am *authorityManager, ss *sessionStore, roomID, accessToken, sessionCapability, hostProof, targetParticipantID string) error {
+	roomID = canonicalRoomID(roomID)
+	accessClaims, err := validateAccessToken(accessToken)
+	if err != nil {
+		return errPrivateSessionRequired
+	}
+	if accessTokenRoom(accessClaims) != roomID {
+		return errIdentityMismatch
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	if !ok {
+		return errors.New("room not found")
+	}
+
+	record, ok := ss.authenticate(sessionCapability)
+	if !ok {
+		return errPrivateSessionInvalid
+	}
+	if record.ParticipantID != accessClaims.ParticipantID || record.RoomInstanceID != auth.RoomInstanceID {
+		return errIdentityMismatch
+	}
+	if record.ParticipantID != auth.HostID {
+		return errIdentityMismatch
+	}
+
+	hostClaims, err := validateHostToken(hostProof)
+	if err != nil {
+		return errHostProofRequired
+	}
+	if hostClaims.ParticipantID != record.ParticipantID || hostClaims.RoomID != roomID || hostClaims.Role != "host" {
+		return errIdentityMismatch
+	}
+	if hostClaims.Generation != auth.AuthorityGeneration || hostClaims.RoomInstanceID != auth.RoomInstanceID {
+		return errIdentityMismatch
+	}
+
+	if targetParticipantID == "" || targetParticipantID == auth.HostID {
+		return errTransferTargetUnauthenticated
+	}
+	if !ss.hasActiveSession(targetParticipantID, auth.RoomInstanceID) {
+		return errTransferTargetUnauthenticated
+	}
+
+	// Commit via compare-and-swap on the expected generation. Concurrent
+	// transfers based on a stale generation lose with errGenerationConflict.
+	return am.transferHost(roomID, record.ParticipantID, targetParticipantID, hostClaims.Generation)
 }
 
 func handleTransferHost(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request) {
@@ -881,75 +1434,90 @@ func handleTransferHost(h *hub, am *authorityManager, w http.ResponseWriter, r *
 		return
 	}
 
-	auth := r.Header.Get("Authorization")
-	if !strings.HasPrefix(auth, "Bearer ") {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-	tokenStr := strings.TrimPrefix(auth, "Bearer ")
-
-	claims, err := validateJWT(tokenStr)
-	if err != nil {
-		http.Error(w, "invalid token", http.StatusUnauthorized)
-		return
-	}
-
 	var req struct {
 		RoomID              string `json:"roomId"`
 		TargetParticipantID string `json:"targetParticipantId"`
 	}
 	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
-	if req.RoomID == "" || req.TargetParticipantID == "" {
-		http.Error(w, "roomId and targetParticipantId required", http.StatusBadRequest)
-		return
-	}
 	req.RoomID = canonicalRoomID(req.RoomID)
-
-	// Verify requester is host
-	if err := am.transferHost(req.RoomID, claims.ParticipantID, req.TargetParticipantID); err != nil {
-		http.Error(w, err.Error(), http.StatusForbidden)
+	if req.RoomID == "" || req.TargetParticipantID == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "roomId and targetParticipantId are required", http.StatusBadRequest)
 		return
 	}
 
-	// Mint new host token for target
-	newHostToken, err := mintHostToken(req.TargetParticipantID, req.RoomID, jwtTTL)
+	authorization := headerValue(r.Header, "Authorization")
+	sessionCapability := headerValue(r.Header, "X-Session-Capability")
+	hostProof := headerValue(r.Header, "X-Host-Proof")
+	if !headerPresent(r.Header, "Authorization") || sessionCapability == "" || hostProof == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		writeAuthError(w, errPrivateSessionRequired)
+		return
+	}
+
+	// Private delivery requires a live authenticated target connection. Refuse
+	// before committing any authority transition if the target cannot receive
+	// its credential; never fall back to a room-wide broadcast.
+	if _, ok := h.clientByParticipant(req.RoomID, req.TargetParticipantID); !ok {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "transfer_target_unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	if err := transferHostIdentity(am, sessionManager, req.RoomID, bearerToken(authorization), sessionCapability, bearerToken(hostProof), req.TargetParticipantID); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		writeAuthError(w, err)
+		return
+	}
+
+	auth, ok := am.getAuthority(req.RoomID)
+	if !ok {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "room not found", http.StatusNotFound)
+		return
+	}
+
+	atomic.AddInt64(&metricTokensIssued, 1)
+	targetHostToken, err := mintHostToken(req.TargetParticipantID, req.RoomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
 	if err != nil {
-		http.Error(w, "failed to mint new host token", http.StatusInternalServerError)
+		log.Printf("transfer_host: target signing failed: %v", err)
+		http.Error(w, "signing failed", http.StatusInternalServerError)
+		return
+	}
+	targetHandle, err := resumeHandles.issue(req.TargetParticipantID, auth.RoomInstanceID, auth.AuthorityGeneration, 1, jwtTTL)
+	if err != nil {
+		log.Printf("transfer_host: target handle issuance failed: %v", err)
+		http.Error(w, "signing failed", http.StatusInternalServerError)
 		return
 	}
 
-	// Broadcast host-changed to room hub
-	broadcastPayload, _ := json.Marshal(map[string]any{
-		"action":       "host-changed",
-		"newHostId":    req.TargetParticipantID,
-		"newHostToken": newHostToken,
-		"hostKey":      hostPublicKeyHex,
-		"timestamp":    time.Now().UnixMilli(),
+	payload, err := json.Marshal(map[string]any{
+		"hostToken":      targetHostToken,
+		"hostKey":        hostPublicKeyHex,
+		"roomInstanceId": auth.RoomInstanceID,
+		"generation":     auth.AuthorityGeneration,
+		"resumeHandle":   targetHandle,
 	})
-	sigMsg := SignalMessage{
-		Type:          "host-changed",
-		Payload:       broadcastPayload,
-		RoomID:        req.RoomID,
-		ParticipantID: "system",
-		Timestamp:     time.Now().UnixMilli(),
-	}
-	rawMsg, _ := json.Marshal(sigMsg)
-	for _, peer := range h.peers(req.RoomID, nil) {
-		_ = peer.writeRaw(rawMsg)
+	if err != nil || !h.deliverHostCredential(req.RoomID, req.TargetParticipantID, payload) {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "credential_delivery_failed", http.StatusBadGateway)
+		return
 	}
 
-	log.Printf("host_transfer: room=%s transferred from %s to %s", req.RoomID, claims.ParticipantID, req.TargetParticipantID)
-
+	// Public metadata only: the new host credential is never returned to the
+	// requester or broadcast to other peers.
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
-		"status":       "ok",
-		"roomId":       req.RoomID,
-		"hostId":       req.TargetParticipantID,
-		"newHostToken": newHostToken,
-		"hostKey":      hostPublicKeyHex,
+		"roomId":     req.RoomID,
+		"hostId":     req.TargetParticipantID,
+		"hostKey":    hostPublicKeyHex,
+		"generation": auth.AuthorityGeneration,
+		"delivered":  true,
+		"timestamp":  time.Now().UnixMilli(),
 	})
 }
 
@@ -1028,7 +1596,7 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	claims, err := validateJWT(token)
+	claims, err := validateAccessToken(token)
 	if err != nil {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "unauthorized", http.StatusUnauthorized)

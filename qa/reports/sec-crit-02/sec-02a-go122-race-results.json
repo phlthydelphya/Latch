@@ -1,0 +1,20 @@
+{
+  "incident": "SEC-CRIT-02",
+  "milestone": "SEC-02A",
+  "evidenceSource": "PM-captured isolated Docker build execution, supplied to independent QA on 2026-09-12; this is a structured result summary, not a raw build log",
+  "buildExitCode": 0,
+  "goVersion": "go1.22.12 linux/amd64",
+  "baseImage": "golang:1.22-alpine",
+  "additionalBuildPackage": "build-base",
+  "candidateMainGoSHA256": "bc7158cb659024ef46ec46ebfdd8dc005b40ffa0952daa681c3f97a3db3199bb",
+  "testSourceSHA256": "635a813133c35535efca6fdacfaf832ee185139b7c44e18e5b428cf0d79729a9",
+  "commands": [
+    {"command": "go test -count=1 ./...", "result": "PASS", "output": "ok meet-signal 0.020s"},
+    {"command": "go test -race -count=1 ./...", "result": "PASS", "output": "ok meet-signal 1.061s"}
+  ],
+  "image": "meet-secure/meet-signal:sec02a-race-verification",
+  "imageManifestListDigest": "sha256:b730800ccc2d3bac89eb80a7ffadbd360e0e4b35716fcf2d0b47b9dbbe028cc8",
+  "dockerBuildId": "njcnpwpqlvdo0sln01b9mhfax",
+  "productionDeployment": false,
+  "authorizationNote": "Initial Docker build request was rejected by automatic approval review due an account usage limit. User explicitly approved retry; PM ran the supported full/race build successfully."
+}
