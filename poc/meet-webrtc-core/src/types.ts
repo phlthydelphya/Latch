@@ -247,7 +247,7 @@ export interface KeyRotationMessage {
 }
 
 export interface SignalingMessage {
-  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'hpke-pubkey' | 'leave' | 'mute' | 'speaking' | 'welcome' | 'session-update' | 'ping';
+  type: 'offer' | 'answer' | 'ice-candidate' | 'join' | 'hpke-pubkey' | 'leave' | 'mute' | 'speaking' | 'welcome' | 'session-update' | 'ping' | 'host-credential';
   payload: any;
   roomId: string;
   participantId: string;

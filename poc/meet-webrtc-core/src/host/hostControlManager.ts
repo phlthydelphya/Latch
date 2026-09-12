@@ -115,7 +115,7 @@ export class HostControlManager {
           return;
         }
 
-        // host-changed event from server or host
+        // host-changed event from server or host (announcement only — no credentials)
         if (msg.action === 'host-changed') {
           const newHostId = msg.newHostId || msg.targetParticipantId;
           if (newHostId) {
@@ -123,11 +123,14 @@ export class HostControlManager {
             if (msg.hostKey) {
               this.hostPublicKey = msg.hostKey;
             }
-            if (newHostId === localId && msg.newHostToken) {
-              this.setLocalHostToken(msg.newHostToken, msg.hostKey);
-            } else if (newHostId !== localId && this.localHostToken) {
+            if (newHostId !== localId) {
+              // Authority lost: drop the host-operation proof and one-use handle.
               this.localHostToken = null;
+              useAppStore.getState().clearHostAuthority();
             }
+            // When newHostId === localId, the target's private credential arrives
+            // separately over the host-credential control channel; it is never
+            // carried inside this announcement.
 
             const newHostName =
               presence.participants.get(newHostId)?.name ||
@@ -291,8 +294,9 @@ export class HostControlManager {
             if (msg.targetParticipantId) {
               const isTargetLocalHost = isTargetLocal(msg.targetParticipantId);
               usePresenceStore.getState().setAuthoritativeHost(msg.targetParticipantId);
-              if (!isTargetLocalHost && this.localHostToken) {
+              if (!isTargetLocalHost) {
                 this.localHostToken = null;
+                useAppStore.getState().clearHostAuthority();
               }
               const newHostName =
                 presence.participants.get(msg.targetParticipantId)?.name ||
@@ -497,58 +501,58 @@ export class HostControlManager {
 
     const roomId = this.activeRoomId || useAppStore.getState().roomId || '';
     const store = useAppStore.getState();
-    const token = this.localHostToken || store.jwt || store.livekitToken;
+    const accessToken = store.jwt || store.livekitToken;
+    const capability = store.sessionToken;
+    const hostProof = store.hostToken || this.localHostToken;
 
-    let newHostToken: string | undefined;
-    let hostKey: string | undefined;
-
-    // 1. Authoritative API call to meet-signal if token and roomId are available
-    if (token && roomId && typeof fetch !== 'undefined') {
-      try {
-        const res = await fetch('/room/transfer-host', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            roomId,
-            targetParticipantId,
-          }),
-        });
-
-        if (res.ok) {
-          const body = await res.json();
-          newHostToken = body.newHostToken;
-          hostKey = body.hostKey;
-          if (hostKey) this.hostPublicKey = hostKey;
-        } else if (res.status === 404) {
-          console.warn('[HostControlManager] Server transfer-host endpoint returned 404, falling back to data channel broadcast');
-        } else {
-          console.warn('[HostControlManager] Server transfer-host returned non-200:', res.status);
-          throw new Error(`Server rejected host transfer with status ${res.status}`);
-        }
-      } catch (err: any) {
-        if (err?.message?.includes('status 404')) {
-          // Fallback to data channel broadcast
-        } else {
-          console.warn('[HostControlManager] Server transfer-host request failed:', err);
-        }
-      }
+    if (!roomId || typeof fetch === 'undefined') {
+      throw new Error('Host transfer requires an authoritative room session');
+    }
+    if (!accessToken || !capability || !hostProof) {
+      // Fail closed: no credential broadcast fallback when the private contract
+      // is unavailable.
+      throw new Error('Host transfer requires a private session and host proof');
     }
 
-    // 2. Broadcast host-changed directive via DataChannel
+    const res = await fetch('/room/transfer-host', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        'X-Session-Capability': capability,
+        'X-Host-Proof': `Bearer ${hostProof}`,
+      },
+      body: JSON.stringify({
+        roomId,
+        targetParticipantId,
+      }),
+    });
+
+    if (!res.ok) {
+      // Fail closed: never broadcast authority or credentials on rejection.
+      throw new Error(`Server rejected host transfer with status ${res.status}`);
+    }
+
+    // Public metadata only. The target's host credential is delivered privately
+    // on its own authenticated control channel and is never returned here.
+    const meta = await res.json();
+    if (meta?.hostKey) {
+      this.hostPublicKey = meta.hostKey;
+      store.setSessionAuthority({ hostKey: meta.hostKey });
+    }
+
+    // Local tenure ends now; drop the host-operation proof and its resume handle.
+    this.localHostToken = null;
+    store.clearHostAuthority();
+    usePresenceStore.getState().setAuthoritativeHost(targetParticipantId);
+
+    // Announcement only — no credentials inside the event.
     await this.publishDirective({
       action: 'host-changed',
       targetParticipantId,
       newHostId: targetParticipantId,
-      newHostToken,
-      hostKey,
+      hostKey: meta?.hostKey,
     });
-
-    // 3. Demote local host state
-    this.localHostToken = null;
-    usePresenceStore.getState().setAuthoritativeHost(targetParticipantId);
   }
 
   async setRoomLocked(locked: boolean): Promise<void> {

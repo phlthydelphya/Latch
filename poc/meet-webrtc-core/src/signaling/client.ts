@@ -136,6 +136,11 @@ export class SignalingClient extends EventEmitter {
         case 'session-update':
           this.emit('session-update', message.payload);
           break;
+        // SEC-02C: server-delivered private host credential for the transfer
+        // target only. Never logged; applied by the control-channel manager.
+        case 'host-credential':
+          this.emit('host-credential', message.payload);
+          break;
         default:
           console.warn('Unknown signaling message type:', message.type);
       }

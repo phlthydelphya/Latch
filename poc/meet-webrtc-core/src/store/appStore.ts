@@ -11,6 +11,19 @@ export interface Participant {
   stream?: MediaStream;
 }
 
+/**
+ * SEC-02B/SEC-02C session-authority state. These are the private credentials the
+ * activated meet-signal contract requires for host resume and transfer. They are
+ * never logged and are cleared on room leave, logout, or authority loss.
+ */
+export interface SessionAuthority {
+  sessionToken?: string | null;   // 256-bit private session capability (identity proof)
+  resumeHandle?: string | null;   // SEC-02C one-use, generation-bound host resume handle
+  roomInstanceId?: string | null; // SEC-02B room incarnation binding
+  hostToken?: string | null;      // SEC-02C ES256 host-operation proof
+  hostKey?: string | null;        // Public host verification key (not secret)
+}
+
 export interface MeetingState {
   roomId: string | null;
   participantId: string | null;
@@ -18,6 +31,11 @@ export interface MeetingState {
   livekitToken: string | null;  // LiveKit access token
   sfuUrl: string | null;        // LiveKit SFU WebSocket URL (wss://host/rtc)
   keyParam: string | null;      // #k= from URL
+  sessionToken: string | null;  // SEC-02B private session capability
+  resumeHandle: string | null;  // SEC-02C one-use host resume handle
+  roomInstanceId: string | null; // SEC-02B room incarnation binding
+  hostToken: string | null;     // SEC-02C host-operation proof
+  hostKey: string | null;       // Public host verification key
   participants: Map<string, Participant>;
   localParticipant: Participant | null;
   isConnected: boolean;
@@ -46,6 +64,8 @@ export interface AppActions {
   toggleLocalAudio: () => void;
   toggleLocalVideo: () => void;
   setLocalScreenShare: (sharing: boolean) => void;
+  setSessionAuthority: (authority: SessionAuthority) => void;
+  clearHostAuthority: () => void;
   leave: () => void;
 }
 
@@ -56,6 +76,11 @@ const initialState: MeetingState = {
   livekitToken: null,
   sfuUrl: null,
   keyParam: null,
+  sessionToken: null,
+  resumeHandle: null,
+  roomInstanceId: null,
+  hostToken: null,
+  hostKey: null,
   participants: new Map(),
   localParticipant: null,
   isConnected: false,
@@ -155,6 +180,19 @@ export const useAppStore = create<MeetingState & AppActions>()((set) => ({
       newParticipants.set(state.localParticipant.id, updated);
       return { localParticipant: updated, participants: newParticipants };
     }),
+
+  setSessionAuthority: (authority) =>
+    set((state) => ({
+      sessionToken: authority.sessionToken !== undefined ? authority.sessionToken : state.sessionToken,
+      resumeHandle: authority.resumeHandle !== undefined ? authority.resumeHandle : state.resumeHandle,
+      roomInstanceId: authority.roomInstanceId !== undefined ? authority.roomInstanceId : state.roomInstanceId,
+      hostToken: authority.hostToken !== undefined ? authority.hostToken : state.hostToken,
+      hostKey: authority.hostKey !== undefined ? authority.hostKey : state.hostKey,
+    })),
+
+  // On authority loss only the host-operation proof and its one-use handle are
+  // dropped; the private session capability remains valid identity state.
+  clearHostAuthority: () => set({ hostToken: null, resumeHandle: null }),
 
   leave: () => set(initialState),
 }));

@@ -5,6 +5,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { Room, RoomEvent, ParticipantEvent, ConnectionState, Track } from 'livekit-client';
 import { fetchToken, resolveSfuUrl } from '../auth/token';
+import { ControlChannelManager, resolveSignalingUrl } from '../signaling/controlChannel';
 import { useAppStore } from '../store/appStore';
 import { KeyManager } from '../keys/manager';
 import { canonicalizeIdentity } from '../utils/identity';
@@ -147,6 +148,7 @@ export function useWebRTC() {
         const store = useAppStore.getState();
         let token = store.livekitToken;
         let resolvedSfuUrl = store.sfuUrl ? resolveSfuUrl(store.sfuUrl) : '';
+        let effectiveParticipantId = store.participantId || '';
 
         if (!token || !resolvedSfuUrl) {
           const name = `user-${store.participantId?.slice(0, 6) || 'anon'}`;
@@ -154,12 +156,13 @@ export function useWebRTC() {
           if (isCancelled) return;
           token = fetched.livekitToken;
           resolvedSfuUrl = resolveSfuUrl(fetched.sfuUrl);
+          effectiveParticipantId = fetched.participantId || effectiveParticipantId;
           // Persist credentials for session reloads / evidence
           if (token && fetched.sfuUrl) {
             store.setCredentials(token, fetched.sfuUrl);
             console.log('[LiveKit] Credentials persisted', { sfuUrl: fetched.sfuUrl, tokenPresent: true });
           }
-          // M4A: Pass server-signed host credentials to HostControlManager and presence
+          // M4A/SEC-02B: Pass server-signed host credentials to HostControlManager and presence
           HostControlManager.getInstance().setSessionContext({
             roomId: targetRoomId,
             localParticipantId: fetched.participantId,
@@ -176,6 +179,16 @@ export function useWebRTC() {
         if (!token || !resolvedSfuUrl) {
           throw new Error('Missing livekitToken or sfuUrl after token fetch');
         }
+
+        // SEC-02C: dedicated authenticated control channel for private,
+        // target-only host-credential delivery. Non-fatal if the connection
+        // cannot be established; privileged paths still fail closed.
+        ControlChannelManager.getInstance().connect({
+          url: resolveSignalingUrl(),
+          roomId: targetRoomId,
+          participantId: effectiveParticipantId,
+          jwt: token,
+        });
 
         const sframeEnabled = import.meta.env.VITE_SFRAME_ENABLED !== 'false';
 
@@ -1273,6 +1286,9 @@ export function useWebRTC() {
 
       HostControlManager.getInstance().detach();
       useHostControlStore.getState().reset();
+
+      // SEC-02C: tear down the private host-credential control channel.
+      ControlChannelManager.getInstance().disconnect();
 
       // Clear organized streams
       setCameraStreams(new Map());
