@@ -9,8 +9,10 @@ import { ContentView } from './layout/ContentView';
 
 interface VideoGridProps {
   localStream: MediaStream | null;
-  remoteStreams: MediaStream[];
-  screenStream: MediaStream | null;
+  /** Camera streams keyed by participantId (for both local and remote) */
+  cameraStreams: Map<string, MediaStream>;
+  /** Screen share streams keyed by participantId (owner-keyed) */
+  screenStreams: Map<string, MediaStream>;
   localVideoEnabled: boolean;
   localAudioEnabled: boolean;
   screenSharing: boolean;
@@ -20,8 +22,8 @@ interface VideoGridProps {
 
 export function VideoGrid({
   localStream,
-  remoteStreams,
-  screenStream,
+  cameraStreams,
+  screenStreams,
   localVideoEnabled,
   localAudioEnabled,
   screenSharing,
@@ -34,22 +36,28 @@ export function VideoGrid({
   const localPresence = presenceParticipants.get(localParticipantId || '');
   const activeSpeakers = usePresenceStore((s) => s.activeSpeakers);
   const waitingQueue = useHostControlStore((s) => s.waitingQueue);
+  const screenShareOwnerId = useLayoutStore((s) => s.screenShareOwnerId);
 
   // Construct LayoutParticipantTiles from streams + presence store
   const tiles = useMemo(() => {
     const result: LayoutParticipantTile[] = [];
 
-    // Local participant tile
+    // Local participant tile - ALWAYS use camera stream (localStream)
+    // When screen sharing, also attach cameraStream for PiP
     const localId = localParticipantId || 'local';
+    const localCameraStream = cameraStreams.get(localId) || localStream;
+    const localScreenStream = screenStreams.get(localId) || null;
+    
     result.push({
       id: localId,
       name: localPresence?.name || 'You',
-      stream: screenSharing ? screenStream : localStream,
+      stream: localCameraStream, // Always camera stream for the tile
       isLocal: true,
-      isScreen: screenSharing,
+      isScreen: false, // Local tile is never a screen tile
       videoEnabled: localVideoEnabled,
       audioEnabled: localAudioEnabled,
       speaking: activeSpeakers.has(localId),
+      cameraStream: localCameraStream,
     });
 
     // Remote participant tiles
@@ -59,22 +67,29 @@ export function VideoGrid({
     const remoteList = remotePresenceList.filter((p) => !waitingIds.has(p.id));
 
     if (remoteList.length > 0) {
-      remoteList.forEach((p, idx) => {
-        const stream = remoteStreams[idx] || null;
+      remoteList.forEach((p) => {
+        // Use camera stream keyed by participantId, not index
+        const cameraStream = cameraStreams.get(p.id) || null;
+        const screenStream = screenStreams.get(p.id) || null;
+        const isScreenOwner = screenShareOwnerId === p.id;
+        
         result.push({
           id: p.id,
           name: p.name,
-          stream,
+          stream: cameraStream, // Always camera stream for the tile
           isLocal: false,
-          isScreen: p.screenSharing,
+          isScreen: p.screenSharing && isScreenOwner, // Only true if this participant is the screen share owner
           videoEnabled: p.videoEnabled,
           audioEnabled: p.audioEnabled,
           speaking: activeSpeakers.has(p.id),
+          cameraStream: cameraStream,
         });
       });
     } else if (remotePresenceList.length === 0) {
       // Fallback for mock/test runs without full presence roster
-      remoteStreams.forEach((stream, idx) => {
+      // Convert cameraStreams map to array for backward compatibility
+      const cameraStreamArray = Array.from(cameraStreams.values());
+      cameraStreamArray.forEach((stream, idx) => {
         const id = `remote-${idx}`;
         result.push({
           id,
@@ -85,6 +100,7 @@ export function VideoGrid({
           videoEnabled: true,
           audioEnabled: true,
           speaking: false,
+          cameraStream: stream,
         });
       });
     }
@@ -92,8 +108,8 @@ export function VideoGrid({
     return result;
   }, [
     localStream,
-    remoteStreams,
-    screenStream,
+    cameraStreams,
+    screenStreams,
     localVideoEnabled,
     localAudioEnabled,
     screenSharing,
@@ -101,12 +117,16 @@ export function VideoGrid({
     localPresence,
     activeSpeakers,
     waitingQueue,
+    screenShareOwnerId,
   ]);
+
+  // For ContentView, we need the owner's screen stream
+  const ownerScreenStream = screenShareOwnerId ? screenStreams.get(screenShareOwnerId) || null : null;
 
   if (mode === 'content') {
     return (
       <ContentView
-        screenStream={screenStream}
+        screenStream={ownerScreenStream}
         tiles={tiles}
         onPin={onPin}
         onSpotlight={onSpotlight}

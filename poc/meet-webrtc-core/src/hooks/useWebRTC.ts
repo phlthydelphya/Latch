@@ -57,6 +57,10 @@ export function useWebRTC() {
 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
+  /** Camera streams keyed by participantId (for both local and remote) */
+  const [cameraStreams, setCameraStreams] = useState<Map<string, MediaStream>>(new Map());
+  /** Screen share streams keyed by participantId (owner-keyed) */
+  const [screenStreams, setScreenStreams] = useState<Map<string, MediaStream>>(new Map());
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [stats, setStats] = useState<RTCStatsReport | null>(null);
 
@@ -76,7 +80,7 @@ export function useWebRTC() {
 
     room.localParticipant.trackPublications.forEach((pub) => {
       const pubSource = (pub as any)?.source;
-      // Only include camera tracks — exclude screen share and screen share audio
+      // Only include camera tracks ï¿½ exclude screen share and screen share audio
       if (pubSource === Track.Source.ScreenShare || pubSource === Track.Source.ScreenShareAudio) {
         return;
       }
@@ -543,14 +547,50 @@ export function useWebRTC() {
             next.set(publication.trackSid, stream);
             return next;
           });
+
+          // Organize streams by participantId and source type for layout
+          const participantId = participant.identity;
+          const pubSource = publication.source;
+          if (pubSource === Track.Source.ScreenShare) {
+            setScreenStreams((prev) => {
+              const next = new Map(prev);
+              next.set(participantId, stream);
+              return next;
+            });
+          } else if (pubSource === Track.Source.Camera) {
+            setCameraStreams((prev) => {
+              const next = new Map(prev);
+              next.set(participantId, stream);
+              return next;
+            });
+          }
         });
 
-        room.on(RoomEvent.TrackUnsubscribed, (_track, publication) => {
+        room.on(RoomEvent.TrackUnsubscribed, (_track, publication, participant) => {
           setRemoteStreams((prev) => {
             const next = new Map(prev);
             next.delete(publication.trackSid);
             return next;
           });
+
+          // Remove from organized streams
+          if (participant) {
+            const participantId = participant.identity;
+            const pubSource = publication.source;
+            if (pubSource === Track.Source.ScreenShare) {
+              setScreenStreams((prev) => {
+                const next = new Map(prev);
+                next.delete(participantId);
+                return next;
+              });
+            } else if (pubSource === Track.Source.Camera) {
+              setCameraStreams((prev) => {
+                const next = new Map(prev);
+                next.delete(participantId);
+                return next;
+              });
+            }
+          }
         });
 
         // I-5: LocalTrackPublished
@@ -582,24 +622,46 @@ export function useWebRTC() {
 
           // Local track published - handle camera/mic and screen share separately
           if (participant === room.localParticipant) {
+            const localId = room.localParticipant.identity;
             if (isScreenShare) {
               // Screen share: create dedicated screenStream, keep localStream camera-only
               const mst = (publication.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
               if (mst) {
                 const stream = new MediaStream([mst]);
                 setScreenStream(stream);
+                // Also update screenStreams Map for layout
+                setScreenStreams((prev) => {
+                  const next = new Map(prev);
+                  next.set(localId, stream);
+                  return next;
+                });
                 console.log('[Screen] screenStream hydrated from LocalTrackPublished', { trackSid: publication.trackSid });
 
                 // Browser chrome stop: listen for track ended to atomically clear stream + owner
                 mst.addEventListener('ended', () => {
                   console.log('[Screen] track ended (browser chrome stop) â€” atomic cleanup');
                   setScreenStream(null);
+                  setScreenStreams((prev) => {
+                    const next = new Map(prev);
+                    next.delete(localId);
+                    return next;
+                  });
                   useLayoutStore.getState().setScreenShareOwner(null);
                 }, { once: true });
               }
             } else {
               // Camera/mic: use authoritative rebuild path
               rebuildLocalStream();
+              // Also update cameraStreams Map for layout
+              setCameraStreams((prev) => {
+                const next = new Map(prev);
+                if (localStream) {
+                  next.set(localId, localStream);
+                } else {
+                  next.delete(localId);
+                }
+                return next;
+              });
             }
           }
         });
@@ -607,20 +669,50 @@ export function useWebRTC() {
         // Screen share lifecycle: sync store when browser stops sharing or track is unpublished
         room.on(RoomEvent.LocalTrackUnpublished, (publication) => {
           const pubSource = (publication as any)?.source;
+          const localId = room.localParticipant?.identity;
           if (pubSource === Track.Source.ScreenShare) {
             useAppStore.getState().setLocalScreenShare(false);
             setScreenStream(null);
+            if (localId) {
+              setScreenStreams((prev) => {
+                const next = new Map(prev);
+                next.delete(localId);
+                return next;
+              });
+            }
             useLayoutStore.getState().setScreenShareOwner(null);
           } else {
             // Camera/mic unpublished: rebuild localStream from remaining publications
             rebuildLocalStream();
+            if (localId) {
+              setCameraStreams((prev) => {
+                const next = new Map(prev);
+                if (localStream) {
+                  next.set(localId, localStream);
+                } else {
+                  next.delete(localId);
+                }
+                return next;
+              });
+            }
           }
         });
 
         // ActiveDeviceChanged: covers replaceTrack() in-place mutation where Published never fires
-        room.on(RoomEvent.ActiveDeviceChanged, (track, participant) => {
-          if (participant === room.localParticipant) {
-            rebuildLocalStream();
+        // Event args: (kind: MediaDeviceKind, deviceId: string) - triggered by room.switchActiveDevice
+        room.on(RoomEvent.ActiveDeviceChanged, (_kind: MediaDeviceKind, _deviceId: string) => {
+          rebuildLocalStream();
+          const localId = room.localParticipant?.identity;
+          if (localId) {
+            setCameraStreams((prev) => {
+              const next = new Map(prev);
+              if (localStream) {
+                next.set(localId, localStream);
+              } else {
+                next.delete(localId);
+              }
+              return next;
+            });
           }
         });
 
@@ -1180,6 +1272,10 @@ export function useWebRTC() {
       HostControlManager.getInstance().detach();
       useHostControlStore.getState().reset();
 
+      // Clear organized streams
+      setCameraStreams(new Map());
+      setScreenStreams(new Map());
+
       if (subscriptionManagerRef.current) {
         subscriptionManagerRef.current.detach();
         subscriptionManagerRef.current = null;
@@ -1287,12 +1383,13 @@ export function useWebRTC() {
     DeviceManager.getInstance().destroy();
     useDeviceStore.getState().reset();
 
-HostControlManager.getInstance().detach();
-      useHostControlStore.getState().reset();
-      setScreenStream(null);
-      useLayoutStore.getState().setScreenShareOwner(null);
+    HostControlManager.getInstance().detach();
+    useHostControlStore.getState().reset();
+    setScreenStream(null);
+    setLocalStream(null);
+    useLayoutStore.getState().setScreenShareOwner(null);
 
-      if (roomRef.current) {
+    if (roomRef.current) {
       await roomRef.current.disconnect();
       roomRef.current = null;
       (window as any).__LIVEKIT_ROOM__ = null;
@@ -1462,6 +1559,8 @@ HostControlManager.getInstance().detach();
     room: roomRef.current,
     localStream,
     remoteStreams: Array.from(remoteStreams.values()),
+    cameraStreams,
+    screenStreams,
     screenStream,
     stats,
     toggleAudio,

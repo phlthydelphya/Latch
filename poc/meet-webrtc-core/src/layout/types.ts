@@ -17,6 +17,8 @@ export interface LayoutParticipantTile {
   videoEnabled: boolean;
   audioEnabled: boolean;
   speaking: boolean;
+  /** Camera-only stream for presenter (when screen sharing, this is the camera, not screen) */
+  cameraStream?: MediaStream | null;
 }
 
 export interface SpotlightDataChannelMessage {

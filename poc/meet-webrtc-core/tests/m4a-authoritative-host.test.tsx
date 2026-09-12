@@ -567,8 +567,8 @@ describe('M4A: Authoritative Session Control', () => {
       const { unmount: unmountGrid } = render(
         <VideoGrid
           localStream={null}
-          remoteStreams={[]}
-          screenStream={null}
+          cameraStreams={new Map()}
+          screenStreams={new Map()}
           localVideoEnabled={true}
           localAudioEnabled={true}
           screenSharing={false}
@@ -617,8 +617,8 @@ describe('M4A: Authoritative Session Control', () => {
       const { unmount: unmountGridAfter } = render(
         <VideoGrid
           localStream={null}
-          remoteStreams={[]}
-          screenStream={null}
+          cameraStreams={new Map()}
+          screenStreams={new Map()}
           localVideoEnabled={true}
           localAudioEnabled={true}
           screenSharing={false}

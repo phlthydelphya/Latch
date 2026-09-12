@@ -31,6 +31,8 @@ export function MeetingPage() {
   const {
     localStream,
     remoteStreams,
+    cameraStreams,
+    screenStreams,
     screenStream,
     toggleAudio,
     toggleVideo,
@@ -197,8 +199,8 @@ export function MeetingPage() {
         <WaitingRoomBanner />
         <VideoGrid
           localStream={localStream}
-          remoteStreams={remoteStreams}
-          screenStream={screenStream}
+          cameraStreams={cameraStreams}
+          screenStreams={screenStreams}
           localVideoEnabled={localParticipant?.videoEnabled ?? true}
           localAudioEnabled={localParticipant?.audioEnabled ?? true}
           screenSharing={localParticipant?.screenSharing ?? false}

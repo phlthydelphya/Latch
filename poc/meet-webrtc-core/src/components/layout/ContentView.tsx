@@ -19,17 +19,20 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
   const setSplitRatio = useLayoutStore((s) => s.setSplitRatio);
 
   // Presenter tile for PiP overlay or side-by-side
+  // Use cameraStream for the presenter (their camera, not screen)
   const presenterTile = useMemo(() => {
-    if (!screenShareOwnerId) {
-      return tiles.find((t) => t.isScreen || t.isLocal) || tiles[0];
+    let tile: LayoutParticipantTile | undefined;
+    if (screenShareOwnerId) {
+      tile = tiles.find((t) => t.id === screenShareOwnerId);
     }
-    return (
-      tiles.find((t) => t.id === screenShareOwnerId) ||
-      tiles.find((t) => t.isLocal) ||
-      tiles[0]
-    );
+    if (!tile) {
+      tile = tiles.find((t) => t.isLocal) || tiles[0];
+    }
+    return tile;
   }, [tiles, screenShareOwnerId]);
 
+  // Filmstrip includes ALL non-screen tiles (presenter's camera tile should remain)
+  // Filter out only tiles that are explicitly screen shares (isScreen === true)
   const filmstripTiles = useMemo(() => {
     return tiles.filter((t) => !t.isScreen);
   }, [tiles]);
@@ -38,6 +41,17 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
   const isSideBySide = presentationMode === 'side-by-side';
   const isOverBelow = presentationMode === 'over-below';
   const isPip = presentationMode === 'pip';
+
+  // For PiP, we need a presenter tile with the CAMERA stream, not screen
+  const pipPresenterTile = useMemo(() => {
+    if (!presenterTile) return null;
+    return {
+      ...presenterTile,
+      // Use cameraStream if available (for presenter), fallback to stream
+      stream: presenterTile.cameraStream ?? presenterTile.stream,
+      isScreen: false, // PiP always shows camera
+    };
+  }, [presenterTile]);
 
   return (
     <div
@@ -134,9 +148,9 @@ export function ContentView({ screenStream, tiles, onPin, onSpotlight }: Content
           </div>
         )}
 
-        {/* Floating PiP Presenter if PiP mode is selected */}
-        {isPip && presenterTile && (
-          <PipPresenter presenterTile={presenterTile} />
+        {/* Floating PiP Presenter if PiP mode is selected - shows CAMERA, not screen */}
+        {isPip && pipPresenterTile && (
+          <PipPresenter presenterTile={pipPresenterTile} />
         )}
       </div>
 
