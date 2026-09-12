@@ -236,11 +236,11 @@ func TestSEC02BResumeIdentityRejections(t *testing.T) {
 			rh := newResumeHandleStore()
 
 			cases := []struct {
-				name      string
-				access    string
-				session   string
-				proof     string
-				wantErr   error
+				name    string
+				access  string
+				session string
+				proof   string
+				wantErr error
 			}{
 				{"host_attestation_alone_as_access", hostProof, "", "", errPrivateSessionRequired},
 				{"missing_session", hostAccess, "", hostProof, errPrivateSessionInvalid},

@@ -221,17 +221,17 @@ func TestSEC02ATokenCredentialAttemptsFailClosed(t *testing.T) {
 				})
 			}
 			t.Run("invalid_body_with_credentials_fails_closed", func(t *testing.T) {
-					count := atomic.LoadInt64(&metricTokensIssued)
-					r := httptest.NewRequest(http.MethodPost, "/token", strings.NewReader("invalid json"))
-					r.Header.Set("Authorization", "Bearer "+capturedB)
-					w := httptest.NewRecorder()
-					handleToken(w, r)
-					if w.Code != http.StatusBadRequest {
-						t.Errorf("credential attempt with invalid body returned %d; want 400", w.Code)
-					}
-					sec02aAssertAuthRejected(t, w)
-					sec02aAssertUnchanged(t, before, count)
-				})
+				count := atomic.LoadInt64(&metricTokensIssued)
+				r := httptest.NewRequest(http.MethodPost, "/token", strings.NewReader("invalid json"))
+				r.Header.Set("Authorization", "Bearer "+capturedB)
+				w := httptest.NewRecorder()
+				handleToken(w, r)
+				if w.Code != http.StatusBadRequest {
+					t.Errorf("credential attempt with invalid body returned %d; want 400", w.Code)
+				}
+				sec02aAssertAuthRejected(t, w)
+				sec02aAssertUnchanged(t, before, count)
+			})
 		})
 	}
 }

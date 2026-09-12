@@ -63,11 +63,11 @@ type LiveKitClaims struct {
 }
 
 type LiveKitVideoGrant struct {
-	RoomJoin     bool   `json:"roomJoin"`
-	Room         string `json:"room"`
-	CanPublish   bool   `json:"canPublish"`
-	CanSubscribe bool   `json:"canSubscribe"`
-	CanPublishData bool `json:"canPublishData"`
+	RoomJoin       bool   `json:"roomJoin"`
+	Room           string `json:"room"`
+	CanPublish     bool   `json:"canPublish"`
+	CanSubscribe   bool   `json:"canSubscribe"`
+	CanPublishData bool   `json:"canPublishData"`
 }
 
 type TokenRequest struct {
@@ -76,17 +76,17 @@ type TokenRequest struct {
 }
 
 type TokenResponse struct {
-	Token          string `json:"token"`                   // Legacy mesh token / LiveKit JWT (backward compat)
-	LiveKitToken   string `json:"livekitToken"`            // Alias for token when LiveKit path is used
+	Token          string `json:"token"`        // Legacy mesh token / LiveKit JWT (backward compat)
+	LiveKitToken   string `json:"livekitToken"` // Alias for token when LiveKit path is used
 	ParticipantID  string `json:"participantId"`
 	RoomID         string `json:"roomId"`
-	Role           string `json:"role"`                    // M4A: "host" or "participant"
-	HostToken      string `json:"hostToken,omitempty"`     // M4A: Server-signed ES256 host claim (if role == "host")
-	HostKey        string `json:"hostKey,omitempty"`       // M4A: Public key in hex for peer verification
-	SessionToken   string `json:"sessionToken,omitempty"`  // SEC-02B: private session capability (identity proof)
-	ResumeHandle   string `json:"resumeHandle,omitempty"`  // SEC-02C: one-use host resume handle
+	Role           string `json:"role"`                     // M4A: "host" or "participant"
+	HostToken      string `json:"hostToken,omitempty"`      // M4A: Server-signed ES256 host claim (if role == "host")
+	HostKey        string `json:"hostKey,omitempty"`        // M4A: Public key in hex for peer verification
+	SessionToken   string `json:"sessionToken,omitempty"`   // SEC-02B: private session capability (identity proof)
+	ResumeHandle   string `json:"resumeHandle,omitempty"`   // SEC-02C: one-use host resume handle
 	RoomInstanceID string `json:"roomInstanceId,omitempty"` // SEC-02B: room incarnation binding
-	URL            string `json:"url,omitempty"`           // Legacy field (backward compat)
+	URL            string `json:"url,omitempty"`            // Legacy field (backward compat)
 	SFUUrl         string `json:"sfuUrl,omitempty"`         // Alias for url when LiveKit path is used
 }
 
@@ -419,12 +419,12 @@ func (r *resumeHandleStore) revoke(handle string) {
 }
 
 // SEC-02B error contracts. These are returned by the identity-binding flows and
-// mapped to HTTP status codes by the (still gated) privileged handlers.
+// mapped to HTTP status codes by the privileged handlers.
 var (
-	errPrivateSessionRequired       = errors.New("private_session_required")
-	errPrivateSessionInvalid        = errors.New("private_session_invalid")
-	errIdentityMismatch             = errors.New("identity_mismatch")
-	errHostProofRequired            = errors.New("host_proof_required")
+	errPrivateSessionRequired        = errors.New("private_session_required")
+	errPrivateSessionInvalid         = errors.New("private_session_invalid")
+	errIdentityMismatch              = errors.New("identity_mismatch")
+	errHostProofRequired             = errors.New("host_proof_required")
 	errTransferTargetUnauthenticated = errors.New("transfer_target_unauthenticated")
 	errGenerationConflict            = errors.New("generation_conflict")
 	errResumeHandleInvalid           = errors.New("resume_handle_invalid")
@@ -625,14 +625,14 @@ var (
 )
 
 var (
-	jwtSecret       []byte
-	jwtIssuer       string
-	jwtTTL          time.Duration
-	liveKitAPIKey   string
+	jwtSecret        []byte
+	jwtIssuer        string
+	jwtTTL           time.Duration
+	liveKitAPIKey    string
 	liveKitAPISecret string
-	liveKitURL      string
-	sfuManagerURL   string
-	liveKitTTL      time.Duration // 5 min default for LiveKit path
+	liveKitURL       string
+	sfuManagerURL    string
+	liveKitTTL       time.Duration // 5 min default for LiveKit path
 
 	sfuAddrCache = struct {
 		mu   sync.RWMutex
@@ -1325,8 +1325,7 @@ func accessTokenRoom(claims *Claims) string {
 // whether that identity is the current host. A host resume additionally requires
 // a valid ES256 host-operation proof and fails closed if it is missing.
 //
-// This is an SEC-02B identity-binding primitive. The /token handler remains
-// gated by SEC-02A and does not call it until activation.
+// This is an SEC-02B identity-binding primitive used by handleTokenResume.
 func resumeIdentity(am *authorityManager, ss *sessionStore, rh *resumeHandleStore, roomID, accessToken, sessionCapability, hostProof, resumeHandle string) (participantID string, isHost bool, err error) {
 	roomID = canonicalRoomID(roomID)
 	accessClaims, err := validateAccessToken(accessToken)
@@ -1377,8 +1376,7 @@ func resumeIdentity(am *authorityManager, ss *sessionStore, rh *resumeHandleStor
 // the same room instance. On success it commits the transfer. It neither mints
 // nor delivers credentials; the caller performs those steps privately.
 //
-// This is an SEC-02B identity-binding primitive. The /room/transfer-host handler
-// remains gated by SEC-02A and does not call it until activation.
+// This is an SEC-02B identity-binding primitive used by handleTransferHost.
 func transferHostIdentity(am *authorityManager, ss *sessionStore, roomID, accessToken, sessionCapability, hostProof, targetParticipantID string) error {
 	roomID = canonicalRoomID(roomID)
 	accessClaims, err := validateAccessToken(accessToken)
