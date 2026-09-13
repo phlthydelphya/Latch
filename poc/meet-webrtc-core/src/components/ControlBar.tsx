@@ -13,16 +13,16 @@ import { LeaveConfirmationModal } from './LeaveConfirmationModal';
 import { InviteModal } from './InviteModal';
 
 interface ControlBarProps {
+  onToggleAudio?: () => Promise<void> | void;
+  onToggleVideo?: () => Promise<void> | void;
   onToggleHand?: (raised: boolean) => Promise<void> | void;
   onToggleScreenShare?: (sharing: boolean) => Promise<void> | void;
   onLeave?: () => Promise<void> | void;
 }
 
-export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: ControlBarProps = {}) {
+export function ControlBar({ onToggleAudio, onToggleVideo, onToggleHand, onToggleScreenShare, onLeave }: ControlBarProps = {}) {
   const {
     localParticipant,
-    toggleLocalAudio,
-    toggleLocalVideo,
     leave,
     isConnected,
     isReconnecting,
@@ -44,6 +44,9 @@ export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: Contr
 
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
+  const publishedLocalParticipant = usePresenceStore((s) =>
+    s.localParticipantId ? s.participants.get(s.localParticipantId) : undefined
+  );
   const isLocalHost = hostId !== null && hostId === localParticipantId;
 
   const permissions = useHostControlStore((s) => s.permissions);
@@ -55,8 +58,8 @@ export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: Contr
   const isReactionsBarOpen = useCollaborationStore((s) => s.isReactionsBarOpen);
   const toggleReactionsBar = useCollaborationStore((s) => s.toggleReactionsBar);
 
-  const audioEnabled = localParticipant?.audioEnabled ?? true;
-  const videoEnabled = localParticipant?.videoEnabled ?? true;
+  const audioEnabled = publishedLocalParticipant?.audioEnabled ?? localParticipant?.audioEnabled ?? false;
+  const videoEnabled = publishedLocalParticipant?.videoEnabled ?? localParticipant?.videoEnabled ?? false;
   const screenSharing = localParticipant?.screenSharing ?? false;
 
   const isMuteLocked = !audioEnabled && !permissions.canUnmuteSelf && !isLocalHost;
@@ -94,6 +97,7 @@ export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: Contr
       await HostControlManager.getInstance().transferHost(targetId);
     } catch (err) {
       console.error('Host transfer before leave failed:', err);
+      throw err;
     }
     setLeaveModalOpen(false);
     if (onLeave) {
@@ -118,11 +122,11 @@ export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: Contr
       <div className="control-bar__group">
         <button
           className={`media-toggle ${audioEnabled ? 'active' : 'muted'}`}
-          onClick={toggleLocalAudio}
+          onClick={() => void onToggleAudio?.()}
           aria-pressed={audioEnabled}
           aria-label={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
           title={isMuteLocked ? 'Unmuting restricted by host' : (audioEnabled ? 'Mute microphone' : 'Unmute microphone')}
-          disabled={!isConnected || isReconnecting || isMuteLocked}
+          disabled={!isConnected || isReconnecting || isMuteLocked || !onToggleAudio}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             {audioEnabled ? (
@@ -143,10 +147,10 @@ export function ControlBar({ onToggleHand, onToggleScreenShare, onLeave }: Contr
 
         <button
           className={`media-toggle ${videoEnabled ? 'active' : 'muted'}`}
-          onClick={toggleLocalVideo}
+          onClick={() => void onToggleVideo?.()}
           aria-pressed={videoEnabled}
           aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
-          disabled={!isConnected || isReconnecting}
+          disabled={!isConnected || isReconnecting || !onToggleVideo}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             {videoEnabled ? (

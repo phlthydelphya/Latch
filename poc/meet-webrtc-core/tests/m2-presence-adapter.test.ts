@@ -163,4 +163,22 @@ describe('M2 Phase A2: LiveKit Presence Adapter', () => {
     // Local state updated
     expect(usePresenceStore.getState().participants.get('local-alice')?.isHandRaised).toBe(true);
   });
+
+  it('UX-C06: a second client reflects remote publication mute and unmute events', () => {
+    adapter.attach(mockRoom as any);
+    const remoteBob = {
+      identity: 'remote-bob', name: 'Bob Remote', isMicrophoneEnabled: true,
+      isCameraEnabled: true, isScreenShareEnabled: false, isSpeaking: false,
+      connectionQuality: LKConnectionQuality.Good,
+    };
+    mockRoom.emit('participantConnected', remoteBob);
+    mockRoom.emit('trackMuted', { kind: 'audio', source: 'microphone' }, remoteBob);
+    mockRoom.emit('trackMuted', { kind: 'video', source: 'camera' }, remoteBob);
+    expect(usePresenceStore.getState().participants.get('remote-bob')?.audioEnabled).toBe(false);
+    expect(usePresenceStore.getState().participants.get('remote-bob')?.videoEnabled).toBe(false);
+    mockRoom.emit('trackUnmuted', { kind: 'audio', source: 'microphone' }, remoteBob);
+    mockRoom.emit('trackUnmuted', { kind: 'video', source: 'camera' }, remoteBob);
+    expect(usePresenceStore.getState().participants.get('remote-bob')?.audioEnabled).toBe(true);
+    expect(usePresenceStore.getState().participants.get('remote-bob')?.videoEnabled).toBe(true);
+  });
 });

@@ -1318,17 +1318,41 @@ export function useWebRTC() {
   // I-8: Audio & Video toggling preserves SFrame transform & counter
   const toggleAudio = useCallback(async () => {
     if (roomRef.current?.localParticipant) {
-      const enabled = !roomRef.current.localParticipant.isMicrophoneEnabled;
-      await roomRef.current.localParticipant.setMicrophoneEnabled(enabled);
+      const participant = roomRef.current.localParticipant;
+      const enabled = !participant.isMicrophoneEnabled;
+      try {
+        await participant.setMicrophoneEnabled(enabled);
+        const appParticipant = useAppStore.getState().localParticipant;
+        if (appParticipant) {
+          useAppStore.getState().setLocalParticipant({ ...appParticipant, audioEnabled: enabled });
+        }
+        usePresenceStore.getState().updateParticipantTracks(participant.identity, {
+          microphoneState: enabled ? 'on' : 'muted',
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Microphone update failed');
+      }
     }
-  }, []);
+  }, [setError]);
 
   const toggleVideo = useCallback(async () => {
     if (roomRef.current?.localParticipant) {
-      const enabled = !roomRef.current.localParticipant.isCameraEnabled;
-      await roomRef.current.localParticipant.setCameraEnabled(enabled);
+      const participant = roomRef.current.localParticipant;
+      const enabled = !participant.isCameraEnabled;
+      try {
+        await participant.setCameraEnabled(enabled);
+        const appParticipant = useAppStore.getState().localParticipant;
+        if (appParticipant) {
+          useAppStore.getState().setLocalParticipant({ ...appParticipant, videoEnabled: enabled });
+        }
+        usePresenceStore.getState().updateParticipantTracks(participant.identity, {
+          cameraState: enabled ? 'on' : 'muted',
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Camera update failed');
+      }
     }
-  }, []);
+  }, [setError]);
 
   // I-9: Screen Share with shared SFrame transform
   const startScreenShare = useCallback(async () => {

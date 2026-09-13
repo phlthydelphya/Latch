@@ -295,15 +295,25 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
   await page1.waitForSelector('#name-create');
   await page1.fill('#name-create', 'Browser-1');
   await page1.click('button[type="submit"]');
-  
+
+  // Current create flow presents the invite before entering prejoin.
+  await page1.getByRole('button', { name: /Start Meeting/i }).click();
+
   // Wait for preview to load to know we've navigated
-  await page1.waitForFunction(() => window.location.hash.includes('#k='), { timeout: 10000 });
+  await page1.waitForURL(/\/r\/[^/#]+#k=.+/, { timeout: 10000 });
   const actualUrl = page1.url();
   const urlObj = new URL(actualUrl);
   const pathParts = urlObj.pathname.split('/');
   const actualRoomId = pathParts[pathParts.length - 1];
   console.log('[Page1] Navigated to pre-join page, room:', actualRoomId);
     console.log('[Page1] Preview video element found');
+
+    // Explicitly enable both devices in prejoin so this remains compatible
+    // with C01's opt-in defaults and enters the meeting with publications on.
+    const prejoinMic = page1.getByRole('button', { name: /(?:mute|unmute) microphone/i });
+    const prejoinCamera = page1.getByRole('button', { name: /turn (?:on|off) camera/i });
+    if ((await prejoinMic.getAttribute('aria-pressed')) !== 'true') await prejoinMic.click();
+    if ((await prejoinCamera.getAttribute('aria-pressed')) !== 'true') await prejoinCamera.click();
     
     // Click Join
     await page1.click('button:has-text("Join Meeting")');
@@ -328,18 +338,10 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
     await page2.goto(`${BASE_URL}/r/${actualRoomId}#k=${actualKeyParam}`, { waitUntil: 'networkidle' });
     console.log('[Page2] Navigated to pre-join with key');
     
-    // Fill name on landing/pre-join (if redirected to landing, fill and submit)
-    try {
-      await page2.fill('#name', 'Browser-2', { timeout: 5000 });
-      await page2.click('button[type="submit"]');
-      console.log('[Page2] Submitted name on landing');
-    } catch {
-      console.log('[Page2] Already on pre-join page');
-    }
-    
-    // Wait for pre-join page (use sanitized room ID, allow hash)
-    await page2.waitForURL(`**/r/${sanitizedRoomId}*`, { timeout: 10000 });
+    // Wait for pre-join page and provide the guest display name.
+    await page2.waitForURL(`**/r/${actualRoomId}*`, { timeout: 10000 });
     console.log('[Page2] On pre-join page');
+    await page2.fill('#displayName', 'Browser-2');
     
     // Wait for preview
     await page2.waitForSelector('video', { timeout: 10000 });
@@ -350,11 +352,16 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
     console.log('[Page2] Clicked Join Meeting');
     
     // Wait for meeting page
-    await page2.waitForURL(`**/r/${sanitizedRoomId}*/join#k=*`, { timeout: 15000 });
+    await page2.waitForURL(`**/r/${actualRoomId}*/join#k=*`, { timeout: 15000 });
     console.log('[Page2] Joined meeting at:', page2.url());
     
-    // Wait for connection
-    await page2.waitForSelector('[role="status"]', { timeout: 15000 });
+    // A guest can be connected to LiveKit while the waiting-room UI hides the
+    // meeting controls, so use provider connection state rather than a DOM cue.
+    await page2.waitForFunction(
+      () => (window as any).__APP_STORE__?.getState().isConnected === true,
+      undefined,
+      { timeout: 15000 }
+    );
     console.log('[Page2] Connected to meeting');
 
     // ========== VERIFY WEBRTC CONNECTION ==========
@@ -370,6 +377,39 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
       const store = (window as any).__APP_STORE__;
       return store && store.getState().isConnected && store.getState().participants && store.getState().participants.size >= 1;
     }, { timeout: 30000 });
+
+    // UX-PHASE1 C06: cross the actual LiveKit/SFU boundary. Browser 1
+    // operates ControlBar and Browser 2 observes Browser 1 as a remote
+    // participant; this is intentionally not a mocked-room assertion.
+    const publisherIdentity = await page1.evaluate(() =>
+      (window as any).__LIVEKIT_ROOM__?.localParticipant?.identity as string | undefined
+    );
+    expect(publisherIdentity).toBeTruthy();
+
+    const micButton = page1.getByRole('button', { name: /(?:mute|unmute) microphone/i });
+    const cameraButton = page1.getByRole('button', { name: /turn (?:on|off) camera/i });
+    // Both publications were explicitly enabled in prejoin and must be visible
+    // to the second client before ControlBar changes either one.
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isMicrophoneEnabled === true && remote?.isCameraEnabled === true;
+    }, publisherIdentity, { timeout: 30000 });
+    await expect(micButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(cameraButton).toHaveAttribute('aria-pressed', 'true');
+
+    await micButton.click();
+    await expect(micButton).toHaveAttribute('aria-pressed', 'false');
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isMicrophoneEnabled === false;
+    }, publisherIdentity, { timeout: 30000 });
+
+    await cameraButton.click();
+    await expect(cameraButton).toHaveAttribute('aria-pressed', 'false');
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isCameraEnabled === false;
+    }, publisherIdentity, { timeout: 30000 });
     
     // Check peer connection states via page evaluation
     const pcState1 = await page1.evaluate(async () => {

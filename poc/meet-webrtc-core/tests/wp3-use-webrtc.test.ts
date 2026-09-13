@@ -64,6 +64,7 @@ import {
 } from '../src/sframe/transform';
 import { canonicalizeIdentity } from '../src/utils/identity';
 import { useAppStore } from '../src/store/appStore';
+import { usePresenceStore } from '../src/presence/presenceStore';
 
 // Mock livekit-client classes and events using vi.hoisted
 const { MockRoom, mockRoomInstances } = vi.hoisted(() => {
@@ -215,6 +216,7 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
       shieldMode: false,
       participants: new Map(),
     });
+    usePresenceStore.getState().resetPresence();
   });
 
   afterEach(() => {
@@ -451,6 +453,27 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
 
     expect(sframe.getEncryptCounter(0)).toBe(0n);
 
+    unmount();
+  });
+
+  it('UX-C06: completed LiveKit media operations update publication-backed state and failures do not', async () => {
+    const { result, unmount } = renderHook(() => useWebRTC());
+    await act(async () => { await new Promise((r) => setTimeout(r, 50)); });
+    const room = mockRoomInstances[0];
+
+    await act(async () => {
+      await result.current.toggleAudio();
+      await result.current.toggleVideo();
+    });
+    expect(room.localParticipant.setMicrophoneEnabled).toHaveBeenCalledWith(true);
+    expect(room.localParticipant.setCameraEnabled).toHaveBeenCalledWith(true);
+    expect(usePresenceStore.getState().participants.get('alice')?.audioEnabled).toBe(true);
+    expect(usePresenceStore.getState().participants.get('alice')?.videoEnabled).toBe(true);
+
+    room.localParticipant.setMicrophoneEnabled.mockRejectedValueOnce(new Error('publisher rejected mute'));
+    await act(async () => { await result.current.toggleAudio(); });
+    expect(usePresenceStore.getState().participants.get('alice')?.audioEnabled).toBe(true);
+    expect(useAppStore.getState().error).toBe('publisher rejected mute');
     unmount();
   });
 

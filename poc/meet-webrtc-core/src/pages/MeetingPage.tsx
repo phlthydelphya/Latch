@@ -231,6 +231,8 @@ export function MeetingPage() {
       <HostAnnouncementBanner />
       <ReactionsOverlay />
       <ControlBar
+        onToggleAudio={toggleAudio}
+        onToggleVideo={toggleVideo}
         onToggleHand={publishHandRaise}
         onToggleScreenShare={async (sharing) => {
           if (sharing) {

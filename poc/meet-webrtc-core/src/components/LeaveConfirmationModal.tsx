@@ -38,6 +38,15 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
   }, [participants, localParticipantId, waitingQueue]);
 
   const [selectedSuccessorId, setSelectedSuccessorId] = useState<string>('');
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [transferError, setTransferError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsTransferring(false);
+      setTransferError(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (remoteParticipants.length > 0 && (!selectedSuccessorId || !remoteParticipants.some((p) => p.id === selectedSuccessorId))) {
@@ -147,6 +156,7 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
                     className="input-field"
                     value={selectedSuccessorId}
                     onChange={(e) => setSelectedSuccessorId(e.target.value)}
+                    disabled={isTransferring}
                     style={{ width: '100%' }}
                   >
                     {remoteParticipants.map((p) => (
@@ -156,6 +166,11 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
                     ))}
                   </select>
                 </div>
+              )}
+              {transferError && (
+                <p role="alert" style={{ margin: 0, fontSize: '0.8rem', color: 'var(--danger)', lineHeight: 1.4 }}>
+                  {transferError}
+                </p>
               )}
             </div>
           ) : (
@@ -180,6 +195,7 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
             type="button"
             className="btn btn-secondary"
             onClick={onClose}
+            disabled={isTransferring}
           >
             Cancel
           </button>
@@ -190,13 +206,21 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    if (selectedSuccessorId) {
-                      onTransferAndLeave(selectedSuccessorId);
+                  onClick={async () => {
+                    if (!selectedSuccessorId || isTransferring) return;
+                    setIsTransferring(true);
+                    setTransferError(null);
+                    try {
+                      await onTransferAndLeave(selectedSuccessorId);
+                    } catch {
+                      setTransferError('Host transfer failed. You are still in the meeting. Try again or cancel.');
+                    } finally {
+                      setIsTransferring(false);
                     }
                   }}
+                  disabled={isTransferring || !selectedSuccessorId}
                 >
-                  Transfer & Leave
+                  {isTransferring ? 'Transferring…' : 'Transfer & Leave'}
                 </button>
               )}
               <button
