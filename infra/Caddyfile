@@ -7,7 +7,13 @@
 	auto_https off
 }
 
+# Apply security headers globally
+(security_headers) {
+	header Content-Security-Policy "default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' wss: ws:; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com data:; media-src 'self' blob:; worker-src 'self' blob:;"
+}
+
 :80 {
+	import security_headers
 	# Health passthrough
 	handle /healthz* {
 		reverse_proxy meet-signal:8080
@@ -34,6 +40,7 @@
 }
 
 :443 {
+	import security_headers
 	tls internal
 	handle /signal* {
 		reverse_proxy meet-signal:8080

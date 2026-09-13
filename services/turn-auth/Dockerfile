@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN apk add --no-cache git ca-certificates
 
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY main.go ./

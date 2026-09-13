@@ -24,6 +24,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type healthResponse struct {
@@ -69,6 +71,16 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+
+	var rdb *redis.Client
+	if redisURL != "" {
+		opts, err := redis.ParseURL(redisURL)
+		if err != nil {
+			log.Printf("turn-auth: WARNING: invalid REDIS_URL, audit logging disabled: %v", err)
+		} else {
+			rdb = redis.NewClient(opts)
+		}
+	}
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -168,10 +180,15 @@ func main() {
 		}
 
 		// Optional Redis audit key (non-blocking, best-effort)
-		// Key: turn:alloc:{userHash} EX 86400 — see docs/privacy-inventory.md D-7 TTL 86400
-		if redisURL != "" {
-			// TODO: implement Redis SET with TTL when Redis client added
-			// For P0, logging allocation with ipHash is sufficient
+		// Key: turn:alloc:{userHash} EX 86400 - see docs/privacy-inventory.md D-7 TTL 86400
+		if rdb != nil {
+			go func(uh string) {
+				ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+				defer cancel()
+				if err := rdb.Set(ctx, "turn:alloc:"+uh, time.Now().Unix(), time.Duration(turnTTL)*time.Second).Err(); err != nil {
+					log.Printf("turn/credentials: WARNING: Redis audit log failed for userHash=%s...: %v", uh[:8], err)
+				}
+			}(userHash)
 		}
 
 		// Sanitized allocation log — NEVER log TURN_SECRET, credential raw, or raw IP

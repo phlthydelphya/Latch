@@ -10,10 +10,10 @@
 ## 2. Data Inventory (Minimization Table)
 | # | Data Type | Collection | Purpose | Legal Basis | Storage | Retention | Deletion | Minimized |
 |---|-----------|------------|---------|-------------|---------|-----------|----------|-----------|
-| D-1 | roomId | URL hash #k= | Room routing | Art.6(1)(b) | sessionStorage / PG | Session / 24h | Tab close / PG GC hourly | ✅ hash |
-| D-2 | participantId hash | JWT sub | Presence | Art.6(1)(b) | sessionStorage / Redis presence:{roomId}:{hash} | Session / 24h | TTL expiry | ✅ hash |
-| D-3 | JWT 5m aud=roomId nonce | OIDC PKCE | Auth | Art.6(1)(b) | sessionStorage / stateless | 5m | Expiry | ✅ |
-| D-4 | keyParam #k= | URL hash | SFrame HKDF | Art.6(1)(b) | sessionStorage client-only never server | Session | Tab close/zeroize | ✅ |
+| D-1 | roomId | URL hash #k= | Room routing | Art.6(1)(b) | in-memory Zustand state only / PG | Session / 24h | Tab close / PG GC hourly | ✅ hash |
+| D-2 | participantId hash | JWT sub | Presence | Art.6(1)(b) | in-memory Zustand state only / Redis presence:{roomId}:{hash} | Session / 24h | TTL expiry | ✅ hash |
+| D-3 | JWT 5m aud=roomId nonce | OIDC PKCE | Auth | Art.6(1)(b) | in-memory Zustand state only / stateless | 5m | Expiry | ✅ |
+| D-4 | keyParam #k= | URL hash | SFrame HKDF | Art.6(1)(b) | in-memory Zustand state only client-only never server | Session | Tab close/zeroize | ✅ |
 | D-5 | SFrame epoch secrets | KeyManager CryptoKey | E2EE | Art.6(1)(b) | In-memory only | Session | zeroizeKey() on leftAt | ✅ |
 | D-6 | WebRTC stats | getStats() | QA metrics | Legitimate interest | In-memory MetricsCollector | Session | reset()/destroy() | ✅ no PII |
 | D-7 | TURN HMAC allocation | coturn | NAT traversal | Art.6(1)(b) | Redis TTL 86400 | 24h | TTL GC | ✅ hash |
@@ -32,7 +32,7 @@
 | PG rooms | 24h post-end | expires_at + hourly GC cron | ⬜ scaffold only — no GC yet |
 | TURN allocations | 24h | TURN_SECRET TTL 86400 | ⬜ force relay test |
 | Logs | 24h | Loki retention | ⬜ |
-| sessionStorage | Session | browser | ✅ |
+| in-memory Zustand state only | Session | browser | no sessionStorage persistence |
 
 Enforcement commands: `redis-cli KEYS "presence:*" | xargs redis-cli TTL {}; psql -c "SELECT id, expires_at FROM rooms WHERE expires_at < NOW();"`
 
@@ -72,3 +72,5 @@ curl -I http://localhost:80/ | grep -i content-security-policy  # expect CSP hea
 ```
 
 Gate exit: @privacy APPROVED only when F-01..F-06 + SEC-001/002 closed and privacy-scan.json PASS.
+
+
