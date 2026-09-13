@@ -1,0 +1,46 @@
+# METADATA-ONLY SCAFFOLD — HELM INSTALLS AN EMPTY RELEASE (NO WORKLOADS).
+# This chart ships NO templates/ and NO values.yaml. `helm install`/`helm
+# upgrade` against it will not deploy meet-signal, meet-sfu-manager, LiveKit,
+# coturn, turn-auth, Redis, or Postgres. It exists solely to reserve chart
+# metadata (name, version, keywords, maintainers) for the intended platform.
+# Do not treat it as a deployable full platform until templates/ + values.yaml
+# are authored and the referenced Services are defined.
+apiVersion: v2
+name: meet-secure-core
+description: >-
+  METADATA-ONLY chart scaffold for meet-secure-core (planned SFrame/RFC 9605
+  end-to-end encrypted video collaboration). Helm can install an empty release
+  (no templates/, no values.yaml), but it deploys no workload resources.
+  Intended future components (not deployed by this chart):
+  meet-signal (WSS signaling + room authority), meet-sfu-manager (HRW
+  room-to-SFU assignment), LiveKit SFU (blind forward), coturn + turn-auth
+  (HMAC 24h TURN credentials), Redis, and Postgres.
+type: application
+
+# Chart version (Helm packaging). Bump on every chart change.
+version: 0.1.0
+
+# Version of the app deployed by this chart. Track the release tag.
+# Placeholder — update per release (e.g. v1.0.0-m1-beta, v1.0.0-m2-complete).
+appVersion: "0.0.0-placeholder"
+
+keywords:
+  - webrtc
+  - e2ee
+  - sframe
+  - livekit
+  - coturn
+  - video-conferencing
+  - self-hosted
+
+home: https://github.com/meet-secure/meet-secure-core
+sources:
+  - https://github.com/meet-secure/meet-secure-core
+
+maintainers:
+  - name: meet-secure-core maintainers
+    email: admin@example.com
+
+# Postgres 16 / Redis 7 / Go 1.22 services — see infra/compose.yaml for the
+# P0 image/digest parity target. K8s parity documented in
+# docs/c4/p0-context.md "Deployment View".
