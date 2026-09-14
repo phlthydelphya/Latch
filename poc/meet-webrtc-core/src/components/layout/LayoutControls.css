@@ -1,0 +1,150 @@
+/* LayoutControls — view-mode selector rendered inside .meeting-header-tools.
+   Local to the component (imported by LayoutControls.tsx).
+   Relies on global.css custom properties (Latch brand kit v1.3). */
+
+.meeting-layout-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+/* ── View choice pills ─────────────────────────────────────────────────────── */
+
+.meeting-layout-options__choices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
+.meeting-layout-options__choices button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.9rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--latch-rule-strong, rgba(244, 245, 238, 0.42));
+  border-radius: 999px;
+  background: var(--latch-ink-soft, #101210);
+  color: var(--fg-muted);
+  font: 700 0.65rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    color var(--transition-brand-fast, 160ms cubic-bezier(0.22, 1, 0.36, 1)),
+    border-color var(--transition-brand-fast, 160ms cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--transition-brand-fast, 160ms cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.meeting-layout-options__choices button span[aria-hidden='true'] {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.meeting-layout-options__choices button:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+
+.meeting-layout-options__choices button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: rgba(183, 255, 42, 0.12);
+  color: var(--accent);
+}
+
+/* ── Detail row: hint, pin count, spotlight status ─────────────────────────── */
+
+.meeting-layout-options__details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.meeting-layout-options__hint {
+  color: var(--fg-muted);
+  font: 500 0.625rem/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.meeting-layout-options__pins {
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--accent-iris);
+  border-radius: 999px;
+  color: var(--accent-iris);
+  font: 700 0.625rem/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color var(--transition-brand-fast, 160ms cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.meeting-layout-options__pins:hover {
+  background: rgba(167, 155, 255, 0.15);
+}
+
+.meeting-layout-options__spotlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.3rem 0.15rem 0.55rem;
+  border: 1px solid #eab308;
+  border-radius: 999px;
+  color: #eab308;
+  font: 700 0.625rem/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.meeting-layout-options__spotlight button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  color: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: background-color var(--transition-brand-fast, 160ms cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.meeting-layout-options__spotlight button:hover {
+  background: rgba(234, 179, 8, 0.2);
+}
+
+/* ── Narrow viewports: full-width row, left-aligned ────────────────────────── */
+
+@media (max-width: 720px) {
+  .meeting-layout-options {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .meeting-layout-options__choices,
+  .meeting-layout-options__details {
+    justify-content: flex-start;
+  }
+
+  .meeting-layout-options__hint {
+    /* Keep the "affects only your view" copy readable but compact. */
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .meeting-layout-options__choices button,
+  .meeting-layout-options__pins,
+  .meeting-layout-options__spotlight button {
+    transition: none;
+  }
+}

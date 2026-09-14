@@ -1,0 +1,87 @@
+/* Illustration Motion — global (imported once in App.tsx).
+   Ambient motion for Latch linework illustrations and decorative rule layers.
+   Contract:
+   - Transform / opacity / background-position only → compositor-driven,
+     zero layout shift (CLS 0), no main-thread work (TBT unaffected).
+   - Every animation is disabled under prefers-reduced-motion.
+   - Targets are aria-hidden decorative nodes; motion never conveys state. */
+
+/* ─── Keyframes ────────────────────────────────────────────────────────────── */
+
+@keyframes illustration-breathe {
+  from {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(1.035) rotate(-1.2deg);
+    opacity: 1;
+  }
+}
+
+@keyframes illustration-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes linework-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 22rem 0;
+  }
+}
+
+/* ─── Botanical linework illustrations (landing art, camera-off preview) ───── */
+
+.preview-botanical,
+.latch-home__art img {
+  animation:
+    illustration-fade-in 480ms ease-out both,
+    illustration-breathe 9s ease-in-out 480ms infinite alternate;
+  will-change: transform, opacity;
+}
+
+/* Slower, smaller drift for the compact pre-join preview plate. */
+.preview-botanical {
+  animation:
+    illustration-fade-in 480ms ease-out both,
+    illustration-breathe 12s ease-in-out 480ms infinite alternate;
+}
+
+/* ─── Decorative ruled-linework layers ─────────────────────────────────────── */
+
+.support-linework,
+.meeting-linework,
+.meeting-shell__linework,
+.video-tile__linework {
+  animation: linework-drift 90s linear infinite;
+  will-change: background-position;
+}
+
+/* Tile plates are tiny; a shorter travel keeps the motion imperceptible. */
+.video-tile__linework {
+  animation-duration: 140s;
+}
+
+/* ─── Reduced motion: static illustrations, no drift ───────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-botanical,
+  .latch-home__art img {
+    animation: none;
+    opacity: 0.9;
+  }
+
+  .support-linework,
+  .meeting-linework,
+  .meeting-shell__linework,
+  .video-tile__linework {
+    animation: none;
+  }
+}
