@@ -8,6 +8,12 @@
 
 ## 1. Principles & Constraints (Privacy-by-Design)
 
+### Latch V1 product principles and scope
+
+The V1 product boundary is authoritative in [`docs/releases/v1-scope.md`](releases/v1-scope.md). Its six principles are: privacy without AI or meeting-content telemetry; server blindness to plaintext media and encryption keys; mandatory encryption with explicit fallbacks; user control of media permissions and device selection; explicit human control of room admission and moderation; and a simple, open, accessible PWA experience. Operational metrics are permitted when privacy-safe; this is not a zero-operational-metrics claim. The linked scope file lists V1 features and release evidence requirements, which are not assertions that those checks have passed.
+
+The scope preserves the permanent product exclusions and the caveats in ADR-002 (SFrame/SFU pivot and no silent downgrade), ADR-006 (invitation-link bearer/decryption boundary), and ADR-007 (Latch rename planning only; code authorization blocked). It does not alter architecture gate outcomes.
+
 | Principle | Enforcement in P0 |
 |-----------|-------------------|
 | **Privacy-by-design** | No analytics SDK, no cookies except `__Host-` auth `SameSite=Strict`, no UA sniffing, VAPID not FCM, logs sanitized (no SDP/PII/IP beyond 24h hash), 24h TTL on all ephemeral Redis/PG rows, no `localStorage` tracking keys. SFrame keys client-only (IndexedDB non-extractable), SFU/TURN see ciphertext only. |
