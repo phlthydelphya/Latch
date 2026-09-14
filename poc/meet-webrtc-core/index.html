@@ -15,15 +15,10 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <title>meet-secure</title>
-  <script>
-    // Inline CSP nonce for inline scripts (if any)
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { type: 'module', scope: '/' })
-          .catch(err => console.warn('[SW] Registration failed:', err));
-      });
-    }
-  </script>
+  <!-- Service worker registration lives in src/sw-register.ts (initSW) and the
+       vite-plugin-pwa injected registerSW.js. Do NOT register here: the built
+       Workbox sw.js is a classic script (uses importScripts) and must never be
+       registered with { type: 'module' }. -->
 </head>
 <body>
   <div id="root"></div>

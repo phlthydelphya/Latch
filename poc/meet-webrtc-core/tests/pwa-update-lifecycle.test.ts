@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { initSW, onSWUpdate, applySWUpdate, checkForUpdate, isUpdateAvailable } from '../src/sw-register';
 
 describe('PWA Update Lifecycle & Cache Invalidation', () => {
@@ -39,12 +41,47 @@ describe('PWA Update Lifecycle & Cache Invalidation', () => {
     vi.restoreAllMocks();
   });
 
-  it('PWA-UPDATE-01: Registers service worker with module type and scope', async () => {
+  it('PWA-UPDATE-01: Registers service worker as a CLASSIC script with scope (no type:module)', async () => {
     await initSW();
+    // The built Workbox sw.js is a classic script whose UMD shim calls
+    // importScripts(). Registering it with { type: 'module' } makes the browser
+    // evaluate it as an ES module, where importScripts() is forbidden and throws
+    // "Module scripts don't support importScripts()". Classic registration is
+    // required; it also matches the vite-plugin-pwa injected registerSW.js so
+    // both paths resolve to a single registration.
     expect(navigator.serviceWorker.register).toHaveBeenCalledWith('/sw.js', {
-      type: 'module',
       scope: '/',
     });
+    // Guard against regression: no `type` key must be passed.
+    const call = vi.mocked(navigator.serviceWorker.register).mock.calls.at(-1);
+    expect(call?.[1]).not.toHaveProperty('type');
+  });
+
+  it('PWA-UPDATE-05: source never registers the SW with type:module (regression guard)', () => {
+    // Regression guard for the production error
+    // "Module scripts don't support importScripts()". Neither the runtime
+    // registration module nor the HTML entrypoint may (re)introduce a
+    // module-type service worker registration for the classic Workbox sw.js.
+    const swRegister = readFileSync(
+      join(process.cwd(), 'src', 'sw-register.ts'),
+      'utf-8',
+    );
+    const indexHtml = readFileSync(
+      join(process.cwd(), 'index.html'),
+      'utf-8',
+    );
+
+    // The only `type: 'module'` allowed in sw-register.ts is the WASM Worker
+    // (initWASMWorker), NOT the service worker registration. Assert the SW
+    // register() call itself carries no module type.
+    const swRegisterCall = swRegister.match(
+      /serviceWorker\.register\([^)]*\{[\s\S]*?\}\s*\)/,
+    )?.[0];
+    expect(swRegisterCall).toBeDefined();
+    expect(swRegisterCall).not.toMatch(/type\s*:\s*['"]module['"]/);
+
+    // index.html must not inline any module-type SW registration.
+    expect(indexHtml).not.toMatch(/serviceWorker\.register\([^)]*type\s*:\s*['"]module['"]/);
   });
 
   it('PWA-UPDATE-02: Emits sw-update event when new worker reaches installed state', async () => {

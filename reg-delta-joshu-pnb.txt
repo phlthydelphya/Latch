@@ -1,0 +1,86 @@
+=== REGISTRY DELTA PCR 09/13/2026 22:24:00 ===
+--- Target Profile Workspace: desktop-6h7jn0p\joshu
+--- SURFACE 1: HKCU Zoom (caller profile) ---
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Intel_Processor}] count = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\NPU_Info}] count = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_ComputerSystem}] count = 1
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_ComputerSystem\0}] Manufacturer = Dell Inc.
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_ComputerSystem\0}] Model = Inspiron 15 3525
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_ComputerSystem\0}] SystemType = x64-based PC
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory}] count = 2
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] BankLabel = P0 CHANNEL A
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] Capacity = 17179869184
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] ConfiguredClockSpeed = 3200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] ConfiguredVoltage = 1200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] DataWidth = 64
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] DeviceLocator = DIMM 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] FormFactor = 12
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] Manufacturer = 802C0000802C
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] MemoryType = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] Name = Physical Memory
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\0}] Speed = 3200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] BankLabel = P0 CHANNEL B
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] Capacity = 8589934592
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] ConfiguredClockSpeed = 3200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] ConfiguredVoltage = 1200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] DataWidth = 64
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] DeviceLocator = DIMM 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] FormFactor = 12
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] Manufacturer = 019800000198
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] MemoryType = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] Name = Physical Memory
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_PhysicalMemory\1}] Speed = 3200
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor}] count = 1
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] CurrentClockSpeed = 2301
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] Description = AMD64 Family 25 Model 80 Stepping 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] Manufacturer = AuthenticAMD
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] MaxClockSpeed = 2301
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] Name = AMD Ryzen 5 5625U with Radeon Graphics         
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_Processor\0}] Version = Model 0, Stepping 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController}] count = 1
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] Caption = AMD Radeon (TM) Graphics
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] Description = AMD Radeon (TM) Graphics
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] DriverDate = 20260114000000.000000-000
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] DriverVersion = 31.0.21924.1004
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] Name = AMD Radeon (TM) Graphics
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] PNPDeviceID = PCI\VEN_1002&DEV_15E7&SUBSYS_0B6B1028&REV_C2\4&20C24D55&0&0041
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoController\0}] VideoProcessor = AMD Radeon Graphics Processor (0x15E7)
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D}] count = 2
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] Name = AMD Radeon (TM) Graphics
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] VendorId = 4098
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] DeviceId = 5607
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] D3D_FEATURE_LEVEL = 45056
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] DML_FEATURE_LEVEL = 25088
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] DML_TENSOR_DATA_TYPE = 0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] ValidIntelGpuInfo2 = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwGpuMaxFreq = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwGpuMinFreq = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwGpuArchitecture = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwEuCount = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwPackageTdp = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] IntelGpuInfo_dwMaxFillRate = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\0}] QueryTimeStamp = 1788977822
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] Name = Microsoft Basic Render Driver
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] VendorId = 5140
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] DeviceId = 140
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] D3D_FEATURE_LEVEL = 45056
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] DML_FEATURE_LEVEL = 25088
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] DML_TENSOR_DATA_TYPE = 0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] ValidIntelGpuInfo2 = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwGpuMaxFreq = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwGpuMinFreq = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwGpuArchitecture = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwEuCount = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwPackageTdp = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] IntelGpuInfo_dwMaxFillRate = 0
+[{HKEY_CURRENT_USER\Software\Zoom\SystemInfo\Win32_VideoControllerD3D\1}] QueryTimeStamp = 1788977822
+[{HKEY_CURRENT_USER\Software\Zoom\WMI\LoginInfo}] IsUserLoggedIn = 0
+[{HKEY_CURRENT_USER\Software\Zoom\WMI\MeetingInfo}] IsUserInMeeting = 0
+--- SURFACE 2/3: HKLM machine policy ---
+== native ==
+MISSING: HKLM:\SOFTWARE\Policies\Zoom
+== WOW6432Node ==
+MISSING: HKLM:\SOFTWARE\WOW6432Node\Policies\Zoom
+--- SURFACE 4: legacy per-user install residue ---
+
+--- RGP / GPP overlay ---

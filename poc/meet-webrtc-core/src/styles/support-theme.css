@@ -1,0 +1,60 @@
+/* Support Theme - ErrorBoundary / LoadingScreen / ReloadPrompt / ToastContainer
+   Latch brand kit v1.3. Relies on global.css custom properties.
+   Also defines the surface/primary vars referenced by global.css rules
+   (.audio-meter-bar, .pwa-update-prompt, select.device-select:focus). */
+
+:root {
+  --bg-surface: var(--latch-ink-soft, #101210);
+  --primary: var(--accent, #b7ff2a);
+}
+
+/* Decorative linework backdrop for support screens (error boundary).
+   Purely ornamental: never intercepts pointer events, never affects layout. */
+.support-linework {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0,
+      transparent 5.5rem,
+      var(--latch-rule, rgba(244, 245, 238, 0.2)) 5.5rem,
+      var(--latch-rule, rgba(244, 245, 238, 0.2)) calc(5.5rem + 1px)
+    );
+  opacity: 0.35;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 0%, transparent 75%);
+}
+
+/* Keep boundary content above the linework; global.css handles the rest. */
+.error-boundary {
+  position: relative;
+}
+
+.error-boundary > *:not(.support-linework) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ephemeral toast region (ToastContainer applies positioning inline).
+   Class hook kept for print-hiding and future theming only. */
+.toast-container {
+  pointer-events: none;
+}
+
+/* Update banner buttons already use .btn variants from global.css;
+   ensure the banner never blocks the skip link or focus rings. */
+.pwa-update-prompt :focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+@media print {
+  .support-linework,
+  .toast-container,
+  .loading-overlay {
+    display: none !important;
+  }
+}
