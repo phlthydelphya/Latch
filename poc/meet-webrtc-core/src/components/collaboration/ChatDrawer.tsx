@@ -83,7 +83,7 @@ export function ChatDrawer({ onSendMessage }: ChatDrawerProps) {
   };
 
   return (
-    <aside
+    <aside className="meeting-chat"
       role="complementary"
       aria-label="Meeting chat"
       style={{

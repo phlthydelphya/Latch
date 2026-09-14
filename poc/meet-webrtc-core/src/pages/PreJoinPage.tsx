@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMediaDevices } from '../hooks/useMediaDevices';
 import { useAudioMeter } from '../hooks/useAudioMeter';
@@ -8,6 +8,8 @@ import { useHostControlStore } from '../host/hostControlStore';
 import { HostControlManager } from '../host/hostControlManager';
 import { fetchToken } from '../auth/token';
 import { useDeviceStore } from '../devices/deviceStore';
+import { describeDeviceError } from '../devices/deviceErrorCopy';
+import '../styles/pages-theme.css';
 
 function generateKeyParam(): string {
   const array = new Uint8Array(32);
@@ -21,22 +23,34 @@ export function PreJoinPage() {
   const { participantId, jwt, livekitToken, sfuUrl, keyParam, setRoom, setCredentials, setLocalParticipant, setError } = useAppStore();
   const existingName = useAppStore((s) => s.localParticipant?.name) || '';
   const videoRef = useRef<HTMLVideoElement>(null);
-  const audioTestRef = useRef<HTMLAudioElement | null>(null);
-  const [previewStream, setPreviewStream] = useState<MediaStream | null>(null);
-  const [videoEnabled, setVideoEnabled] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [microphoneStream, setMicrophoneStream] = useState<MediaStream | null>(null);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('');
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('');
   const [selectedSpeakerDevice, setSelectedSpeakerDevice] = useState<string>('');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [permissionsRequested, setPermissionsRequested] = useState(false);
+  const [cameraBusy, setCameraBusy] = useState(false);
+  const [microphoneBusy, setMicrophoneBusy] = useState(false);
   const [isPlayingTestSound, setIsPlayingTestSound] = useState(false);
+  const [speakerTested, setSpeakerTested] = useState(false);
   const [joining, setJoining] = useState(false);
   const [displayName, setDisplayName] = useState(existingName);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const { devices, getUserMedia, error: deviceError, loading: deviceLoading, supportsSinkId, refreshDevices, cameraAvailability, microphoneAvailability } = useMediaDevices(previewStream, cameraError, audioError, videoEnabled, audioEnabled);
+  const previewStream = useMemo(() => {
+    if (cameraStream && microphoneStream) {
+      return new MediaStream([
+        ...cameraStream.getVideoTracks(),
+        ...microphoneStream.getAudioTracks(),
+      ]);
+    }
+    return cameraStream ?? microphoneStream;
+  }, [cameraStream, microphoneStream]);
+
+  const { devices, getUserMedia, error: deviceError, loading: deviceLoading, refreshDevices, cameraAvailability, microphoneAvailability } = useMediaDevices(previewStream, cameraError, audioError, videoEnabled, audioEnabled);
 
   const audioLevel = useAudioMeter(previewStream, audioEnabled);
 
@@ -79,10 +93,12 @@ export function PreJoinPage() {
     return () => { cancelled = true; };
   }, [roomId]);
 
-  // Track acquisition generations and active streams
-  const previewGeneration = useRef(0);
-  const activeStreamRef = useRef<MediaStream | null>(null);
-  const previewAcquiring = useRef(false);
+  // Camera and microphone have separate ownership so one control never acquires
+  // or tears down the other device.
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const microphoneStreamRef = useRef<MediaStream | null>(null);
+  const mediaGeneration = useRef({ video: 0, audio: 0 });
+  const mediaAcquiring = useRef({ video: false, audio: false });
 
   // Initialize selected devices from enumerated devices if empty
   useEffect(() => {
@@ -103,229 +119,98 @@ export function PreJoinPage() {
     }
   }, [devices, selectedVideoDevice, selectedAudioDevice, selectedSpeakerDevice]);
 
-  // Request permissions EXACTLY ONCE on mount
-  useEffect(() => {
-    if (!permissionsRequested) {
-      setPermissionsRequested(true);
-      refreshDevices(true);
+  const stopDevice = useCallback((kind: 'video' | 'audio') => {
+    mediaGeneration.current[kind]++;
+    const streamRef = kind === 'video' ? cameraStreamRef : microphoneStreamRef;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (kind === 'video') {
+      setCameraStream(null);
+      setVideoEnabled(false);
+      setCameraBusy(false);
+    } else {
+      setMicrophoneStream(null);
+      setAudioEnabled(false);
+      setMicrophoneBusy(false);
     }
-  }, [permissionsRequested, refreshDevices]);
+  }, []);
 
-  // Defer preview acquisition until permission-requesting enumeration completes
-  const [permissionsResolved, setPermissionsResolved] = useState(false);
-  useEffect(() => {
-    if (permissionsRequested && !deviceLoading) {
-      setPermissionsResolved(true);
-    }
-  }, [permissionsRequested, deviceLoading]);
-
-  // The actual acquisition function with generation ownership
-  const requestPreview = useCallback(async (
-    videoReq: boolean | { deviceId: { exact: string } },
-    audioReq: boolean | { deviceId: { exact: string } }
-  ) => {
-    const generation = ++previewGeneration.current;
-
-    // Serialize concurrent acquisitions to prevent Firefox "Failed to allocate videosource"
-    if (previewAcquiring.current) {
-      return;
-    }
-    previewAcquiring.current = true;
+  const requestDevice = useCallback(async (kind: 'video' | 'audio', deviceId = '') => {
+    if (mediaAcquiring.current[kind]) return;
+    const generation = ++mediaGeneration.current[kind];
+    mediaAcquiring.current[kind] = true;
+    if (kind === 'video') setCameraBusy(true);
+    else setMicrophoneBusy(true);
+    const constraints = kind === 'video'
+      ? { video: deviceId ? { deviceId: { exact: deviceId } } : true, audio: false }
+      : { video: false, audio: deviceId ? { deviceId: { exact: deviceId } } : true };
 
     try {
-
-    // Fast-path for turning both off cleanly
-    if (!videoReq && !audioReq) {
-      if (activeStreamRef.current) {
-        activeStreamRef.current.getTracks().forEach(t => t.stop());
-        activeStreamRef.current = null;
-      }
-      setPreviewStream(null);
-      return;
-    }
-
-    try {
-      console.log('[PreJoin] getUserMedia request', { video: videoReq, audio: audioReq, generation });
-      const stream = await getUserMedia({ video: videoReq, audio: audioReq });
-
-      // Generation Commit Gate
-      if (generation !== previewGeneration.current) {
-        stream.getTracks().forEach((t) => t.stop());
+      const stream = await getUserMedia(constraints);
+      if (generation !== mediaGeneration.current[kind]) {
+        stream.getTracks().forEach((track) => track.stop());
         return;
       }
 
-      // Stop older streams before committing
-      if (activeStreamRef.current) {
-        activeStreamRef.current.getTracks().forEach(t => t.stop());
-      }
-
-      activeStreamRef.current = stream;
-      setPreviewStream(stream);
-      if (videoReq) setCameraError(null);
-      if (audioReq) setAudioError(null);
-      setError(null);
-    } catch (err) {
-      if (generation !== previewGeneration.current) return;
-
-      const errName = (err as { name?: string })?.name;
-      console.warn('[PreJoin] Full media stream request failed:', err);
-
-      // Firefox hardware-release race: retry once after delay to allow device unlock
-      if (errName === 'NotReadableError' || errName === 'TrackStartError') {
-        await new Promise((r) => setTimeout(r, 500));
-        if (generation !== previewGeneration.current) return;
-        try {
-          const retryStream = await getUserMedia({ video: videoReq, audio: audioReq });
-          if (generation !== previewGeneration.current) {
-            retryStream.getTracks().forEach((t) => t.stop());
-            return;
-          }
-          if (activeStreamRef.current) {
-            activeStreamRef.current.getTracks().forEach(t => t.stop());
-          }
-          activeStreamRef.current = retryStream;
-          setPreviewStream(retryStream);
-          if (videoReq) setCameraError(null);
-          if (audioReq) setAudioError(null);
-          setError(null);
-          console.log('[PreJoin] Retry after NotReadableError succeeded');
-          return;
-        } catch (retryErr) {
-          console.warn('[PreJoin] Retry also failed:', retryErr);
-          if (generation !== previewGeneration.current) return;
-        }
-      }
-
-      // Audio-only fallback path
-      if (videoReq && audioReq) {
-        try {
-          const audioOnlyStream = await getUserMedia({ video: false, audio: audioReq });
-          if (generation !== previewGeneration.current) {
-            audioOnlyStream.getTracks().forEach((t) => t.stop());
-            return;
-          }
-
-          if (activeStreamRef.current) {
-            activeStreamRef.current.getTracks().forEach(t => t.stop());
-          }
-          activeStreamRef.current = audioOnlyStream;
-          setPreviewStream(audioOnlyStream);
-          setVideoEnabled(false);
-          setCameraError('Camera is in use by another application or unavailable. Joined with microphone.');
-          return;
-        } catch (audioErr) {
-          console.warn('[PreJoin] Audio fallback also failed:', audioErr);
-        }
-      }
-
-      // Video-only fallback path
-      if (!videoReq && audioReq) {
-        try {
-          const videoOnlyStream = await getUserMedia({ video: videoReq, audio: false });
-          if (generation !== previewGeneration.current) {
-            videoOnlyStream.getTracks().forEach((t) => t.stop());
-            return;
-          }
-
-          if (activeStreamRef.current) {
-            activeStreamRef.current.getTracks().forEach(t => t.stop());
-          }
-          activeStreamRef.current = videoOnlyStream;
-          setPreviewStream(videoOnlyStream);
-          setAudioEnabled(false);
-          setAudioError('Microphone is unavailable or permission denied. Joined without audio.');
-          return;
-        } catch (videoErr) {
-          console.warn('[PreJoin] Video fallback also failed:', videoErr);
-        }
-      }
-
-      if (generation !== previewGeneration.current) return;
-
-      // Final failure commits
-      if (videoReq && audioReq) {
-        setVideoEnabled(false);
-        setAudioEnabled(false);
-        setCameraError('Camera and microphone are in use or unavailable. Joined in listen-only mode.');
-      } else if (!videoReq && audioReq) {
-        setAudioEnabled(false);
-        setAudioError('Microphone is unavailable or permission denied. Joined in listen-only mode.');
-      } else if (videoReq && !audioReq) {
-        setVideoEnabled(false);
-        setCameraError('Camera is unavailable or permission denied.');
+      const streamRef = kind === 'video' ? cameraStreamRef : microphoneStreamRef;
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = stream;
+      stream.getTracks().forEach((track) => track.addEventListener?.('ended', () => {
+        if (streamRef.current === stream) stopDevice(kind);
+      }, { once: true }));
+      if (kind === 'video') {
+        setCameraStream(stream);
+        setVideoEnabled(true);
+        setCameraError(null);
       } else {
+        setMicrophoneStream(stream);
+        setAudioEnabled(true);
+        setAudioError(null);
+      }
+      setError(null);
+      void refreshDevices();
+    } catch (err) {
+      if (generation !== mediaGeneration.current[kind]) return;
+      const message = describeDeviceError(err, kind === 'video' ? 'camera' : 'microphone').message;
+      if (kind === 'video') {
         setVideoEnabled(false);
+        setCameraError(message);
+      } else {
         setAudioEnabled(false);
-        setCameraError('Camera and microphone access denied. You can still join in listen-only mode.');
+        setAudioError(message);
       }
-    }
     } finally {
-      previewAcquiring.current = false;
-    }
-  }, [getUserMedia, setError]);
-
-  // Unified dependency observer for triggering acquisition
-  useEffect(() => {
-    if (!roomId) return;
-    if (deviceLoading) return; // Wait for initial population to finish
-    if (!permissionsResolved) return; // Wait for permission-requesting enumeration to complete
-
-    // Determine current active stream state
-    const currentVideoId = activeStreamRef.current?.getVideoTracks()[0]?.getSettings().deviceId;
-    const currentAudioId = activeStreamRef.current?.getAudioTracks()[0]?.getSettings().deviceId;
-
-    const requestedVideo = videoEnabled ? (selectedVideoDevice ? { deviceId: { exact: selectedVideoDevice } } : true) : false;
-    const requestedAudio = audioEnabled ? (selectedAudioDevice ? { deviceId: { exact: selectedAudioDevice } } : true) : false;
-
-    let needsUpdate = false;
-
-    if (videoEnabled) {
-      // If we don't have video, we need it.
-      if (!activeStreamRef.current?.getVideoTracks().length) {
-        needsUpdate = true;
-      } else if (selectedVideoDevice && currentVideoId !== selectedVideoDevice) {
-        // If we have video, but the ID differs from our explicit selection
-        // Exception: If currentVideoId is undefined/provisional, and selectedVideoDevice is populated,
-        // it means we got default initially, but now we know the ID.
-        // Wait, if we requested true initially, we might already have the right device.
-        // But if the IDs are strictly different, we request again.
-        // If the browser didn't return deviceId in getSettings() yet (rare), this causes 1 retry.
-        needsUpdate = true;
+      mediaAcquiring.current[kind] = false;
+      if (generation === mediaGeneration.current[kind]) {
+        if (kind === 'video') setCameraBusy(false);
+        else setMicrophoneBusy(false);
       }
-    } else {
-      if (activeStreamRef.current?.getVideoTracks().length) needsUpdate = true;
     }
+  }, [getUserMedia, refreshDevices, setError, stopDevice]);
 
-    if (audioEnabled) {
-      if (!activeStreamRef.current?.getAudioTracks().length) {
-        needsUpdate = true;
-      } else if (selectedAudioDevice && currentAudioId !== selectedAudioDevice) {
-        needsUpdate = true;
-      }
-    } else {
-      if (activeStreamRef.current?.getAudioTracks().length) needsUpdate = true;
-    }
+  const toggleCamera = useCallback(() => {
+    if (videoEnabled) stopDevice('video');
+    else void requestDevice('video', selectedVideoDevice);
+  }, [requestDevice, selectedVideoDevice, stopDevice, videoEnabled]);
 
-    if (needsUpdate || !activeStreamRef.current) {
-      requestPreview(requestedVideo, requestedAudio);
-    }
-  }, [roomId, deviceLoading, permissionsResolved, videoEnabled, audioEnabled, selectedVideoDevice, selectedAudioDevice, requestPreview]);
+  const toggleMicrophone = useCallback(() => {
+    if (audioEnabled) stopDevice('audio');
+    else void requestDevice('audio', selectedAudioDevice);
+  }, [audioEnabled, requestDevice, selectedAudioDevice, stopDevice]);
 
   // Component cleanup
   useEffect(() => {
     return () => {
-      // Increment generation on unmount to prevent late commits
-      previewGeneration.current++;
-      if (activeStreamRef.current) {
-        activeStreamRef.current.getTracks().forEach((t) => t.stop());
-        activeStreamRef.current = null;
-      }
+      mediaGeneration.current.video++;
+      mediaGeneration.current.audio++;
+      cameraStreamRef.current?.getTracks().forEach((track) => track.stop());
+      microphoneStreamRef.current?.getTracks().forEach((track) => track.stop());
+      cameraStreamRef.current = null;
+      microphoneStreamRef.current = null;
     };
   }, []);
 
-  // Attach the preview stream once the <video> element has rendered.
-  // (setPreviewStream above re-renders after this effect body runs, so the
-  // ref is still null at that point and srcObject must be set post-render.)
+  // Attach the composed local stream once the <video> element has rendered.
   useEffect(() => {
     if (videoRef.current && previewStream) {
       videoRef.current.srcObject = previewStream;
@@ -420,7 +305,10 @@ export function PreJoinPage() {
       // Stop preview tracks so LiveKit can allocate the hardware cleanly
       if (previewStream) {
         previewStream.getTracks().forEach((t) => t.stop());
-        setPreviewStream(null);
+        cameraStreamRef.current = null;
+        microphoneStreamRef.current = null;
+        setCameraStream(null);
+        setMicrophoneStream(null);
       }
       setError(null);
 
@@ -435,8 +323,6 @@ export function PreJoinPage() {
 
   const videoDevices = devices.filter((d) => d.kind === 'videoinput');
   const audioDevices = devices.filter((d) => d.kind === 'audioinput');
-  const speakerDevices = devices.filter((d) => d.kind === 'audiooutput');
-
   const handleTestSound = async () => {
     try {
       setIsPlayingTestSound(true);
@@ -451,6 +337,7 @@ export function PreJoinPage() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.5);
+      setSpeakerTested(true);
       setTimeout(() => {
         setIsPlayingTestSound(false);
         audioCtx.close().catch(() => {});
@@ -507,254 +394,153 @@ export function PreJoinPage() {
     );
   }
 
+  const initials = trimmedName
+    ? trimmedName.split(/\s+/u).slice(0, 2).map((part) => Array.from(part)[0]).join('').toUpperCase()
+    : 'YOU';
+  const activeError = cameraError || audioError || deviceError;
+
   return (
-    <main className="preview-container" id="main" role="main">
-      <div className="shield-badge" role="status" aria-label="End-to-end encryption active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
-        <span>E2EE · SFrame</span>
-      </div>
+    <div className="preflight-page">
+      <a className="skip-link" href="#main">Skip to device check</a>
+      <header className="preflight-header">
+        <button className="preflight-wordmark" type="button" onClick={() => navigate('/', { replace: true })}>LATCH</button>
+        <div className="preflight-location" aria-hidden="true">
+          <span className="preflight-mark" />
+          <span>PREFLIGHT / DEVICE CHECK</span>
+        </div>
+        <button className="preflight-exit" type="button" onClick={() => navigate('/', { replace: true })}>Exit to home ↗</button>
+      </header>
 
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Preview & Join</h1>
-      <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem' }}>
-        Room: <code style={{ fontFamily: 'var(--font-mono)', background: 'var(--bg-elevated)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>{roomId}</code>
-      </p>
-
-      <div className="preview-video" aria-label="Camera preview">
-        {previewStream ? (
-          <video ref={videoRef} autoPlay playsInline muted />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--fg-muted)' }}>
-            {deviceLoading ? 'Loading camera…' : 'No camera available'}
+      <main id="main" className="preflight-main">
+        <div className="preflight-heading">
+          <div>
+            <p className="preflight-eyebrow">A moment for you</p>
+            <h1 aria-label="Before you step in.">Before you<br /><span>step in.</span></h1>
           </div>
-        )}
-      </div>
-
-      <div className="input-group" style={{ width: '100%', maxWidth: '360px', margin: '1rem auto 0 auto' }}>
-        <label htmlFor="displayName" className="input-label">
-          Your Name
-        </label>
-        <input
-          id="displayName"
-          type="text"
-          className="input-field"
-          placeholder="Enter your name"
-          value={displayName}
-          onChange={(e) => {
-            setDisplayName(e.target.value);
-            setNameTouched(true);
-          }}
-          onBlur={() => setNameTouched(true)}
-          maxLength={64}
-          autoComplete="name"
-          disabled={joining}
-        />
-        {nameTouched && nameError && (
-          <div role="alert" style={{ marginTop: '0.25rem', color: '#ff4757', fontSize: '0.8rem' }}>
-            {nameError}
-          </div>
-        )}
-      </div>
-
-      <div className="preview-controls">
-        <fieldset className="preview-controls__row">
-          <legend className="input-label">Camera</legend>
-          <button
-            className={`media-toggle ${videoEnabled ? 'active' : 'muted'}`}
-            onClick={() => setVideoEnabled((v) => !v)}
-            aria-pressed={videoEnabled}
-            aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
-            disabled={cameraAvailability === 'denied' || cameraAvailability === 'unsupported' || cameraAvailability === 'error'}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="12" r="4" />
-            </svg>
-          </button>
-
-          {cameraAvailability === 'available' ? (
-            <select
-              className="input-field device-select"
-              style={{ maxWidth: '220px' }}
-              value={selectedVideoDevice}
-              onChange={(e) => setSelectedVideoDevice(e.target.value)}
-              aria-label="Select camera"
-            >
-              {videoDevices.length > 0 ? (
-                videoDevices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.label || `Camera ${videoDevices.indexOf(d) + 1}`}
-                  </option>
-                ))
-              ) : (
-                <option value="">Default camera</option>
-              )}
-            </select>
-          ) : (
-            <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>No camera detected</span>
-          )}
-        </fieldset>
-
-        <fieldset className="preview-controls__row">
-          <legend className="input-label">Microphone</legend>
-          <button
-            className={`media-toggle ${audioEnabled ? 'active' : 'muted'}`}
-            onClick={() => setAudioEnabled((a) => !a)}
-            aria-pressed={audioEnabled}
-            aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
-            disabled={microphoneAvailability === 'denied' || microphoneAvailability === 'unsupported' || microphoneAvailability === 'error'}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="22" />
-            </svg>
-          </button>
-
-          {microphoneAvailability === 'available' ? (
-            <select
-              className="input-field device-select"
-              style={{ maxWidth: '220px' }}
-              value={selectedAudioDevice}
-              onChange={(e) => setSelectedAudioDevice(e.target.value)}
-              aria-label="Select microphone"
-            >
-              {audioDevices.length > 0 ? (
-                audioDevices.map((d) => (
-                  <option key={d.deviceId} value={d.deviceId}>
-                    {d.label || `Microphone ${audioDevices.indexOf(d) + 1}`}
-                  </option>
-                ))
-              ) : (
-                <option value="">Default microphone</option>
-              )}
-            </select>
-          ) : (
-            <span style={{ fontSize: '0.8rem', color: 'var(--fg-muted)' }}>No microphone detected</span>
-          )}
-        </fieldset>
-
-        {/* Live Audio Activity Meter */}
-        <div className="audio-meter-container" aria-label="Microphone activity">
-          <div className="audio-meter-label">
-            <span>Mic Activity</span>
-            <span>{audioEnabled ? `${audioLevel}%` : 'Muted'}</span>
-          </div>
-          <div
-            className="audio-meter-bar"
-            role="progressbar"
-            aria-valuenow={audioEnabled ? audioLevel : 0}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Microphone input level"
-          >
-            <div
-              className="audio-meter-fill"
-              style={{ width: `${audioEnabled ? audioLevel : 0}%` }}
-            />
-          </div>
+          <p>Find your light. Check your sound.<br />Come as you are.</p>
         </div>
 
-        {/* Speaker / Audio Output Selection (when supported) */}
-        {supportsSinkId && speakerDevices.length > 0 && (
-          <fieldset className="preview-controls__row">
-            <legend className="input-label">Speaker / Output</legend>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
-              onClick={handleTestSound}
-              disabled={isPlayingTestSound}
-              aria-label="Test speaker sound"
-            >
-              {isPlayingTestSound ? 'Playing…' : '🔊 Test Sound'}
-            </button>
-            <select
-              className="input-field device-select"
-              style={{ maxWidth: '220px' }}
-              value={selectedSpeakerDevice}
-              onChange={(e) => setSelectedSpeakerDevice(e.target.value)}
-              aria-label="Select speaker"
-            >
-              {speakerDevices.map((d) => (
-                <option key={d.deviceId} value={d.deviceId}>
-                  {d.label || `Speaker ${speakerDevices.indexOf(d) + 1}`}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-        )}
-      </div>
+        <div className="preflight-grid">
+          <section className="device-workspace" aria-labelledby="preview-title">
+            <div className="preview-meta">
+              <h2 id="preview-title">Your preview</h2>
+              <span className="local-badge">LOCAL ONLY</span>
+            </div>
 
-      {(cameraError || audioError || deviceError) && (
-        <div
-          role="alert"
-          style={{
-            padding: '0.75rem',
-            background: 'rgba(255,71,87,0.1)',
-            border: '1px solid #ff4757',
-            borderRadius: '8px',
-            color: '#ff4757',
-            fontSize: '0.875rem',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-            alignItems: 'center',
-            width: '100%',
-            maxWidth: '360px',
-            margin: '0 auto',
-          }}
-        >
-          <span>{cameraError || audioError || deviceError}</span>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {cameraError && !videoEnabled && (
+            <div className="camera-preview" aria-label="Your local camera preview">
+              {!videoEnabled && (
+                <div className="preview-idle">
+                  <img className="preview-botanical" src="/brand/linework-flow.png" alt="" aria-hidden="true" />
+                  <div className="camera-message">
+                    <span className="initials">{initials}</span>
+                    <h3>Your camera is off.</h3>
+                    <p>No one can see or hear this preview.</p>
+                  </div>
+                </div>
+              )}
+              {videoEnabled && cameraStream && (
+                <>
+                  <video ref={videoRef} autoPlay playsInline muted aria-label="Your local camera preview video" />
+                  <div className="video-overlay"><span>{trimmedName || 'You'}</span><span>Visible only to you</span></div>
+                </>
+              )}
+            </div>
+
+            <div className="device-controls" aria-label="Local device controls">
               <button
+                className={`device-button ${videoEnabled ? 'active' : 'muted'}`}
                 type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
-                onClick={() => {
-                  setCameraError(null);
-                  setVideoEnabled(true);
-                }}
+                onClick={toggleCamera}
+                aria-pressed={videoEnabled}
+                aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
+                disabled={joining || cameraBusy || cameraAvailability === 'unsupported'}
               >
-                Retry Camera
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="12" rx="3" /><path d="m15 10 6-3v10l-6-3" /></svg>
+                <span>{cameraBusy ? 'Waiting for permission…' : videoEnabled ? 'Turn camera off' : 'Enable camera'}</span>
               </button>
-            )}
-            {audioError && !audioEnabled && (
               <button
+                className={`device-button ${audioEnabled ? 'active' : 'muted'}`}
                 type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
-                onClick={() => {
-                  setAudioError(null);
-                  setAudioEnabled(true);
-                }}
+                onClick={toggleMicrophone}
+                aria-pressed={audioEnabled}
+                aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
+                disabled={joining || microphoneBusy || microphoneAvailability === 'unsupported'}
               >
-                Retry Microphone
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" /></svg>
+                <span>{microphoneBusy ? 'Waiting for permission…' : audioEnabled ? 'Turn mic off' : 'Enable mic'}</span>
               </button>
-            )}
-          </div>
+              <button className="device-button speaker-button" type="button" onClick={handleTestSound} disabled={joining || isPlayingTestSound} aria-label="Test speaker sound">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3zm13-1q5 4 0 8m3-11q8 7 0 14" /></svg>
+                <span>{isPlayingTestSound ? 'Playing…' : 'Test speakers'}</span>
+              </button>
+            </div>
+
+            <div className={`device-feedback${activeError ? ' device-feedback--error' : ''}`} role={activeError ? 'alert' : 'status'} aria-live="polite">
+              <p>{activeError || 'Camera and microphone stay off until you enable them.'}</p>
+              {activeError && (
+                <div className="device-feedback__actions">
+                  {cameraError && !videoEnabled && <button type="button" onClick={() => { setCameraError(null); void requestDevice('video', selectedVideoDevice); }}>Retry camera</button>}
+                  {audioError && !audioEnabled && <button type="button" onClick={() => { setAudioError(null); void requestDevice('audio', selectedAudioDevice); }}>Retry microphone</button>}
+                </div>
+              )}
+            </div>
+
+            <details className="device-settings" open>
+              <summary>Device settings <span aria-hidden="true">＋</span></summary>
+              <div className="settings-grid">
+                <div>
+                  <label htmlFor="camera-select">Camera</label>
+                  <select id="camera-select" value={selectedVideoDevice} disabled={!videoEnabled || cameraBusy || joining} onChange={(event) => { const id = event.target.value; setSelectedVideoDevice(id); void requestDevice('video', id); }}>
+                    <option value="">System default camera</option>
+                    {videoDevices.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Camera ${index + 1}`}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="microphone-select">Microphone</label>
+                  <select id="microphone-select" value={selectedAudioDevice} disabled={!audioEnabled || microphoneBusy || joining} onChange={(event) => { const id = event.target.value; setSelectedAudioDevice(id); void requestDevice('audio', id); }}>
+                    <option value="">System default microphone</option>
+                    {audioDevices.map((device, index) => <option key={device.deviceId} value={device.deviceId}>{device.label || `Microphone ${index + 1}`}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="mic-meter-row">
+                <span>Input level</span>
+                <div className="preflight-meter" role="progressbar" aria-label="Microphone input level" aria-valuemin={0} aria-valuemax={100} aria-valuenow={audioEnabled ? audioLevel : 0}>
+                  <span style={{ width: `${audioEnabled ? audioLevel : 0}%` }} />
+                </div>
+                <span>{audioEnabled ? (audioLevel > 3 ? 'Receiving sound' : 'Try speaking') : 'Mic off'}</span>
+              </div>
+              <p className="setting-note">Device choices appear after permission is granted. Speaker tests use your system’s selected output.</p>
+            </details>
+          </section>
+
+          <aside className="join-panel" aria-labelledby="join-title">
+            <p className="preflight-eyebrow">Your space to connect</p>
+            <h2 id="join-title">Settle in.</h2>
+            <p className="join-lede">Choose how you show up.<br />You can keep your camera and mic off.</p>
+            <div className="preflight-form">
+              <label htmlFor="displayName">Your name</label>
+              <input id="displayName" type="text" value={displayName} onChange={(event) => { setDisplayName(event.target.value); setNameTouched(true); }} onBlur={() => setNameTouched(true)} maxLength={64} autoComplete="name" placeholder="What should we call you?" aria-describedby="name-note" disabled={joining} />
+              <p className="setting-note" id="name-note">Used for this meeting only. Not saved.</p>
+              {nameTouched && nameError && <p className="name-error" role="alert">{nameError}</p>}
+              <div className="readiness-list" aria-label="Device readiness">
+                <div><span>Camera</span><strong data-on={videoEnabled}>{cameraBusy ? 'Requesting…' : videoEnabled ? 'On · local' : 'Off'}</strong></div>
+                <div><span>Microphone</span><strong data-on={audioEnabled}>{microphoneBusy ? 'Requesting…' : audioEnabled ? 'On · local' : 'Off'}</strong></div>
+                <div><span>Speakers</span><strong data-on={speakerTested}>{speakerTested ? 'Tone played' : 'Not tested'}</strong></div>
+              </div>
+              <button className="btn btn-primary preflight-join" type="button" onClick={handleJoin} disabled={joining || cameraBusy || microphoneBusy || Boolean(nameError)}>{joining ? 'Joining…' : 'Join Meeting'} <span aria-hidden="true">↗</span></button>
+              <button className="preflight-cancel" type="button" onClick={() => navigate('/', { replace: true })} disabled={joining}>Cancel</button>
+            </div>
+            <div className="security-note">
+              <span className="notice-label">PRIVATE BY DESIGN</span>
+              <p>This preview stays on your device. Your selected device settings carry into the encrypted meeting when you join.</p>
+            </div>
+            <div className="privacy-note"><h3>A boundary, not a barrier.</h3><p>Camera and microphone access begins only when you choose it. You can enter with either device off.</p></div>
+          </aside>
         </div>
-      )}
 
-      <button
-        className="btn btn-primary"
-        style={{ width: '100%', marginTop: '0.5rem' }}
-        onClick={handleJoin}
-        disabled={joining || !displayName.trim() || displayName.trim().length > 64}
-      >
-        {joining ? 'Joining…' : 'Join Meeting'}
-      </button>
-
-      <button
-        className="btn btn-secondary"
-        style={{ width: '100%' }}
-        onClick={() => navigate('/', { replace: true })}
-      >
-        Cancel
-      </button>
-    </main>
+        <footer className="preflight-footer"><span>Human by nature. Private by design.</span><span>01 / GET COMFORTABLE</span></footer>
+      </main>
+    </div>
   );
 }

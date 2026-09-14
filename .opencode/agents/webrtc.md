@@ -1,7 +1,7 @@
 ---
 description: WebRTC and Media Engineer - SFU, signaling, media routing, E2EE, TURN/STUN
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: opencode-go/grok-4.6
 permission:
   bash: allow
   read: allow

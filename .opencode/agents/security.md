@@ -1,7 +1,7 @@
 ---
 description: Application Security Reviewer - auth, encryption, WebRTC, storage, APIs
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode-go/deepseek-v4-pro
 permission:
   read: allow
   glob: allow

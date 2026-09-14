@@ -1,4 +1,4 @@
-import { Room, RoomEvent, Participant } from 'livekit-client';
+import { Room, RoomEvent, Participant, Track } from 'livekit-client';
 import { useHostControlStore } from './hostControlStore';
 import { usePresenceStore } from '../presence/presenceStore';
 import { useAppStore } from '../store/appStore';
@@ -8,6 +8,7 @@ import {
   MeetingPermissions,
 } from './types';
 import { HostTokenVerifier } from './hostTokenVerifier';
+import { usePermissionsStore } from '../hooks/usePermissions';
 
 export class HostControlManager {
   private static instance: HostControlManager | null = null;
@@ -16,6 +17,7 @@ export class HostControlManager {
   private localHostToken: string | null = null;
   private hostPublicKey: string | null = null;
   private activeRoomId: string | null = null;
+  private coHostIds: Set<string> = new Set();
 
   static getInstance(): HostControlManager {
     if (!HostControlManager.instance) {
@@ -48,10 +50,79 @@ export class HostControlManager {
     return this.hostPublicKey;
   }
 
+  getCoHostIds(): Set<string> {
+    return new Set(this.coHostIds);
+  }
+
+  isCoHost(participantId: string): boolean {
+    return this.coHostIds.has(participantId) || usePermissionsStore.getState().coHostIds.has(participantId);
+  }
+
+  addCoHostId(participantId: string): void {
+    this.coHostIds.add(participantId);
+    usePermissionsStore.getState().addCoHost(participantId);
+  }
+
+  removeCoHostId(participantId: string): void {
+    this.coHostIds.delete(participantId);
+    usePermissionsStore.getState().removeCoHost(participantId);
+  }
+
+  clearCoHostIds(): void {
+    this.coHostIds.clear();
+    usePermissionsStore.getState().setCoHosts([]);
+  }
+
+  private async terminateLocalScreenShare(): Promise<void> {
+    // Synchronously update local store immediately to avoid UI lag and test race conditions
+    useAppStore.getState().setLocalScreenShare(false);
+
+    const local = this.room?.localParticipant;
+    try {
+      if (local?.setScreenShareEnabled) {
+        await local.setScreenShareEnabled(false);
+      }
+    } catch (err) {
+      console.warn('[HostControlManager] Failed to disable screen share on local participant:', err);
+    }
+
+    try {
+      const pub = (local as any)?.getTrackPublication?.(Track?.Source?.ScreenShare) ||
+                  (local as any)?.getTrackPublication?.('screen_share') ||
+                  (local as any)?.getTrackPublication?.('screen');
+      if (pub?.track?.mediaStreamTrack && typeof pub.track.mediaStreamTrack.stop === 'function') {
+        pub.track.mediaStreamTrack.stop();
+      }
+    } catch {}
+
+    try {
+      if ((local as any)?.videoTracks) {
+        (local as any).videoTracks.forEach((publication: any) => {
+          if (publication.source === Track?.Source?.ScreenShare || publication.source === 'screen_share') {
+            if (publication.track?.mediaStreamTrack && typeof publication.track.mediaStreamTrack.stop === 'function') {
+              publication.track.mediaStreamTrack.stop();
+            }
+          }
+        });
+      }
+    } catch {}
+
+    try {
+      const { ScreenShareManager } = await import('../screen/manager').catch(() => ({ ScreenShareManager: null }));
+      if (ScreenShareManager && typeof (ScreenShareManager as any).getInstance === 'function') {
+        const mgr = (ScreenShareManager as any).getInstance();
+        if (mgr && typeof mgr.stopScreenShare === 'function') {
+          await mgr.stopScreenShare().catch(() => {});
+        }
+      }
+    } catch {}
+  }
+
   reset(): void {
     this.localHostToken = null;
     this.hostPublicKey = null;
     this.activeRoomId = null;
+    this.clearCoHostIds();
   }
 
   attach(room: Room): void {
@@ -171,14 +242,44 @@ export class HostControlManager {
         let isAuthorized = false;
 
         const establishedHostId = usePresenceStore.getState().hostId;
+        const isSenderCoHost = this.isCoHost(senderId) || usePermissionsStore.getState().coHostIds.has(senderId);
 
-        // If an established host is already known, the sender MUST be that host (or local self)
+        // If an established host is already known, the sender MUST be that host, a co-host, or local self
         // Exception: server-relayed messages (participant "system") are allowed to pass through for verification
-        if (establishedHostId && !isServerRelay && senderId !== establishedHostId && !myIdentities.has(senderId)) {
+        if (establishedHostId && !isServerRelay && senderId !== establishedHostId && !isSenderCoHost && !myIdentities.has(senderId)) {
           console.warn(
             `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Does not match established host ${establishedHostId}`
           );
           return;
+        }
+
+        // If sender is a co-host, enforce target hierarchy and action matrix
+        if (isSenderCoHost && senderId !== establishedHostId) {
+          const allowedCoHostActions = [
+            'mute-participant',
+            'remove-participant',
+            'spotlight-participant',
+            'stop-participant-share',
+            'waiting-room-admit',
+            'waiting-room-reject',
+          ];
+          if (!allowedCoHostActions.includes(msg.action)) {
+            console.warn(
+              `[HostControlManager] Rejected co-host directive '${msg.action}': Action requires Host role`
+            );
+            return;
+          }
+          const targetId = msg.targetParticipantId;
+          if (targetId) {
+            const isTargetHost = targetId === establishedHostId;
+            const isTargetCoHost = this.isCoHost(targetId) || usePermissionsStore.getState().coHostIds.has(targetId);
+            if (isTargetHost || isTargetCoHost) {
+              console.warn(
+                `[HostControlManager] Rejected co-host directive '${msg.action}' targeting ${targetId}: Co-hosts cannot moderate equal or higher tier participants`
+              );
+              return;
+            }
+          }
         }
 
         if (msg.hostToken) {
@@ -194,7 +295,7 @@ export class HostControlManager {
           if (verification.valid) {
             isAuthorized = true;
             // Cryptographically proven host: establish as authoritative host if not already set
-            if (!establishedHostId) {
+            if (!establishedHostId && (verification.claims?.role === 'host' || !verification.claims?.role)) {
               usePresenceStore.getState().setAuthoritativeHost(verificationSenderId);
             }
           } else {
@@ -211,8 +312,10 @@ export class HostControlManager {
             );
             return;
           }
-          // If no hostToken attached (e.g. dev/test mode without host token), check if senderId is established host
+          // If no hostToken attached (e.g. dev mode without host token), check if senderId is established host
           if (establishedHostId && (senderId === establishedHostId || myIdentities.has(senderId))) {
+            isAuthorized = true;
+          } else if (isSenderCoHost) {
             isAuthorized = true;
           } else if (!establishedHostId) {
             const allowedUnestablishedActions = [
@@ -229,7 +332,7 @@ export class HostControlManager {
 
         if (!isAuthorized) {
           console.warn(
-            `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Not the authoritative host (current host: ${establishedHostId})`
+            `[HostControlManager] Rejected directive '${msg.action}' from ${senderId}: Not an authorized moderator (current host: ${establishedHostId})`
           );
           return;
         }
@@ -381,22 +484,76 @@ export class HostControlManager {
             break;
           }
 
-          case 'update-permissions': {
+          case 'update-permissions' as any: {
             if (msg.permissions) {
               useHostControlStore.getState().updatePermissions(msg.permissions);
+              if (msg.permissions.canShareScreen === false && useAppStore.getState().localParticipant?.screenSharing) {
+                usePresenceStore.getState().pushToast({
+                  type: 'info',
+                  title: 'Screen Share Stopped',
+                  message: 'Your screen share was stopped due to restricted screen sharing',
+                  durationMs: 5000,
+                });
+                await this.terminateLocalScreenShare();
+              }
+            }
+            break;
+          }
 
-              // If screen sharing was disabled and local user is currently sharing, stop it
-              if (msg.permissions.canShareScreen === false && !isLocalHost) {
-                const app = useAppStore.getState();
-                if (app.localParticipant?.screenSharing) {
-                  app.setLocalScreenShare(false);
-                  usePresenceStore.getState().pushToast({
-                    type: 'info',
-                    title: 'Screen Share Restricted',
-                    message: 'Host has restricted screen sharing',
-                    durationMs: 4000,
-                  });
-                }
+          case 'stop-participant-share' as any: {
+            if (isTargetLocal(msg.targetParticipantId)) {
+              await this.terminateLocalScreenShare();
+              usePresenceStore.getState().pushToast({
+                type: 'info',
+                title: 'Screen Share Stopped',
+                message: 'Your screen share was stopped by a meeting host',
+                durationMs: 5000,
+              });
+            }
+            break;
+          }
+
+
+
+          case 'assign-cohost' as any: {
+            if (msg.targetParticipantId) {
+              this.addCoHostId(msg.targetParticipantId);
+              const targetName = presence.participants.get(msg.targetParticipantId)?.name || 'Participant';
+              usePresenceStore.getState().pushToast({
+                type: 'info',
+                title: 'Co-Host Assigned',
+                message: isTargetLocal(msg.targetParticipantId)
+                  ? 'You are now a co-host'
+                  : `${targetName} is now a co-host`,
+                durationMs: 4000,
+              });
+            }
+            break;
+          }
+
+          case 'revoke-cohost' as any: {
+            if (msg.targetParticipantId) {
+              this.removeCoHostId(msg.targetParticipantId);
+              const targetName = presence.participants.get(msg.targetParticipantId)?.name || 'Participant';
+              usePresenceStore.getState().pushToast({
+                type: 'info',
+                title: 'Co-Host Revoked',
+                message: isTargetLocal(msg.targetParticipantId)
+                  ? 'Your co-host role was removed'
+                  : `${targetName} is no longer a co-host`,
+                durationMs: 4000,
+              });
+            }
+            break;
+          }
+
+          case 'role-changed' as any: {
+            if (msg.targetParticipantId && (msg as any).role) {
+              const role = (msg as any).role;
+              if (role === 'co-host') {
+                this.addCoHostId(msg.targetParticipantId);
+              } else {
+                this.removeCoHostId(msg.targetParticipantId);
               }
             }
             break;
@@ -520,6 +677,71 @@ export class HostControlManager {
       targetParticipantId,
     });
     usePresenceStore.getState().removeParticipant(targetParticipantId);
+  }
+
+  async stopParticipantShare(targetParticipantId: string): Promise<void> {
+    await this.publishDirective({
+      action: 'stop-participant-share' as any,
+      targetParticipantId,
+    });
+  }
+
+  async assignCoHost(targetParticipantId: string): Promise<void> {
+    const presence = usePresenceStore.getState();
+    const localId = this.room?.localParticipant?.identity || presence.localParticipantId;
+    if (!presence.hostId || presence.hostId !== localId) {
+      throw new Error('Only the meeting host can assign co-hosts');
+    }
+
+    // Server is authoritative, wait for role-changed event
+
+    const roomId = this.activeRoomId || useAppStore.getState().roomId || '';
+    const store = useAppStore.getState();
+    const accessToken = store.jwt || store.livekitToken;
+    const hostProof = store.hostToken || this.localHostToken;
+
+    if (roomId && accessToken && typeof fetch !== 'undefined') {
+      try {
+        await fetch('/room/assign-cohost', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+            ...(hostProof ? { 'X-Host-Proof': `Bearer ${hostProof}` } : {}),
+          },
+          body: JSON.stringify({ roomId, targetParticipantId }),
+        });
+      } catch {}
+    }
+  }
+
+  async revokeCoHost(targetParticipantId: string): Promise<void> {
+    const presence = usePresenceStore.getState();
+    const localId = this.room?.localParticipant?.identity || presence.localParticipantId;
+    if (!presence.hostId || presence.hostId !== localId) {
+      throw new Error('Only the meeting host can revoke co-hosts');
+    }
+
+    // Server is authoritative, wait for role-changed event
+
+    const roomId = this.activeRoomId || useAppStore.getState().roomId || '';
+    const store = useAppStore.getState();
+    const accessToken = store.jwt || store.livekitToken;
+    const hostProof = store.hostToken || this.localHostToken;
+
+    if (roomId && accessToken && typeof fetch !== 'undefined') {
+      try {
+        await fetch('/room/revoke-cohost', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+            ...(hostProof ? { 'X-Host-Proof': `Bearer ${hostProof}` } : {}),
+          },
+          body: JSON.stringify({ roomId, targetParticipantId }),
+        });
+      } catch {}
+    }
   }
 
   async transferHost(targetParticipantId: string): Promise<void> {

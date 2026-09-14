@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import '../styles/support-theme.css';
 
 export function LoadingScreen() {
   const [show, setShow] = useState(true);
@@ -14,7 +15,7 @@ export function LoadingScreen() {
   return (
     <div className="loading-overlay" role="status" aria-label="Loading application">
       <div className="loading-spinner" aria-hidden="true" />
-      <span>Loading meet-secure…</span>
+      <span>Loading Latch…</span>
     </div>
   );
 }

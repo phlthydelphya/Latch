@@ -1,7 +1,7 @@
 # UX-F1 Design Token Contract — Latch (meet-secure-core)
 
 **Status:** DRAFT — Produced by Frontend Lead per PM charter UX-01 KICKOFF Phase 1
-**Date:** 2026-09-11
+**Date:** 2026-09-11 (revised 2026-09-12 — palette unified to Latch brand kit v1.3, ink/lime/signal)
 **Scope:** Single source of truth for all visual design decisions. Maps to brand story: **"Private by default, powerful when needed."**
 
 ---
@@ -11,33 +11,33 @@
 | Token | Value | Usage | Contrast (WCAG AA) |
 |-------|-------|-------|-------------------|
 | **Background** |
-| `bg-base` | `#0a0a0f` | Page background, deepest layer | — |
-| `bg-surface` | `#11111a` | Cards, modals, drawers, toolbar | 15.3:1 on `fg-primary` |
-| `bg-elevated` | `#14141e` | Hover states, active tabs, dropdowns | 13.8:1 on `fg-primary` |
+| `bg-base` | `#070807` | Page background, deepest layer (latch-ink) | — |
+| `bg-surface` | `#101210` | Cards, modals, drawers, toolbar (latch-ink-soft) | 18.3:1 on `fg-primary` |
+| `bg-elevated` | `#171a16` | Hover states, active tabs, dropdowns | 16.1:1 on `fg-primary` |
 | `bg-backdrop` | `rgba(0,0,0,0.75)` | Modal/drawer backdrop | N/A |
 | **Foreground** |
-| `fg-primary` | `#eaeaea` | Primary text, headings | 15.3:1 on `bg-base` |
-| `fg-secondary` | `#b8b8cc` | Secondary text, descriptions | 7.2:1 on `bg-base` |
-| `fg-muted` | `#888899` | Placeholders, disabled, meta | 4.6:1 on `bg-base` (AA large) |
-| `fg-inverse` | `#0a0a0f` | Text on accent/primary backgrounds | — |
+| `fg-primary` | `#f4f5ee` | Primary text, headings (latch-paper) | 18.3:1 on `bg-base` |
+| `fg-secondary` | `#d1d5ce` | Secondary text, descriptions | 13.5:1 on `bg-base` |
+| `fg-muted` | `#a4aa9f` | Placeholders, disabled, meta (latch-muted) | 8.4:1 on `bg-base` (AA) |
+| `fg-inverse` | `#070807` | Text on accent/primary backgrounds | — |
 | **Accent / Brand** |
-| `accent-primary` | `#00d4aa` | **Primary actions, focus ring, speaking indicator, host accent** | 4.8:1 on `bg-surface` (AA large) |
-| `accent-primary-hover` | `#00e8bb` | Hover state for primary buttons | — |
-| `accent-primary-active` | `#00c09a` | Active/pressed state | — |
-| `accent-weak` | `rgba(0,212,170,0.15)` | **Subtle backgrounds: badges, banners, selection** | N/A |
-| `accent-weak-border` | `rgba(0,212,170,0.4)` | Borders for accent containers | N/A |
+| `accent-primary` | `#b7ff2a` | **Primary actions, focus ring, speaking indicator, host accent** (latch-lime) | 15.6:1 on `bg-surface` |
+| `accent-primary-hover` | `#d5ff78` | Hover state for primary buttons (latch-lime-hot) | — |
+| `accent-primary-active` | `#9fdc22` | Active/pressed state | — |
+| `accent-weak` | `rgba(183,255,42,0.15)` | **Subtle backgrounds: badges, banners, selection** | N/A |
+| `accent-weak-border` | `rgba(183,255,42,0.4)` | Borders for accent containers | N/A |
 | **Status / Semantic** |
-| `success` | `#16f2b3` | ✅ Connected, admitted, positive actions | 4.5:1 on `bg-surface` |
-| `info` | `#00d4ff` | ℹ️ In-call chat, system messages | 4.5:1 on `bg-surface` |
-| `warning` | `#ffa502` | ⚠️ Hand raised, waiting room, reconnecting | 3.8:1 on `bg-surface` (AA large) |
-| `danger` | `#ff4757` | 🚫 Errors, remove, locked room, mute-locked | 4.5:1 on `bg-surface` |
-| `danger-weak` | `rgba(255,71,87,0.15)` | Error backgrounds, locked badges | N/A |
+| `success` | `#b7ff2a` | ✅ Connected, admitted, positive actions (shares accent per brand kit) | 15.6:1 on `bg-surface` |
+| `info` | `#a79bff` | ℹ️ In-call chat, system messages, waiting badges (latch-signal) | 7.9:1 on `bg-surface` |
+| `warning` | `#ffb020` | ⚠️ Hand raised, waiting room, reconnecting | 10.3:1 on `bg-surface` |
+| `danger` | `#ff5b45` | 🚫 Errors, remove, locked room, mute-locked (latch-danger) | 6.1:1 on `bg-surface` |
+| `danger-weak` | `rgba(255,91,69,0.15)` | Error backgrounds, locked badges | N/A |
 | **Border / Divider** |
-| `border-subtle` | `#222233` | Default borders, dividers | — |
-| `border-strong` | `#28283c` | Focused inputs, active tabs | — |
+| `border-subtle` | `rgba(244,245,238,0.2)` | Default borders, dividers (latch-rule) | — |
+| `border-strong` | `rgba(244,245,238,0.42)` | Focused inputs, active tabs (latch-rule-strong) | — |
 | **Focus** |
-| `focus-ring` | `#00d4aa` | **Universal focus ring (2px solid + 2px offset)** | — |
-| `focus-ring-inset` | `rgba(0,212,170,0.4)` | Inset focus for inputs | — |
+| `focus-ring` | `#b7ff2a` | **Universal focus ring (2px solid + 2px offset)** | — |
+| `focus-ring-inset` | `rgba(183,255,42,0.4)` | Inset focus for inputs | — |
 
 ### Color Usage Rules
 1. **Never use raw hex** in components — only semantic tokens
@@ -52,9 +52,17 @@
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `font-sans` | `'Manrope', 'Inter', system-ui, sans-serif` | **All UI text, headings, buttons, inputs** |
-| `font-mono` | `'JetBrains Mono', 'Fira Code', monospace` | **Room IDs, keys, diagnostics, code blocks** |
-| `font-display` | `'Manrope', system-ui, sans-serif` | Landing hero, large headlines (weight 700) |
+| `font-sans` | `'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif` | **All UI text, headings, buttons, inputs** |
+| `font-mono` | `'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace` | **Room IDs, keys, diagnostics, code blocks** |
+| `font-display` | `'Arial Black', 'Helvetica Neue', Arial, sans-serif` | Landing hero, large headlines (weight 900, uppercase, `tracking-tight`) |
+
+### Tracking (Brand Kit Additions)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `tracking-tight` | `-0.07em` | Display headlines, wordmark |
+| `tracking-heading` | `-0.05em` | Section headings (uppercase display) |
+| `tracking-label` | `0.12em` | Eyebrows, uppercase mono labels |
 
 ### Type Scale (Rem-based, 8px base)
 
@@ -70,11 +78,11 @@
 | `text-3xl` | `2rem` (32px) | 1.1 | 700 | Empty states, large icons |
 
 ### Typography Rules
-1. **Manrope** for all UI — geometric, legible at small sizes, modern neutral
-2. **Inter** as fallback — system-ui stack ensures no layout shift
-3. **JetBrains Mono** for all technical identifiers — room IDs, SFrame keys, diagnostics
+1. **Inter** for all UI — geometric, legible at small sizes, modern neutral (no webfont download: system stack first)
+2. **Display treatment** — `font-display` 900 uppercase with `tracking-tight`, per Latch brand kit v1.3
+3. **JetBrains Mono** for all technical identifiers — room IDs, SFrame keys, diagnostics; eyebrow labels use `tracking-label` uppercase
 4. **No font-weight below 400** — light weights fail contrast on dark backgrounds
-5. **Line height ≥1.4** for body — ensures readability in dense meeting UI
+5. **Line height ≥1.4** for body — ensures readability in dense meeting UI (display headlines may drop to 0.9–1.0)
 
 ---
 
@@ -135,6 +143,8 @@
 | `motion-slide-200` | `200ms` | `ease-out` | **Drawer slide, modal slide-up, content view transitions** |
 | `motion-scale-100` | `100ms` | `ease-out` | Button press, tile hover scale |
 | `motion-spring-200` | `200ms` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | PiP corner cycle, playful micro-interactions |
+| `motion-brand-fast` | `160ms` | `cubic-bezier(0.22, 1, 0.36, 1)` | Brand-kit hover lifts, link transitions |
+| `motion-brand-base` | `360ms` | `cubic-bezier(0.22, 1, 0.36, 1)` | Brand-kit section reveals, large surface transitions |
 
 ### Banned Animations (Do Not Use)
 | Pattern | Reason |
@@ -162,9 +172,9 @@
 | `shadow-2` | `0 4px 12px rgba(0,0,0,0.4)` | **Toolbars, cards, VideoTile hover** |
 | `shadow-3` | `0 8px 24px rgba(0,0,0,0.5)` | **Modals, drawers, dropdowns, PiP** |
 | `shadow-4` | `0 20px 60px rgba(0,0,0,0.6)` | **Full-screen modals (Leave, HostControls)** |
-| `glow-primary` | `0 0 0 2px var(--accent-primary), 0 0 16px rgba(0,212,170,0.3)` | **Speaking ring, focus ring, active primary** |
-| `glow-warning` | `0 0 0 2px var(--warning), 0 0 12px rgba(255,165,2,0.4)` | Hand raised, reconnecting |
-| `glow-danger` | `0 0 0 2px var(--danger), 0 0 12px rgba(255,71,87,0.4)` | Locked, muted-by-host, errors |
+| `glow-primary` | `0 0 0 2px var(--accent-primary), 0 0 16px rgba(183,255,42,0.3)` | **Speaking ring, focus ring, active primary** |
+| `glow-warning` | `0 0 0 2px var(--warning), 0 0 12px rgba(255,176,32,0.4)` | Hand raised, reconnecting |
+| `glow-danger` | `0 0 0 2px var(--danger), 0 0 12px rgba(255,91,69,0.4)` | Locked, muted-by-host, errors |
 | `glow-spotlight` | `0 0 0 2px #eab308, 0 0 12px rgba(234,179,8,0.4)` | Spotlighted participant |
 
 ### Shadow Rules
@@ -252,46 +262,51 @@ export const tokens = {
   // Color
   color: {
     bg: {
-      base: '#0a0a0f',
-      surface: '#11111a',
-      elevated: '#14141e',
+      base: '#070807',
+      surface: '#101210',
+      elevated: '#171a16',
       backdrop: 'rgba(0,0,0,0.75)',
     },
     fg: {
-      primary: '#eaeaea',
-      secondary: '#b8b8cc',
-      muted: '#888899',
-      inverse: '#0a0a0f',
+      primary: '#f4f5ee',
+      secondary: '#d1d5ce',
+      muted: '#a4aa9f',
+      inverse: '#070807',
     },
     accent: {
-      primary: '#00d4aa',
-      primaryHover: '#00e8bb',
-      primaryActive: '#00c09a',
-      weak: 'rgba(0,212,170,0.15)',
-      weakBorder: 'rgba(0,212,170,0.4)',
+      primary: '#b7ff2a',
+      primaryHover: '#d5ff78',
+      primaryActive: '#9fdc22',
+      weak: 'rgba(183,255,42,0.15)',
+      weakBorder: 'rgba(183,255,42,0.4)',
     },
     status: {
-      success: '#16f2b3',
-      info: '#00d4ff',
-      warning: '#ffa502',
-      danger: '#ff4757',
-      dangerWeak: 'rgba(255,71,87,0.15)',
+      success: '#b7ff2a',
+      info: '#a79bff',
+      warning: '#ffb020',
+      danger: '#ff5b45',
+      dangerWeak: 'rgba(255,91,69,0.15)',
     },
     border: {
-      subtle: '#222233',
-      strong: '#28283c',
+      subtle: 'rgba(244,245,238,0.2)',
+      strong: 'rgba(244,245,238,0.42)',
     },
     focus: {
-      ring: '#00d4aa',
-      ringInset: 'rgba(0,212,170,0.4)',
+      ring: '#b7ff2a',
+      ringInset: 'rgba(183,255,42,0.4)',
     },
   },
 
   // Typography
   font: {
-    sans: "'Manrope', 'Inter', system-ui, sans-serif",
-    mono: "'JetBrains Mono', 'Fira Code', monospace",
-    display: "'Manrope', system-ui, sans-serif",
+    sans: "'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
+    mono: "'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace",
+    display: "'Arial Black', 'Helvetica Neue', Arial, sans-serif",
+  },
+  tracking: {
+    tight: '-0.07em',
+    heading: '-0.05em',
+    label: '0.12em',
   },
   text: {
     xs: { size: '0.75rem', lineHeight: '1.4', weight: '500' },
@@ -320,6 +335,8 @@ export const tokens = {
     slide200: '200ms ease-out',
     scale100: '100ms ease-out',
     spring200: '200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+    brandFast: '160ms cubic-bezier(0.22, 1, 0.36, 1)',
+    brandBase: '360ms cubic-bezier(0.22, 1, 0.36, 1)',
   },
 
   // Shadow & Glow
@@ -330,9 +347,9 @@ export const tokens = {
     4: '0 20px 60px rgba(0,0,0,0.6)',
   },
   glow: {
-    primary: '0 0 0 2px var(--accent-primary), 0 0 16px rgba(0,212,170,0.3)',
-    warning: '0 0 0 2px var(--warning), 0 0 12px rgba(255,165,2,0.4)',
-    danger: '0 0 0 2px var(--danger), 0 0 12px rgba(255,71,87,0.4)',
+    primary: '0 0 0 2px var(--accent-primary), 0 0 16px rgba(183,255,42,0.3)',
+    warning: '0 0 0 2px var(--warning), 0 0 12px rgba(255,176,32,0.4)',
+    danger: '0 0 0 2px var(--danger), 0 0 12px rgba(255,91,69,0.4)',
     spotlight: '0 0 0 2px #eab308, 0 0 12px rgba(234,179,8,0.4)',
   },
 
@@ -449,6 +466,7 @@ export function injectTokens(): void {
   setVar('--font-sans', tokens.font.sans);
   setVar('--font-mono', tokens.font.mono);
   setVar('--font-display', tokens.font.display);
+  Object.entries(tokens.tracking).forEach(([k, v]) => setVar(`--tracking-${k}`, v));
   Object.entries(tokens.text).forEach(([k, v]) => {
     setVar(`--text-${k}-size`, v.size);
     setVar(`--text-${k}-line-height`, v.lineHeight);
@@ -486,7 +504,7 @@ export function injectTokens(): void {
 | Brand Pillar | Token Manifestation |
 |--------------|---------------------|
 | **Private by default** | `bg-base`/`bg-surface` = deep dark (no light leakage); `accent-weak` for passive E2EE badges; `fg-muted` for non-critical meta; no bright backgrounds |
-| **Powerful when needed** | `accent-primary` = high-contrast teal for primary actions; `glow-primary` for speaking/focus; `motion-slide-150` for responsive feel; `shadow-4` for critical modals |
+| **Powerful when needed** | `accent-primary` = high-contrast lime for primary actions; `glow-primary` for speaking/focus; `motion-slide-150` for responsive feel; `shadow-4` for critical modals |
 | **Calm under pressure** | Reduced motion respect; no infinite animations; `motion-fade-150` standard; `radius-md` softness; consistent 8pt rhythm |
 | **Technical honesty** | `font-mono` for keys/IDs; `status` colors for real state (not marketing); `dtls-warning` explicit ⚠️; `e2ee-blind` bandwidth caption |
 

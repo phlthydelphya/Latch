@@ -1,7 +1,7 @@
 ---
 description: QA and Automation - test plans, coverage, reliability, conferencing edge cases
 mode: subagent
-model: opencode/nemotron-3.5-lightning-free
+model: opencode-go/deepseek-v4-pro
 permission:
   bash: allow
   read: allow

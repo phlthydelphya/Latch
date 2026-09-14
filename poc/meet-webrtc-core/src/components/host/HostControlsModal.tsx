@@ -71,6 +71,7 @@ export const HostControlsModal: React.FC = () => {
 
   return (
     <div
+      className="meeting-dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="host-controls-modal-title"

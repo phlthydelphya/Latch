@@ -54,6 +54,9 @@ export const SIMULCAST_LAYERS: SimulcastLayerConfig[] = [
 
 export const M3B_PUBLISH_DEFAULTS: TrackPublishDefaults = {
   simulcast: true,
+  // LiveKit defaults to VP8, while this deployment intentionally enables only
+  // VP9 and H264. Select an enabled codec so camera publications reach peers.
+  videoCodec: 'vp9',
   videoSimulcastLayers: [
     VideoPresets.h180,
     VideoPresets.h360,

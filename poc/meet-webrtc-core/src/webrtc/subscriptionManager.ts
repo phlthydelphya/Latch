@@ -151,6 +151,11 @@ export class SubscriptionManager {
     };
 
     addPriority(stageParticipantId);
+    if (layoutState.pinnedParticipantIds && layoutState.pinnedParticipantIds.length > 0) {
+      for (const pinId of layoutState.pinnedParticipantIds) {
+        addPriority(pinId);
+      }
+    }
     addPriority(layoutState.pinnedParticipantId);
     addPriority(layoutState.spotlightParticipantId);
     addPriority(layoutState.activeSpeakerId);

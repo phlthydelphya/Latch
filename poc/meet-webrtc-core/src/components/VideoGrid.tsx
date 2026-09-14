@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLayoutStore } from '../layout/layoutStore';
 import { usePresenceStore } from '../presence/presenceStore';
 import { useHostControlStore } from '../host/hostControlStore';
@@ -37,6 +37,8 @@ export function VideoGrid({
   const activeSpeakers = usePresenceStore((s) => s.activeSpeakers);
   const waitingQueue = useHostControlStore((s) => s.waitingQueue);
   const screenShareOwnerId = useLayoutStore((s) => s.screenShareOwnerId);
+  const retainParticipants = useLayoutStore((s) => s.retainParticipants);
+  const evaluateArbitration = useLayoutStore((s) => s.evaluateArbitration);
 
   // Construct LayoutParticipantTiles from streams + presence store
   const tiles = useMemo(() => {
@@ -108,6 +110,7 @@ export function VideoGrid({
     return result;
   }, [
     localStream,
+    localParticipantId,
     cameraStreams,
     screenStreams,
     localVideoEnabled,
@@ -119,6 +122,11 @@ export function VideoGrid({
     waitingQueue,
     screenShareOwnerId,
   ]);
+
+  useEffect(() => {
+    retainParticipants(tiles.map((tile) => tile.id));
+    evaluateArbitration(tiles.length);
+  }, [tiles, retainParticipants, evaluateArbitration]);
 
   // For ContentView, we need the owner's screen stream
   const ownerScreenStream = screenShareOwnerId ? screenStreams.get(screenShareOwnerId) || null : null;

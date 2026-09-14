@@ -78,7 +78,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
 
   return (
     <div
-      className="modal-backdrop"
+      className="modal-backdrop meeting-dialog"
       style={{
         position: 'fixed',
         inset: 0,

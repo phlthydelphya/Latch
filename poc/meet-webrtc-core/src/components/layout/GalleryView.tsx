@@ -14,6 +14,7 @@ export function GalleryView({ tiles, onPin, onSpotlight }: GalleryViewProps) {
   const galleryPage = useLayoutStore((s) => s.galleryPage);
   const setGalleryPage = useLayoutStore((s) => s.setGalleryPage);
   const setVisibleTileIds = useLayoutStore((s) => s.setVisibleTileIds);
+  const pinnedParticipantIds = useLayoutStore((s) => s.pinnedParticipantIds);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1280, height: 720 });
@@ -62,15 +63,27 @@ export function GalleryView({ tiles, onPin, onSpotlight }: GalleryViewProps) {
   }, []);
 
   // Deduplicated pagination via gridOptimizer.paginateParticipants (M3A Condition 6)
-  const allIds = useMemo(() => tiles.map((t) => t.id), [tiles]);
+  // Sort pinned participants to front so they are guaranteed to appear on Page 1 (M4B R1)
+  const sortedTiles = useMemo(() => {
+    if (!pinnedParticipantIds || pinnedParticipantIds.length === 0) return tiles;
+    const pinnedSet = new Set(pinnedParticipantIds);
+    const tileMap = new Map(tiles.map((t) => [t.id, t]));
+    const pinned = pinnedParticipantIds
+      .map((id) => tileMap.get(id))
+      .filter((t): t is LayoutParticipantTile => Boolean(t));
+    const unpinned = tiles.filter((t) => !pinnedSet.has(t.id));
+    return [...pinned, ...unpinned];
+  }, [tiles, pinnedParticipantIds]);
+
+  const allIds = useMemo(() => sortedTiles.map((t) => t.id), [sortedTiles]);
   const pagination = useMemo(() => {
     return paginateParticipants(allIds, galleryPage, MAX_PAGE_TILES);
   }, [allIds, galleryPage]);
 
   const visibleTiles = useMemo(() => {
     const visibleSet = new Set(pagination.visibleTileIds);
-    return tiles.filter((t) => visibleSet.has(t.id));
-  }, [tiles, pagination.visibleTileIds]);
+    return sortedTiles.filter((t) => visibleSet.has(t.id));
+  }, [sortedTiles, pagination.visibleTileIds]);
 
   // Synchronize visible tiles to store for subscriber-track throttling
   useEffect(() => {

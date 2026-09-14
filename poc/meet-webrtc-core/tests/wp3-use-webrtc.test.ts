@@ -396,6 +396,180 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
     unmount();
   });
 
+
+  it('I-1: RoomOptions configures blind SFU forwarding (adaptiveStream: false, dynacast: false)', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    expect(mockRoomInstances.length).toBeGreaterThan(0);
+    const room = mockRoomInstances[0];
+    expect(room.options).toBeDefined();
+    expect(room.options.adaptiveStream).toBe(false);
+    expect(room.options.dynacast).toBe(false);
+    expect(room.options.publishDefaults?.simulcast).toBe(true);
+    expect(room.options.publishDefaults?.videoEncoding?.maxBitrate).toBe(1800000);
+
+    unmount();
+  });
+
+  it('I-2 & I-4: Pre-connect invariants establish KeyManager, global SFrame singleton, 12B salt & 0n counter', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const sframe = getGlobalSFrame();
+    expect(sframe).not.toBeNull();
+    expect(sframe).toBeInstanceOf(SFrameTransform);
+
+    expect(sframe!.getEncryptCounter(0)).toBe(0n);
+    expect((window as any).__LIVEKIT_ROOM__).toBeDefined();
+
+    unmount();
+    expect(getGlobalSFrame()).toBeNull();
+  });
+
+  it('I-3: Flushes pending HPKE public key on RoomEvent.Connected with reliable publishData', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const room = mockRoomInstances[0];
+    expect(room.localParticipant.publishData).toHaveBeenCalled();
+    const calls = room.localParticipant.publishData.mock.calls;
+    const hpkeCall = calls.find((c: any) => c[1]?.topic === 'hpke-pubkey');
+    expect(hpkeCall).toBeDefined();
+    expect(hpkeCall[1].reliable).toBe(true);
+    expect(hpkeCall[0]).toBeInstanceOf(Uint8Array);
+
+    unmount();
+  });
+
+  it('I-5 & I-6: LocalTrackPublished and TrackSubscribed install SFrame transforms sharing global counter', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const room = mockRoomInstances[0];
+    const sframe = getGlobalSFrame()!;
+
+    const mockSenderStream = {
+      readable: { pipeThrough: vi.fn().mockReturnThis() },
+      writable: {},
+    };
+    (mockSenderStream.readable.pipeThrough as any).mockReturnValue({
+      pipeTo: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const mockSender = {
+      createEncodedStreams: vi.fn().mockReturnValue(mockSenderStream),
+    };
+
+    const pub = {
+      trackSid: 'TR_video_1',
+      kind: 'video',
+      source: 'camera',
+      track: { sender: mockSender },
+    };
+
+    await act(async () => {
+      room.emit('localTrackPublished', pub, room.localParticipant);
+    });
+
+    expect(mockSender.createEncodedStreams).toHaveBeenCalled();
+    expect((mockSender as any)._sframeTransformer).toBe(sframe);
+
+    const mockReceiverStream = {
+      readable: { pipeThrough: vi.fn().mockReturnThis() },
+      writable: {},
+    };
+    (mockReceiverStream.readable.pipeThrough as any).mockReturnValue({
+      pipeTo: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const mockReceiver = {
+      createEncodedStreams: vi.fn().mockReturnValue(mockReceiverStream),
+    };
+
+    const remoteTrack = {
+      kind: 'video',
+      receiver: mockReceiver,
+      mediaStreamTrack: { kind: 'video' },
+    };
+    const remotePub = { trackSid: 'TR_remote_1' };
+    const remoteParticipant = { identity: 'Bob' };
+
+    await act(async () => {
+      room.emit('trackSubscribed', remoteTrack, remotePub, remoteParticipant);
+    });
+
+    expect(mockReceiver.createEncodedStreams).toHaveBeenCalled();
+    expect((mockReceiver as any)._sframeTransformer).toBe(sframe);
+
+    unmount();
+  });
+
+  it('LocalSenderCreated installs SFrame transform early and avoids redundant installation on LocalTrackPublished', async () => {
+    const { unmount } = renderHook(() => useWebRTC());
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const room = mockRoomInstances[mockRoomInstances.length - 1];
+    const sframe = getGlobalSFrame()!;
+
+    const mockSenderStream = {
+      readable: { pipeThrough: vi.fn().mockReturnThis() },
+      writable: {},
+    };
+    (mockSenderStream.readable.pipeThrough as any).mockReturnValue({
+      pipeTo: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const mockSender = {
+      createEncodedStreams: vi.fn().mockReturnValue(mockSenderStream),
+    };
+
+    const mockTrack = {
+      kind: 'video',
+      sender: mockSender,
+    };
+
+    // 1. LocalSenderCreated fires synchronously when sender is created
+    await act(async () => {
+      room.localParticipant.emit('localSenderCreated', mockSender, mockTrack);
+    });
+
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
+    expect((mockSender as any)._sframeTransformer).toBe(sframe);
+
+    // 2. LocalTrackPublished fires later after negotiation
+    const pub = {
+      trackSid: 'TR_video_early_1',
+      kind: 'video',
+      source: 'camera',
+      track: mockTrack,
+    };
+
+    await act(async () => {
+      room.emit('localTrackPublished', pub, room.localParticipant);
+    });
+
+    // Should NOT call createEncodedStreams a second time
+    expect(mockSender.createEncodedStreams).toHaveBeenCalledTimes(1);
+
+    unmount();
+  });
+
   it('I-7: DataReceived dispatches hpke-pubkey, sframe-commit, and sframe-welcome', async () => {
     const { unmount } = renderHook(() => useWebRTC());
 
@@ -406,7 +580,7 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
     const room = mockRoomInstances[0];
 
     const bobKM = new KeyManager({ cipherSuite: 'AES_GCM', keyRotationIntervalMs: 60000 });
-    await bobKM.initialize('bob');
+    await bobKM.initialize('z-bob');
     const bobPubB64 = await bobKM.exportHPKEPublicKey();
 
     await act(async () => {
@@ -414,11 +588,11 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
         type: 'hpke-pubkey',
         hpkePublicKey: bobPubB64,
       }));
-      room.emit('dataReceived', payload, { identity: 'Bob' }, 'reliable', 'hpke-pubkey');
+      room.emit('dataReceived', payload, { identity: 'Z-Bob' }, 'reliable', 'hpke-pubkey');
     });
 
     await act(async () => {
-      room.emit('dataReceived', new Uint8Array(0), { identity: 'Bob' }, 'reliable', 'sframe-welcome-request');
+      room.emit('dataReceived', new Uint8Array(0), { identity: 'Z-Bob' }, 'reliable', 'sframe-welcome-request');
       await new Promise((r) => setTimeout(r, 100));
     });
 
@@ -426,7 +600,7 @@ describe('WP-3: useWebRTC SFrame E2EE Integration', () => {
       (c: any) => c[1]?.topic === 'sframe-welcome'
     );
     expect(welcomeCall).toBeDefined();
-    expect(welcomeCall[1].destinationIdentities).toEqual(['bob']);
+    expect(welcomeCall[1].destinationIdentities).toEqual(['z-bob']);
 
     unmount();
   });

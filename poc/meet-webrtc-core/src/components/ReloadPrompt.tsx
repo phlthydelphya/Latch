@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../styles/support-theme.css';
 import { onSWUpdate, applySWUpdate, isUpdateAvailable } from '../sw-register';
 
 export function ReloadPrompt() {

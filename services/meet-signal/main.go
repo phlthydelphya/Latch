@@ -46,10 +46,11 @@ type healthResponse struct {
 
 // Claims is the minimal signed claim set used for signaling auth (legacy mesh).
 type Claims struct {
-	ParticipantID string `json:"sub"`
-	RoomID        string `json:"room"`
-	Name          string `json:"name"`
-	Role          string `json:"role,omitempty"`
+	ParticipantID string             `json:"sub"`
+	RoomID        string             `json:"room"`
+	Name          string             `json:"name"`
+	Role          string             `json:"role,omitempty"`
+	Video         *LiveKitVideoGrant `json:"video,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -80,8 +81,9 @@ type TokenResponse struct {
 	LiveKitToken   string `json:"livekitToken"` // Alias for token when LiveKit path is used
 	ParticipantID  string `json:"participantId"`
 	RoomID         string `json:"roomId"`
-	Role           string `json:"role"`                     // M4A: "host" or "participant"
+	Role           string `json:"role"`                     // M4A: "host" or "participant"; M4B: "co-host"
 	HostToken      string `json:"hostToken,omitempty"`      // M4A: Server-signed ES256 host claim (if role == "host")
+	CoHostToken    string `json:"coHostToken,omitempty"`    // M4B: Server-signed ES256 co-host claim (if role == "co-host")
 	HostKey        string `json:"hostKey,omitempty"`        // M4A: Public key in hex for peer verification
 	SessionToken   string `json:"sessionToken,omitempty"`   // SEC-02B: private session capability (identity proof)
 	ResumeHandle   string `json:"resumeHandle,omitempty"`   // SEC-02C: one-use host resume handle
@@ -91,14 +93,98 @@ type TokenResponse struct {
 }
 
 type RoomAuthority struct {
-	RoomID              string    `json:"roomId"`
-	RoomInstanceID      string    `json:"roomInstanceId"`
-	HostID              string    `json:"hostId"`
-	AuthorityGeneration uint64    `json:"authorityGeneration"`
-	CreatedAt           time.Time `json:"createdAt"`
-	HostUpdatedAt       time.Time `json:"hostUpdatedAt"`
-	GraceExpiry         time.Time `json:"graceExpiry,omitempty"`
-	Locked              bool      `json:"locked"`
+	RoomID              string              `json:"roomId"`
+	RoomInstanceID      string              `json:"roomInstanceId"`
+	HostID              string              `json:"hostId"`
+	CoHostIDs           map[string]struct{} `json:"coHostIds,omitempty"` // M4B R2: In-memory co-host IDs
+	AuthorityGeneration uint64              `json:"authorityGeneration"`
+	CreatedAt           time.Time           `json:"createdAt"`
+	HostUpdatedAt       time.Time           `json:"hostUpdatedAt"`
+	GraceExpiry         time.Time           `json:"graceExpiry,omitempty"`
+	Locked              bool                `json:"locked"`
+}
+
+// M4B R2: 4-tier role hierarchy
+type Role string
+
+const (
+	RoleHost        Role = "host"
+	RoleCoHost      Role = "co-host"
+	RoleParticipant Role = "participant"
+	RoleWaiting     Role = "waiting"
+)
+
+var roleHierarchy = map[Role]int{
+	RoleHost:        4,
+	RoleCoHost:      3,
+	RoleParticipant: 2,
+	RoleWaiting:     1,
+}
+
+func canonicalRole(r string) Role {
+	switch strings.ToLower(strings.TrimSpace(r)) {
+	case "host":
+		return RoleHost
+	case "co-host", "cohost":
+		return RoleCoHost
+	case "waiting", "lobby":
+		return RoleWaiting
+	default:
+		return RoleParticipant
+	}
+}
+
+// M4B R2: Granular moderation actions
+type Action string
+
+const (
+	ActionAssignCoHost         Action = "assignCoHost"
+	ActionRevokeCoHost         Action = "revokeCoHost"
+	ActionTransferHost         Action = "transferHost"
+	ActionEndMeeting           Action = "endMeeting"
+	ActionMuteParticipant      Action = "muteParticipant"
+	ActionRemoveParticipant    Action = "removeParticipant"
+	ActionSpotlightParticipant Action = "spotlightParticipant"
+	ActionAdmitParticipant     Action = "admitParticipant"
+	ActionRejectParticipant    Action = "rejectParticipant"
+	ActionLockMeeting          Action = "lockMeeting"
+	ActionManageWaitingRoom    Action = "manageWaitingRoom"
+	ActionStopParticipantShare Action = "stopParticipantShare"
+	ActionUpdatePermissions    Action = "updatePermissions"
+)
+
+func canonicalAction(act string) Action {
+	cleaned := strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(act, "-", ""), "_", ""))
+	switch cleaned {
+	case "assigncohost":
+		return ActionAssignCoHost
+	case "revokecohost":
+		return ActionRevokeCoHost
+	case "transferhost":
+		return ActionTransferHost
+	case "endmeeting":
+		return ActionEndMeeting
+	case "muteparticipant", "mute":
+		return ActionMuteParticipant
+	case "removeparticipant", "remove":
+		return ActionRemoveParticipant
+	case "spotlightparticipant", "spotlight":
+		return ActionSpotlightParticipant
+	case "admitparticipant", "waitingroomadmit", "admit":
+		return ActionAdmitParticipant
+	case "rejectparticipant", "waitingroomreject", "reject":
+		return ActionRejectParticipant
+	case "lockmeeting", "lockroom", "lock":
+		return ActionLockMeeting
+	case "managewaitingroom", "waitingroom":
+		return ActionManageWaitingRoom
+	case "stopparticipantshare", "stopshare":
+		return ActionStopParticipantShare
+	case "updatepermissions":
+		return ActionUpdatePermissions
+	default:
+		return Action(act)
+	}
 }
 
 type authorityManager struct {
@@ -136,6 +222,7 @@ func (am *authorityManager) createRoom(roomID, creatorID string) (*RoomAuthority
 		RoomID:              roomID,
 		RoomInstanceID:      newRoomInstanceID(),
 		HostID:              creatorID,
+		CoHostIDs:           make(map[string]struct{}),
 		AuthorityGeneration: 1,
 		CreatedAt:           now,
 		HostUpdatedAt:       now,
@@ -157,6 +244,7 @@ func (am *authorityManager) assignRole(roomID, participantID string) (string, bo
 			RoomID:              roomID,
 			RoomInstanceID:      newRoomInstanceID(),
 			HostID:              "",
+			CoHostIDs:           make(map[string]struct{}),
 			AuthorityGeneration: 1,
 			CreatedAt:           now,
 			HostUpdatedAt:       now,
@@ -167,6 +255,11 @@ func (am *authorityManager) assignRole(roomID, participantID string) (string, bo
 	// Role lookup cannot reassign authority or cancel host grace.
 	if auth.HostID != "" && auth.HostID == participantID {
 		return "host", false
+	}
+	if auth.CoHostIDs != nil {
+		if _, ok := auth.CoHostIDs[participantID]; ok {
+			return "co-host", false
+		}
 	}
 
 	return "participant", false
@@ -180,7 +273,72 @@ func (am *authorityManager) getAuthority(roomID string) (*RoomAuthority, bool) {
 		return nil, false
 	}
 	copy := *auth
+	if auth.CoHostIDs != nil {
+		copy.CoHostIDs = make(map[string]struct{}, len(auth.CoHostIDs))
+		for k, v := range auth.CoHostIDs {
+			copy.CoHostIDs[k] = v
+		}
+	}
 	return &copy, true
+}
+
+func (am *authorityManager) getParticipantRole(roomID, participantID string) Role {
+	am.mu.RLock()
+	defer am.mu.RUnlock()
+
+	auth, exists := am.rooms[roomID]
+	if !exists {
+		return RoleParticipant
+	}
+	if auth.HostID != "" && auth.HostID == participantID {
+		return RoleHost
+	}
+	if auth.CoHostIDs != nil {
+		if _, ok := auth.CoHostIDs[participantID]; ok {
+			return RoleCoHost
+		}
+	}
+	return RoleParticipant
+}
+
+func (am *authorityManager) assignCoHost(roomID, requesterID, targetParticipantID string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	auth, exists := am.rooms[roomID]
+	if !exists {
+		return errors.New("room not found")
+	}
+	// Strict invariant: ONLY HOST can assign CO-HOST
+	if auth.HostID != requesterID {
+		return errors.New("unauthorized: requester is not host")
+	}
+	if targetParticipantID == "" || targetParticipantID == auth.HostID {
+		return errors.New("invalid target participant")
+	}
+	if auth.CoHostIDs == nil {
+		auth.CoHostIDs = make(map[string]struct{})
+	}
+	auth.CoHostIDs[targetParticipantID] = struct{}{}
+	return nil
+}
+
+func (am *authorityManager) revokeCoHost(roomID, requesterID, targetParticipantID string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+
+	auth, exists := am.rooms[roomID]
+	if !exists {
+		return errors.New("room not found")
+	}
+	// Strict invariant: ONLY HOST can revoke CO-HOST
+	if auth.HostID != requesterID {
+		return errors.New("unauthorized: requester is not host")
+	}
+	if auth.CoHostIDs != nil {
+		delete(auth.CoHostIDs, targetParticipantID)
+	}
+	return nil
 }
 
 func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantID string, expectedGeneration uint64) error {
@@ -201,6 +359,9 @@ func (am *authorityManager) transferHost(roomID, requesterID, targetParticipantI
 	auth.HostUpdatedAt = time.Now()
 	auth.GraceExpiry = time.Time{}
 	auth.AuthorityGeneration++
+	if auth.CoHostIDs != nil {
+		delete(auth.CoHostIDs, targetParticipantID)
+	}
 	return nil
 }
 
@@ -217,6 +378,7 @@ func (am *authorityManager) revokeAuthority(roomID string) {
 	auth.HostID = ""
 	auth.GraceExpiry = time.Time{}
 	auth.AuthorityGeneration++
+	auth.CoHostIDs = make(map[string]struct{})
 }
 
 // consumeResumeHandle atomically re-checks that participantID is still the
@@ -607,6 +769,82 @@ func (h *hub) deliverHostCredential(roomID, targetParticipantID string, payload 
 	return target.writeRaw(raw) == nil
 }
 
+// deliverCoHostCredential writes a private cohost-credential frame only to the
+// target participant's authenticated signaling connection.
+func (h *hub) deliverCoHostCredential(roomID, targetParticipantID string, payload json.RawMessage) bool {
+	h.mu.Lock()
+	room := h.rooms[roomID]
+	var target *client
+	for peer := range room {
+		if peer.participantID == targetParticipantID {
+			target = peer
+			break
+		}
+	}
+	h.mu.Unlock()
+
+	if target == nil {
+		return false
+	}
+	msg := SignalMessage{
+		Type:          "cohost-credential",
+		Payload:       payload,
+		RoomID:        roomID,
+		ParticipantID: "system",
+		Timestamp:     time.Now().UnixMilli(),
+	}
+	raw, err := json.Marshal(msg)
+	if err != nil {
+		return false
+	}
+	return target.writeRaw(raw) == nil
+}
+
+func (h *hub) broadcastRoleChanged(roomID, participantID, role string) {
+	msg := SignalMessage{
+		Type: "role-changed",
+		Payload: mustRawJSON(map[string]any{
+			"participantId": participantID,
+			"role":          role,
+		}),
+		RoomID:        roomID,
+		ParticipantID: "system",
+		Timestamp:     time.Now().UnixMilli(),
+	}
+	raw, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for peer := range h.rooms[roomID] {
+		_ = peer.writeRaw(raw)
+	}
+}
+
+func (h *hub) broadcastDirective(roomID, senderID, action, targetParticipantID string) {
+	msg := SignalMessage{
+		Type: "directive",
+		Payload: mustRawJSON(map[string]any{
+			"action":              action,
+			"targetParticipantId": targetParticipantID,
+			"senderId":            senderID,
+		}),
+		RoomID:        roomID,
+		ParticipantID: senderID,
+		Timestamp:     time.Now().UnixMilli(),
+	}
+	raw, err := json.Marshal(msg)
+	if err != nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for peer := range h.rooms[roomID] {
+		_ = peer.writeRaw(raw)
+	}
+}
+
 // stats returns the active room and connection count.
 func (h *hub) stats() (rooms int, clients int) {
 	h.mu.Lock()
@@ -681,7 +919,7 @@ type HostClaims struct {
 	jwt.RegisteredClaims
 }
 
-func mintHostToken(participantID, roomID, roomInstanceID string, generation uint64, ttl time.Duration) (string, error) {
+func mintModerationToken(participantID, roomID, role, roomInstanceID string, generation uint64, ttl time.Duration) (string, error) {
 	if hostPrivateKey == nil {
 		return "", errors.New("host signing key not initialized")
 	}
@@ -689,7 +927,7 @@ func mintHostToken(participantID, roomID, roomInstanceID string, generation uint
 	claims := HostClaims{
 		ParticipantID:  participantID,
 		RoomID:         roomID,
-		Role:           "host",
+		Role:           role,
 		RoomInstanceID: roomInstanceID,
 		Generation:     generation,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -704,6 +942,18 @@ func mintHostToken(participantID, roomID, roomInstanceID string, generation uint
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	return token.SignedString(hostPrivateKey)
+}
+
+func mintHostToken(participantID, roomID, roomInstanceID string, generation uint64, ttl time.Duration) (string, error) {
+	return mintModerationToken(participantID, roomID, "host", roomInstanceID, generation, ttl)
+}
+
+func mintCoHostToken(participantID, roomID, roomInstanceID string, generation uint64, ttl time.Duration) (string, error) {
+	return mintModerationToken(participantID, roomID, "co-host", roomInstanceID, generation, ttl)
+}
+
+func validateModerationToken(tokenString string) (*HostClaims, error) {
+	return validateHostToken(tokenString)
 }
 
 func main() {
@@ -746,6 +996,15 @@ func main() {
 	mux.HandleFunc("/room/create", handleCreateRoom)
 	mux.HandleFunc("/room/transfer-host", func(w http.ResponseWriter, r *http.Request) {
 		handleTransferHost(h, authManager, w, r)
+	})
+	mux.HandleFunc("/room/directive", func(w http.ResponseWriter, r *http.Request) {
+		handleDirective(h, authManager, w, r)
+	})
+	mux.HandleFunc("/room/assign-cohost", func(w http.ResponseWriter, r *http.Request) {
+		handleAssignCoHost(h, authManager, w, r)
+	})
+	mux.HandleFunc("/room/revoke-cohost", func(w http.ResponseWriter, r *http.Request) {
+		handleRevokeCoHost(h, authManager, w, r)
 	})
 	mux.HandleFunc("/room/authority", func(w http.ResponseWriter, r *http.Request) {
 		handleRoomAuthority(authManager, w, r)
@@ -1058,6 +1317,14 @@ func handleTokenResume(w http.ResponseWriter, req TokenRequest, name, authorizat
 			http.Error(w, "signing failed", http.StatusInternalServerError)
 			return
 		}
+	} else if authManager.getParticipantRole(req.RoomID, participantID) == RoleCoHost {
+		role = "co-host"
+		hostToken, err = mintCoHostToken(participantID, req.RoomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
+		if err != nil {
+			log.Printf("token: resume co-host signing failed: %v", err)
+			http.Error(w, "signing failed", http.StatusInternalServerError)
+			return
+		}
 	}
 	if name == "" {
 		name = "Participant"
@@ -1117,6 +1384,11 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role,
 	// Sanitized log: only token prefix
 	log.Printf("token: issued livekit token for participant=%s room=%s role=%s token_prefix=%s", participantID, roomID, role, signed[:16]+"...")
 
+	coHostToken := ""
+	if role == "co-host" {
+		coHostToken = hostToken
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
 		Token:          signed,
@@ -1125,6 +1397,7 @@ func issueLiveKitToken(w http.ResponseWriter, participantID, roomID, name, role,
 		RoomID:         roomID,
 		Role:           role,
 		HostToken:      hostToken,
+		CoHostToken:    coHostToken,
 		HostKey:        hostPublicKeyHex,
 		SessionToken:   sessionToken,
 		ResumeHandle:   resumeHandle,
@@ -1160,6 +1433,11 @@ func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, 
 
 	log.Printf("token: issued legacy mesh token for participant=%s room=%s role=%s token_prefix=%s", participantID, roomID, role, signed[:16]+"...")
 
+	coHostToken := ""
+	if role == "co-host" {
+		coHostToken = hostToken
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TokenResponse{
 		Token:          signed,
@@ -1168,6 +1446,7 @@ func issueLegacyToken(w http.ResponseWriter, participantID, roomID, name, role, 
 		RoomID:         roomID,
 		Role:           role,
 		HostToken:      hostToken,
+		CoHostToken:    coHostToken,
 		HostKey:        hostPublicKeyHex,
 		SessionToken:   sessionToken,
 		ResumeHandle:   resumeHandle,
@@ -1262,6 +1541,11 @@ func fallbackSFUAddr() string {
 // HS256-signed tokens (legacy JWT_SECRET or LiveKit API secret) are accepted;
 // ES256 host tokens are never valid access credentials.
 func validateAccessToken(tokenString string) (*Claims, error) {
+	tokenString = strings.TrimSpace(tokenString)
+	if tokenString == "" {
+		return nil, errors.New("empty access token")
+	}
+
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -1270,18 +1554,35 @@ func validateAccessToken(tokenString string) (*Claims, error) {
 		return jwtSecret, nil
 	})
 	if err == nil && token.Valid {
+		if claims.RoomID == "" {
+			claims.RoomID = accessTokenRoom(claims)
+		}
+		if claims.ParticipantID != "" {
+			claims.ParticipantID = strings.TrimSpace(claims.ParticipantID)
+		} else if claims.Subject != "" {
+			claims.ParticipantID = strings.TrimSpace(claims.Subject)
+		}
 		return claims, nil
 	}
 
 	if liveKitAPISecret != "" {
-		token, err = jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		claimsLK := &Claims{}
+		token, err = jwt.ParseWithClaims(tokenString, claimsLK, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
 			return []byte(liveKitAPISecret), nil
 		})
 		if err == nil && token.Valid {
-			return claims, nil
+			if claimsLK.RoomID == "" {
+				claimsLK.RoomID = accessTokenRoom(claimsLK)
+			}
+			if claimsLK.ParticipantID != "" {
+				claimsLK.ParticipantID = strings.TrimSpace(claimsLK.ParticipantID)
+			} else if claimsLK.Subject != "" {
+				claimsLK.ParticipantID = strings.TrimSpace(claimsLK.Subject)
+			}
+			return claimsLK, nil
 		}
 	}
 
@@ -1308,16 +1609,52 @@ func validateHostToken(tokenString string) (*HostClaims, error) {
 	return claims, nil
 }
 
-// accessTokenRoom returns the room a token is bound to. Legacy claims carry a
-// top-level "room" claim; LiveKit claims bind the room via the audience field.
+// accessTokenRoom returns the canonical room a token is bound to. Legacy claims
+// carry a top-level "room" claim; LiveKit claims bind the room via video.room or
+// the audience field. If multiple non-empty rooms are specified and conflict,
+// returns empty string.
 func accessTokenRoom(claims *Claims) string {
-	if claims.RoomID != "" {
-		return claims.RoomID
+	room := canonicalRoomID(claims.RoomID)
+	var videoRoom string
+	if claims.Video != nil && claims.Video.Room != "" {
+		videoRoom = canonicalRoomID(claims.Video.Room)
 	}
+
+	primaryRoom := room
+	if primaryRoom == "" {
+		primaryRoom = videoRoom
+	} else if videoRoom != "" && primaryRoom != videoRoom {
+		return "" // conflicting room and video.room
+	}
+
 	if len(claims.Audience) > 0 {
-		return claims.Audience[0]
+		if primaryRoom != "" {
+			matched := false
+			for _, a := range claims.Audience {
+				if canonicalRoomID(a) == primaryRoom {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return ""
+			}
+		} else {
+			var nonServiceAuds []string
+			for _, a := range claims.Audience {
+				ca := canonicalRoomID(a)
+				if ca == "" || ca == "meet-signal" || ca == "meet-signal-service" || ca == "latch-signal" || ca == "livekit" {
+					continue
+				}
+				nonServiceAuds = append(nonServiceAuds, ca)
+			}
+			if len(nonServiceAuds) == 1 {
+				primaryRoom = nonServiceAuds[0]
+			}
+		}
 	}
-	return ""
+
+	return primaryRoom
 }
 
 // resumeIdentity authenticates a /token resume attempt. It proves the caller's
@@ -1536,10 +1873,18 @@ func handleRoomAuthority(am *authorityManager, w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	coHosts := make([]string, 0)
+	if auth.CoHostIDs != nil {
+		for cid := range auth.CoHostIDs {
+			coHosts = append(coHosts, cid)
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"roomId":    auth.RoomID,
 		"hostId":    auth.HostID,
+		"coHostIds": coHosts,
 		"locked":    auth.Locked,
 		"hostKey":   hostPublicKeyHex,
 		"timestamp": time.Now().UnixMilli(),
@@ -1584,13 +1929,390 @@ func handleRoomStatus(am *authorityManager, w http.ResponseWriter, r *http.Reque
 	})
 }
 
+type DirectiveRequest struct {
+	RoomID              string `json:"roomId"`
+	Action              string `json:"action"`
+	TargetParticipantID string `json:"targetParticipantId,omitempty"`
+	ParticipantID       string `json:"participantId,omitempty"`
+	Target              string `json:"target,omitempty"`
+	ModerationToken     string `json:"moderationToken,omitempty"`
+	HostToken           string `json:"hostToken,omitempty"`
+}
+
+func authenticateModerator(r *http.Request, am *authorityManager, roomID string, auth *RoomAuthority, reqModerationToken string) (string, Role, error) {
+	if auth == nil {
+		var ok bool
+		auth, ok = am.getAuthority(roomID)
+		if !ok {
+			return "", RoleParticipant, errors.New("unauthorized: room authority not found")
+		}
+	}
+
+	// Helper to validate ES256 HostClaims against current room authority
+	validateHostClaims := func(claims *HostClaims) error {
+		if claims.ParticipantID == "" {
+			return errors.New("unauthorized: missing participant ID in token")
+		}
+		if canonicalRoomID(claims.RoomID) != roomID {
+			return errors.New("unauthorized: token room mismatch")
+		}
+		if claims.RoomInstanceID != auth.RoomInstanceID {
+			return errors.New("unauthorized: room instance mismatch")
+		}
+		if claims.Generation != auth.AuthorityGeneration {
+			return errors.New("unauthorized: stale authority generation")
+		}
+		return nil
+	}
+
+	// 1. Check ModerationToken from body or X-Host-Proof header
+	tokenStr := reqModerationToken
+	if tokenStr == "" {
+		tokenStr = headerValue(r.Header, "X-Host-Proof")
+	}
+	if tokenStr != "" {
+		hostClaims, err := validateHostToken(bearerToken(tokenStr))
+		if err != nil {
+			return "", RoleParticipant, errors.New("unauthorized: invalid host token signature")
+		}
+		if err := validateHostClaims(hostClaims); err != nil {
+			return "", RoleParticipant, err
+		}
+		pID := hostClaims.ParticipantID
+		serverRole := am.getParticipantRole(roomID, pID)
+		return pID, serverRole, nil
+	}
+
+	// 2. Check Authorization header
+	authHeader := headerValue(r.Header, "Authorization")
+	if authHeader != "" {
+		rawToken := bearerToken(authHeader)
+		// First try ES256 host/co-host token
+		if hostClaims, err := validateHostToken(rawToken); err == nil {
+			if err := validateHostClaims(hostClaims); err != nil {
+				return "", RoleParticipant, err
+			}
+			pID := hostClaims.ParticipantID
+			serverRole := am.getParticipantRole(roomID, pID)
+			return pID, serverRole, nil
+		}
+		// Try HS256 access token
+		if accessClaims, err := validateAccessToken(rawToken); err == nil {
+			if accessClaims.ParticipantID == "" {
+				return "", RoleParticipant, errors.New("unauthorized: missing participant ID in token")
+			}
+			if accessTokenRoom(accessClaims) != roomID {
+				return "", RoleParticipant, errors.New("unauthorized: token room mismatch")
+			}
+			pID := accessClaims.ParticipantID
+			serverRole := am.getParticipantRole(roomID, pID)
+			return pID, serverRole, nil
+		}
+		return "", RoleParticipant, errors.New("unauthorized: invalid bearer token")
+	}
+
+	// Step 3 (X-Participant-ID header bypass) is COMPLETELY REMOVED.
+	return "", RoleParticipant, errors.New("unauthorized: missing authentication credentials")
+}
+
+func authorizeAction(am *authorityManager, roomID, requesterID string, requesterRole Role, action Action, targetParticipantID string) error {
+	// 1. Evaluate requester role against permission matrix
+	switch action {
+	case ActionAssignCoHost, ActionRevokeCoHost, ActionTransferHost, ActionEndMeeting:
+		// STRICT: ONLY HOST can execute these actions
+		if requesterRole != RoleHost {
+			return errors.New("forbidden: only host may execute " + string(action))
+		}
+	case ActionMuteParticipant, ActionRemoveParticipant, ActionSpotlightParticipant,
+		ActionAdmitParticipant, ActionRejectParticipant, ActionLockMeeting,
+		ActionManageWaitingRoom, ActionStopParticipantShare, ActionUpdatePermissions:
+		// HOST and CO-HOST permitted
+		if requesterRole != RoleHost && requesterRole != RoleCoHost {
+			return errors.New("forbidden: action requires host or co-host role")
+		}
+	default:
+		// Other moderation directives
+		if requesterRole != RoleHost && requesterRole != RoleCoHost {
+			return errors.New("forbidden: unauthorized moderation action")
+		}
+	}
+
+	// 2. Target Hierarchy Guardrail:
+	// A CO-HOST cannot moderate an attendee of equal or higher tier (HOST or another CO-HOST).
+	// A PARTICIPANT cannot moderate anyone (already rejected above).
+	if targetParticipantID != "" && targetParticipantID != requesterID {
+		targetRole := am.getParticipantRole(roomID, targetParticipantID)
+		reqRank := roleHierarchy[requesterRole]
+		targetRank := roleHierarchy[targetRole]
+
+		if requesterRole == RoleCoHost && targetRank >= reqRank {
+			return errors.New("forbidden: co-host cannot moderate participant of equal or higher tier")
+		}
+
+		if requesterRole != RoleHost && targetRank >= reqRank {
+			return errors.New("forbidden: target tier equal or exceeds requester tier")
+		}
+	}
+
+	return nil
+}
+
+func executeDirective(h *hub, am *authorityManager, roomID, requesterID string, action Action, targetParticipantID string, w http.ResponseWriter) {
+	auth, ok := am.getAuthority(roomID)
+	if !ok {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "room not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	switch action {
+	case ActionAssignCoHost:
+		if err := am.assignCoHost(roomID, requesterID, targetParticipantID); err != nil {
+			atomic.AddInt64(&metricSignalErrors, 1)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		var coHostToken string
+		if hostPrivateKey != nil {
+			tok, err := mintCoHostToken(targetParticipantID, roomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
+			if err == nil {
+				coHostToken = tok
+				payload := mustRawJSON(map[string]any{
+					"coHostToken":    coHostToken,
+					"hostKey":        hostPublicKeyHex,
+					"roomInstanceId": auth.RoomInstanceID,
+					"generation":     auth.AuthorityGeneration,
+				})
+				if h != nil {
+					_ = h.deliverCoHostCredential(roomID, targetParticipantID, payload)
+				}
+			}
+		}
+		if h != nil {
+			h.broadcastRoleChanged(roomID, targetParticipantID, "co-host")
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success":             true,
+			"action":              string(action),
+			"roomId":              roomID,
+			"targetParticipantId": targetParticipantID,
+			"role":                "co-host",
+			"timestamp":           time.Now().UnixMilli(),
+		})
+
+	case ActionRevokeCoHost:
+		if err := am.revokeCoHost(roomID, requesterID, targetParticipantID); err != nil {
+			atomic.AddInt64(&metricSignalErrors, 1)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if h != nil {
+			h.broadcastRoleChanged(roomID, targetParticipantID, "participant")
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success":             true,
+			"action":              string(action),
+			"roomId":              roomID,
+			"targetParticipantId": targetParticipantID,
+			"role":                "participant",
+			"timestamp":           time.Now().UnixMilli(),
+		})
+
+	case ActionLockMeeting:
+		am.mu.Lock()
+		if a, exists := am.rooms[roomID]; exists {
+			a.Locked = true
+		}
+		am.mu.Unlock()
+		if h != nil {
+			h.broadcastDirective(roomID, requesterID, string(action), targetParticipantID)
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success":   true,
+			"action":    string(action),
+			"roomId":    roomID,
+			"locked":    true,
+			"timestamp": time.Now().UnixMilli(),
+		})
+
+	default:
+		// muteParticipant, removeParticipant, spotlightParticipant, stopParticipantShare, etc.
+		if h != nil {
+			h.broadcastDirective(roomID, requesterID, string(action), targetParticipantID)
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"success":             true,
+			"action":              string(action),
+			"roomId":              roomID,
+			"targetParticipantId": targetParticipantID,
+			"timestamp":           time.Now().UnixMilli(),
+		})
+	}
+}
+
+func handleDirectiveWithRequest(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request, req DirectiveRequest) {
+	roomID := canonicalRoomID(req.RoomID)
+	if roomID == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "roomId is required", http.StatusBadRequest)
+		return
+	}
+	action := canonicalAction(req.Action)
+	if string(action) == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "action is required", http.StatusBadRequest)
+		return
+	}
+
+	auth, ok := am.getAuthority(roomID)
+	if !ok {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "room not found", http.StatusNotFound)
+		return
+	}
+
+	requesterID, requesterRole, err := authenticateModerator(r, am, roomID, auth, req.ModerationToken)
+	if err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	targetID := strings.TrimSpace(req.TargetParticipantID)
+	if targetID == "" {
+		targetID = strings.TrimSpace(req.ParticipantID)
+	}
+	if targetID == "" {
+		targetID = strings.TrimSpace(req.Target)
+	}
+
+	if err := authorizeAction(am, roomID, requesterID, requesterRole, action, targetID); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	executeDirective(h, am, roomID, requesterID, action, targetID, w)
+}
+
+func handleDirective(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req DirectiveRequest
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8192)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	if req.TargetParticipantID == "" && req.ParticipantID != "" {
+		req.TargetParticipantID = req.ParticipantID
+	}
+	if req.TargetParticipantID == "" && req.Target != "" {
+		req.TargetParticipantID = req.Target
+	}
+	if req.ModerationToken == "" && req.HostToken != "" {
+		req.ModerationToken = req.HostToken
+	}
+	handleDirectiveWithRequest(h, am, w, r, req)
+}
+
+func handleAssignCoHost(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		RoomID              string `json:"roomId"`
+		TargetParticipantID string `json:"targetParticipantId"`
+		ParticipantID       string `json:"participantId"`
+		Target              string `json:"target"`
+		ModerationToken     string `json:"moderationToken"`
+		HostToken           string `json:"hostToken"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	targetID := req.TargetParticipantID
+	if targetID == "" {
+		targetID = req.ParticipantID
+	}
+	if targetID == "" {
+		targetID = req.Target
+	}
+	modToken := req.ModerationToken
+	if modToken == "" {
+		modToken = req.HostToken
+	}
+	dReq := DirectiveRequest{
+		RoomID:              req.RoomID,
+		Action:              string(ActionAssignCoHost),
+		TargetParticipantID: targetID,
+		ModerationToken:     modToken,
+	}
+	handleDirectiveWithRequest(h, am, w, r, dReq)
+}
+
+func handleRevokeCoHost(h *hub, am *authorityManager, w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var req struct {
+		RoomID              string `json:"roomId"`
+		TargetParticipantID string `json:"targetParticipantId"`
+		ParticipantID       string `json:"participantId"`
+		Target              string `json:"target"`
+		ModerationToken     string `json:"moderationToken"`
+		HostToken           string `json:"hostToken"`
+	}
+	if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096)).Decode(&req); err != nil {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	targetID := req.TargetParticipantID
+	if targetID == "" {
+		targetID = req.ParticipantID
+	}
+	if targetID == "" {
+		targetID = req.Target
+	}
+	modToken := req.ModerationToken
+	if modToken == "" {
+		modToken = req.HostToken
+	}
+	dReq := DirectiveRequest{
+		RoomID:              req.RoomID,
+		Action:              string(ActionRevokeCoHost),
+		TargetParticipantID: targetID,
+		ModerationToken:     modToken,
+	}
+	handleDirectiveWithRequest(h, am, w, r, dReq)
+}
+
 func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
-	// Accept token via query (?token=...) or Authorization: Bearer <token>.
-	token := r.URL.Query().Get("token")
+	token := ""
+	auth := strings.TrimSpace(r.Header.Get("Authorization"))
+	if strings.HasPrefix(strings.ToLower(auth), "bearer ") {
+		token = strings.TrimSpace(auth[7:])
+	}
 	if token == "" {
-		auth := r.Header.Get("Authorization")
-		if strings.HasPrefix(auth, "Bearer ") {
-			token = strings.TrimPrefix(auth, "Bearer ")
+		protocols := strings.Split(r.Header.Get("Sec-WebSocket-Protocol"), ",")
+		for _, p := range protocols {
+			p = strings.TrimSpace(p)
+			if p != "meet-token" && p != "" {
+				token = p
+			}
 		}
 	}
 
@@ -1601,17 +2323,37 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.TrimSpace(claims.ParticipantID) == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid token claims", http.StatusUnauthorized)
+		return
+	}
+
+	claimRoom := canonicalRoomID(accessTokenRoom(claims))
+	if claimRoom == "" {
+		atomic.AddInt64(&metricSignalErrors, 1)
+		http.Error(w, "invalid token claims", http.StatusUnauthorized)
+		return
+	}
+
 	roomID := canonicalRoomID(r.URL.Query().Get("room"))
 	if roomID == "" {
-		roomID = canonicalRoomID(claims.RoomID)
+		roomID = claimRoom
 	}
-	if roomID != canonicalRoomID(claims.RoomID) {
+	if roomID != claimRoom {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		http.Error(w, "room mismatch", http.StatusForbidden)
 		return
 	}
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	// We must return the subprotocol we accepted if the client sent one.
+	respHeader := http.Header{}
+	if r.Header.Get("Sec-WebSocket-Protocol") != "" {
+		// Just echo back what they sent to satisfy browser
+		respHeader.Set("Sec-WebSocket-Protocol", r.Header.Get("Sec-WebSocket-Protocol"))
+	}
+
+	conn, err := upgrader.Upgrade(w, r, respHeader)
 	if err != nil {
 		atomic.AddInt64(&metricSignalErrors, 1)
 		return
@@ -1650,6 +2392,10 @@ func handleSignal(h *hub, w http.ResponseWriter, r *http.Request) {
 }
 
 func readLoop(h *hub, roomID string, c *client) {
+	readLoopWithAuth(h, authManager, roomID, c)
+}
+
+func readLoopWithAuth(h *hub, am *authorityManager, roomID string, c *client) {
 	for {
 		_, data, err := c.conn.ReadMessage()
 		if err != nil {
@@ -1661,6 +2407,105 @@ func readLoop(h *hub, roomID string, c *client) {
 			atomic.AddInt64(&metricSignalErrors, 1)
 			continue
 		}
+
+		// Intercept moderation frames (including top-level actions)
+		isModerationFrame := msg.Type == "host-directive" || msg.Type == "directive" || msg.Type == "moderation-directive" ||
+			msg.Type == "mute-participant" || msg.Type == "remove-participant" || msg.Type == "spotlight-participant" ||
+			msg.Type == "stop-participant-share" || msg.Type == "stopParticipantShare" ||
+			msg.Type == "lock-room" || msg.Type == "lockMeeting" ||
+			msg.Type == "update-permissions" || msg.Type == "updatePermissions" ||
+			msg.Type == "assign-cohost" || msg.Type == "assignCoHost" ||
+			msg.Type == "revoke-cohost" || msg.Type == "revokeCoHost"
+
+		var directivePayload struct {
+			Action              string `json:"action"`
+			TargetParticipantID string `json:"targetParticipantId"`
+			ParticipantID       string `json:"participantId"`
+			Target              string `json:"target"`
+			HostToken           string `json:"hostToken"`
+			ModerationToken     string `json:"moderationToken"`
+		}
+		if len(msg.Payload) > 0 {
+			_ = json.Unmarshal(msg.Payload, &directivePayload)
+		}
+
+		if msg.Type == "mute" {
+			targetID := directivePayload.TargetParticipantID
+			if targetID == "" {
+				targetID = directivePayload.ParticipantID
+			}
+			if targetID != "" && targetID != c.participantID {
+				isModerationFrame = true
+				if directivePayload.Action == "" {
+					directivePayload.Action = "muteParticipant"
+				}
+			}
+		}
+
+		if isModerationFrame {
+			actionStr := directivePayload.Action
+			if actionStr == "" {
+				actionStr = msg.Type
+			}
+			action := canonicalAction(actionStr)
+
+			targetID := directivePayload.TargetParticipantID
+			if targetID == "" {
+				targetID = directivePayload.ParticipantID
+			}
+			if targetID == "" {
+				targetID = directivePayload.Target
+			}
+
+			senderRole := am.getParticipantRole(roomID, c.participantID)
+			if err := authorizeAction(am, roomID, c.participantID, senderRole, action, targetID); err != nil {
+				atomic.AddInt64(&metricSignalErrors, 1)
+				_ = c.writeJSON(SignalMessage{
+					Type:          "error",
+					Payload:       mustRawJSON(map[string]any{"code": 403, "error": "forbidden"}),
+					RoomID:        roomID,
+					ParticipantID: "system",
+					Timestamp:     time.Now().UnixMilli(),
+				})
+				continue // Drop unauthorized frame before peer relay
+			}
+
+			// Authorized state modifications
+			if action == ActionAssignCoHost && targetID != "" {
+				_ = am.assignCoHost(roomID, c.participantID, targetID)
+				if hostPrivateKey != nil {
+					if auth, ok := am.getAuthority(roomID); ok {
+						tok, err := mintCoHostToken(targetID, roomID, auth.RoomInstanceID, auth.AuthorityGeneration, jwtTTL)
+						if err == nil {
+							payload := mustRawJSON(map[string]any{
+								"coHostToken":    tok,
+								"hostKey":        hostPublicKeyHex,
+								"roomInstanceId": auth.RoomInstanceID,
+								"generation":     auth.AuthorityGeneration,
+							})
+							if h != nil {
+								_ = h.deliverCoHostCredential(roomID, targetID, payload)
+							}
+						}
+					}
+				}
+				if h != nil {
+					h.broadcastRoleChanged(roomID, targetID, "co-host")
+				}
+			} else if action == ActionRevokeCoHost && targetID != "" {
+				_ = am.revokeCoHost(roomID, c.participantID, targetID)
+				if h != nil {
+					h.broadcastRoleChanged(roomID, targetID, "participant")
+				}
+			} else if action == ActionLockMeeting {
+				am.mu.Lock()
+				if a, ok := am.rooms[roomID]; ok {
+					a.Locked = true
+				}
+				am.mu.Unlock()
+			}
+		}
+
 		// Enforce authenticated identity + room, then relay to peers.
 		msg.ParticipantID = c.participantID
 		msg.RoomID = roomID

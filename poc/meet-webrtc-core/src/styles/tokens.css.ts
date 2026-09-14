@@ -22,6 +22,7 @@ export function injectTokens(): void {
   setVar('--font-sans', tokens.font.sans);
   setVar('--font-mono', tokens.font.mono);
   setVar('--font-display', tokens.font.display);
+  Object.entries(tokens.tracking).forEach(([k, v]) => setVar(`--tracking-${k}`, v));
   Object.entries(tokens.text).forEach(([k, v]) => {
     setVar(`--text-${k}-size`, v.size);
     setVar(`--text-${k}-line-height`, v.lineHeight);
@@ -96,8 +97,8 @@ export function applyHighContrast(): void {
     if (matches) {
       root.style.setProperty('--border-subtle', '#ffffff');
       root.style.setProperty('--fg-muted', '#cccccc');
-      root.style.setProperty('--accent-primary', '#00ffcc');
-      root.style.setProperty('--danger', '#ff6666');
+      root.style.setProperty('--accent-primary', '#ccff70');
+      root.style.setProperty('--danger', '#ff8a75');
       root.style.setProperty('--warning', '#ffcc00');
     } else {
       // Restore original values

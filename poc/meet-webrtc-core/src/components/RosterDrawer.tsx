@@ -15,6 +15,7 @@ import { SpeakingIndicator } from './SpeakingIndicator';
 import { HostControlManager } from '../host/hostControlManager';
 import { useAppStore } from '../store/appStore';
 import { InviteModal } from './InviteModal';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface RosterDrawerProps {
   onLowerHand?: (targetParticipantId?: string) => Promise<void> | void;
@@ -27,8 +28,15 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
   const raisedHands = usePresenceStore((s) => s.raisedHands);
   const hostId = usePresenceStore((s) => s.hostId);
   const localParticipantId = usePresenceStore((s) => s.localParticipantId);
-  const isLocalHost = hostId !== null && hostId === localParticipantId;
   const waitingQueue = useHostControlStore((s) => s.waitingQueue);
+
+  const {
+    isHost: isLocalHost,
+    isPrivileged,
+    canModerateParticipant,
+    isParticipantCoHost,
+    isParticipantHost,
+  } = usePermissions();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
@@ -169,7 +177,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                 : `${raisedHands.length} hands raised in queue`}
             </span>
           </div>
-          {isLocalHost && onLowerHand && (
+          {isPrivileged && onLowerHand && (
             <button
               onClick={() => onLowerHand()}
               style={{
@@ -218,7 +226,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
           padding: '8px 0',
         }}
       >
-        {isLocalHost && waitingQueue.length > 0 && (
+        {isPrivileged && waitingQueue.length > 0 && (
           <div
             style={{
               margin: '8px 16px 16px 16px',
@@ -381,6 +389,20 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                           Host
                         </span>
                       )}
+                      {isParticipantCoHost(p.id) && (
+                        <span
+                          style={{
+                            fontSize: '0.65rem',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            color: '#60a5fa',
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Co-Host
+                        </span>
+                      )}
                       {p.isHandRaised && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span
@@ -394,7 +416,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                           >
                             ✋ Raised
                           </span>
-                          {isLocalHost && onLowerHand && (
+                          {isPrivileged && onLowerHand && (
                             <button
                               onClick={() => onLowerHand(p.id)}
                               style={{
@@ -470,8 +492,8 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                   {/* Connection Quality */}
                   <ConnectionBadge quality={p.connectionQuality} />
 
-                  {/* Host Moderation Menu */}
-                  {isLocalHost && !isSelf && (
+                  {/* Moderation Menu */}
+                  {canModerateParticipant(p.id) && (
                     <div style={{ position: 'relative' }}>
                       <button
                         onClick={() => setActionMenuId(actionMenuId === p.id ? null : p.id)}
@@ -501,7 +523,7 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                             borderRadius: '8px',
                             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
                             zIndex: 1100,
-                            minWidth: '130px',
+                            minWidth: '140px',
                             padding: '4px 0',
                           }}
                         >
@@ -528,7 +550,77 @@ export const RosterDrawer: React.FC<RosterDrawerProps> = ({ onLowerHand }) => {
                               <span>🔇</span> Mute
                             </button>
                           )}
-                          {!isCurrentHost && (
+                          {p.screenSharing && (
+                            <button
+                              onClick={() => {
+                                HostControlManager.getInstance().stopParticipantShare(p.id);
+                                setActionMenuId(null);
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '6px 12px',
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--fg, #eaeaea)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <span>🛑</span> Stop Share
+                            </button>
+                          )}
+                          {isLocalHost && !isParticipantHost(p.id) && (
+                            isParticipantCoHost(p.id) ? (
+                              <button
+                                onClick={() => {
+                                  HostControlManager.getInstance().revokeCoHost(p.id);
+                                  setActionMenuId(null);
+                                }}
+                                style={{
+                                  width: '100%',
+                                  textAlign: 'left',
+                                  padding: '6px 12px',
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--fg, #eaeaea)',
+                                  fontSize: '0.8rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <span>🛡️</span> Remove Co-Host
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  HostControlManager.getInstance().assignCoHost(p.id);
+                                  setActionMenuId(null);
+                                }}
+                                style={{
+                                  width: '100%',
+                                  textAlign: 'left',
+                                  padding: '6px 12px',
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--fg, #eaeaea)',
+                                  fontSize: '0.8rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <span>🛡️</span> Make Co-Host
+                              </button>
+                            )
+                          )}
+                          {isLocalHost && !isCurrentHost && (
                             <button
                               onClick={() => {
                                 HostControlManager.getInstance().transferHost(p.id);

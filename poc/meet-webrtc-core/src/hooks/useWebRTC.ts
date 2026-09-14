@@ -669,14 +669,21 @@ export function useWebRTC() {
               rebuildLocalStream();
               // Also update cameraStreams Map for layout
               setCameraStreams((prev) => {
-                const next = new Map(prev);
-                if (localStream) {
-                  next.set(localId, localStream);
-                } else {
-                  next.delete(localId);
-                }
-                return next;
+              const next = new Map(prev);
+              const tracks: MediaStreamTrack[] = [];
+              room.localParticipant?.trackPublications.forEach((pub) => {
+                const s = (pub as any)?.source;
+                if (s === Track.Source.ScreenShare || s === Track.Source.ScreenShareAudio) return;
+                const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+                if (mst && mst.readyState === 'live') tracks.push(mst);
               });
+              if (tracks.length > 0) {
+                next.set(localId, new MediaStream(tracks));
+              } else {
+                next.delete(localId);
+              }
+              return next;
+            });
             }
           }
         });
@@ -701,14 +708,21 @@ export function useWebRTC() {
             rebuildLocalStream();
             if (localId) {
               setCameraStreams((prev) => {
-                const next = new Map(prev);
-                if (localStream) {
-                  next.set(localId, localStream);
-                } else {
-                  next.delete(localId);
-                }
-                return next;
+              const next = new Map(prev);
+              const tracks: MediaStreamTrack[] = [];
+              room.localParticipant?.trackPublications.forEach((pub) => {
+                const s = (pub as any)?.source;
+                if (s === Track.Source.ScreenShare || s === Track.Source.ScreenShareAudio) return;
+                const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+                if (mst && mst.readyState === 'live') tracks.push(mst);
               });
+              if (tracks.length > 0) {
+                next.set(localId, new MediaStream(tracks));
+              } else {
+                next.delete(localId);
+              }
+              return next;
+            });
             }
           }
         });
@@ -721,8 +735,15 @@ export function useWebRTC() {
           if (localId) {
             setCameraStreams((prev) => {
               const next = new Map(prev);
-              if (localStream) {
-                next.set(localId, localStream);
+              const tracks: MediaStreamTrack[] = [];
+              room.localParticipant?.trackPublications.forEach((pub) => {
+                const s = (pub as any)?.source;
+                if (s === Track.Source.ScreenShare || s === Track.Source.ScreenShareAudio) return;
+                const mst = (pub.track as any)?.mediaStreamTrack as MediaStreamTrack | undefined;
+                if (mst && mst.readyState === 'live') tracks.push(mst);
+              });
+              if (tracks.length > 0) {
+                next.set(localId, new MediaStream(tracks));
               } else {
                 next.delete(localId);
               }

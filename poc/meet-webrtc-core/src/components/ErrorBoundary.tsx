@@ -1,4 +1,5 @@
 import { Component, ReactNode } from 'react';
+import '../styles/support-theme.css';
 
 interface Props {
   children: ReactNode;
@@ -32,6 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="error-boundary" role="alert">
+          <div className="support-linework" aria-hidden="true" />
           <svg className="error-boundary__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />

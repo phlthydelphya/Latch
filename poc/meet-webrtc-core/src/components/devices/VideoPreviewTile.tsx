@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDeviceStore } from '../../devices/deviceStore';
+import { describeDeviceError } from '../../devices/deviceErrorCopy';
 
 export function VideoPreviewTile() {
   const selectedVideoInputId = useDeviceStore((s) => s.selectedVideoInputId);
@@ -40,18 +41,7 @@ export function VideoPreviewTile() {
         }
       } catch (err) {
         if (!isCancelled) {
-          const e = err as Error;
-          if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-            setError('Camera is busy or in use by another application. Close other apps or choose another device.');
-          } else if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            setError('Camera access denied — please allow camera permission in your browser.');
-          } else if (e.name === 'NotFoundError') {
-            setError('No camera device found. Please check your camera connection.');
-          } else if (e.name === 'OverconstrainedError') {
-            setError('Camera constraints could not be satisfied. Try another camera.');
-          } else {
-            setError(e.message || 'Failed to access camera');
-          }
+          setError(describeDeviceError(err, 'camera').message);
         }
       } finally {
         if (!isCancelled) {
@@ -79,10 +69,10 @@ export function VideoPreviewTile() {
         position: 'relative',
         width: '100%',
         aspectRatio: '16 / 9',
-        backgroundColor: '#0a0a0f',
+        backgroundColor: '#070807',
         borderRadius: '8px',
         overflow: 'hidden',
-        border: '1px solid var(--border, #222233)',
+        border: '1px solid var(--border, rgba(244,245,238,0.2))',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -103,13 +93,13 @@ export function VideoPreviewTile() {
       />
 
       {isLoading && (
-        <span style={{ fontSize: '0.85rem', color: 'var(--fg-muted, #888899)' }}>
+        <span style={{ fontSize: '0.85rem', color: 'var(--fg-muted, #a4aa9f)' }}>
           Starting camera preview…
         </span>
       )}
 
       {error && (
-        <div style={{ padding: '16px', textAlign: 'center', color: 'var(--danger, #ff4757)', fontSize: '0.85rem' }}>
+        <div style={{ padding: '16px', textAlign: 'center', color: 'var(--danger, #ff5b45)', fontSize: '0.85rem' }}>
           <span>🚫 Camera unavailable: {error}</span>
         </div>
       )}

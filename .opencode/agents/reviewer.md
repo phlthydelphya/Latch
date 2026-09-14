@@ -1,7 +1,7 @@
 ---
 description: Adversarial Reviewer - challenges assumptions, architecture, security, scalability, privacy
 mode: subagent
-model: opencode/ling-3.0-flash-fin-free
+model: opencode-go/kimi-k3
 permission:
   read: allow
   glob: allow

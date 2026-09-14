@@ -1,7 +1,7 @@
 ---
 description: Backend Lead - APIs, auth, signaling, storage, SFU orchestration
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: opencode-go/deepseek-v4-pro
 permission:
   bash: allow
   read: allow

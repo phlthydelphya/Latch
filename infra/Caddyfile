@@ -9,7 +9,7 @@
 
 # Apply security headers globally
 (security_headers) {
-	header Content-Security-Policy "default-src 'none'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' wss: ws:; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com data:; media-src 'self' blob:; worker-src 'self' blob:;"
+	header Content-Security-Policy "default-src 'none'; manifest-src 'self'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' wss: ws:; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com data:; media-src 'self' blob:; worker-src 'self' blob:;"
 }
 
 :80 {

@@ -1,62 +1,20 @@
-# cert-manager.yaml — ClusterIssuer scaffolding (STAGING default)
-#
-# ⚠️  NON-PRODUCTION SCAFFOLD — staging-first by design  ⚠️
-#   The ACTIVE (uncommented) issuer below targets the Let's Encrypt STAGING CA.
-#   Its certificates are signed by a CA that browsers do NOT trust, so any
-#   accidental issuance against the placeholder host (`meet.example.com`) and
-#   placeholder email (`admin@example.com`) can never produce a certificate
-#   that passes as production. This is intentional.
-#
-# REQUIRED SUBSTITUTIONS before any production issuance (all of them):
-#   1. Replace `admin@example.com` with a monitored ops mailbox — Let's Encrypt
-#      sends expiry/renewal/revocation notices there.
-#   2. Replace the RFC 2606 placeholder host `meet.example.com` in
-#      infra/k8s-manifests/ingress.yaml with the real, owned FQDN.
-#   3. Validate ACME http-01 + Ingress wiring against STAGING first, confirm
-#      the (untrusted) cert issues cleanly, and only THEN uncomment the
-#      `letsencrypt-prod` issuer below and point the Ingress annotation
-#      `cert-manager.io/cluster-issuer` to `letsencrypt-prod`.
-#
-#   DO NOT apply the `letsencrypt-prod` issuer with placeholder values: the
-#   production endpoint enforces rate limits and would issue a publicly-trusted
-#   certificate for a host/email you may not control or monitor.
-#
-# HTTP-01 solver requires Ingress-Nginx port 80 to be reachable from the public
-# internet (the ACME challenge is served via the Ingress shim). If port 80 is
-# blocked, switch to a DNS-01 solver (Cloudflare/Route53/etc.) instead.
----
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: letsencrypt-staging
+  name: selfsigned-issuer
 spec:
-  acme:
-    # STAGING endpoint — certificates are NOT trusted by browsers (expected)
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: admin@example.com   # TODO: replace with a monitored ops mailbox
-    privateKeySecretRef:
-      name: letsencrypt-staging-account-key
-    solvers:
-      - http01:
-          ingress:
-            ingressClassName: nginx
+  selfSigned: {}
 ---
-# PRODUCTION issuer — DO NOT APPLY until all three substitutions above are
-# complete AND staging validation passes. Only then switch the Ingress
-# annotation `cert-manager.io/cluster-issuer` from `letsencrypt-staging` to
-# `letsencrypt-prod`.
-#
-# apiVersion: cert-manager.io/v1
-# kind: ClusterIssuer
-# metadata:
-#   name: letsencrypt-prod
-# spec:
-#   acme:
-#     server: https://acme-v02.api.letsencrypt.org/directory
-#     email: admin@example.com   # MUST be a monitored ops mailbox
-#     privateKeySecretRef:
-#       name: letsencrypt-prod-account-key
-#     solvers:
-#       - http01:
-#           ingress:
-#             ingressClassName: nginx
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: meet-secure-core-tls
+  # Changed namespace to match your active services
+  namespace: meet-secure
+spec:
+  secretName: meet-secure-core-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - meet.securecore.local

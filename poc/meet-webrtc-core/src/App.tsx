@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ReloadPrompt } from './components/ReloadPrompt';
 import { useAppStore } from './store/appStore';
+import './styles/illustration-motion.css';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { roomId, participantId, jwt } = useAppStore();
@@ -27,6 +28,8 @@ export function App() {
       <LoadingScreen />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/new" element={<LandingPage initialIntent="create" />} />
+        <Route path="/r/new" element={<Navigate to="/new" replace />} />
         <Route path="/r/:roomId" element={<PreJoinPage />} />
         <Route
           path="/r/:roomId/join"

@@ -9,6 +9,7 @@ export interface LayoutState {
   presentationMode: PresentationMode;
   splitRatio: number; // 0.2 to 0.8 (default 0.75)
   pinnedParticipantId: string | null;
+  pinnedParticipantIds: string[];
   spotlightParticipantId: string | null;
   activeSpeakerId: string | null;
   speakerConfidence: number; // 0..1
@@ -25,6 +26,7 @@ export interface LayoutState {
   setPresentationMode: (mode: PresentationMode) => void;
   setSplitRatio: (ratio: number) => void;
   pinParticipant: (id: string | null) => void;
+  retainParticipants: (ids: string[]) => void;
   setSpotlight: (id: string | null) => void;
   setActiveSpeaker: (id: string | null, confidence?: number) => void;
   setSpeakerConfidence: (confidence: number) => void;
@@ -46,6 +48,7 @@ const initialState = {
   presentationMode: 'side-by-side' as PresentationMode,
   splitRatio: 0.75,
   pinnedParticipantId: null,
+  pinnedParticipantIds: [] as string[],
   spotlightParticipantId: null,
   activeSpeakerId: null,
   speakerConfidence: 0,
@@ -58,7 +61,9 @@ const initialState = {
   filmstripPosition: 'bottom' as FilmstripPosition,
 };
 
-export const useLayoutStore = create<LayoutState>((set) => ({
+export const MAX_PINNED_PARTICIPANTS = 9;
+
+export const useLayoutStore = create<LayoutState>((set, get) => ({
   ...initialState,
 
   setLayoutMode: (mode) =>
@@ -68,10 +73,10 @@ export const useLayoutStore = create<LayoutState>((set) => ({
       userLockedMode: mode,
     })),
 
-  unlockMode: () =>
-    set({
-      userLockedMode: null,
-    }),
+  unlockMode: () => {
+    set({ userLockedMode: null });
+    get().evaluateArbitration();
+  },
 
   setPresentationMode: (presentationMode) =>
     set({ presentationMode }),
@@ -81,7 +86,11 @@ export const useLayoutStore = create<LayoutState>((set) => ({
 
   pinParticipant: (id) =>
     set((state) => {
-      const nextPin = state.pinnedParticipantId === id ? null : id;
+      const pins = state.pinnedParticipantIds;
+      const nextPins = id === null ? [] : pins.includes(id)
+        ? pins.filter((pin) => pin !== id)
+        : pins.length < MAX_PINNED_PARTICIPANTS ? [...pins, id] : pins;
+      const nextPin = nextPins[nextPins.length - 1] ?? null;
       const scores = layoutEngine.evaluate({
         hasScreenShare: Boolean(state.screenShareOwnerId),
         screenShareOwnerId: state.screenShareOwnerId,
@@ -94,10 +103,20 @@ export const useLayoutStore = create<LayoutState>((set) => ({
       });
       return {
         pinnedParticipantId: nextPin,
+        pinnedParticipantIds: nextPins,
         mode: scores.resolvedMode,
         previousMode: scores.resolvedMode !== state.mode ? state.mode : state.previousMode,
       };
     }),
+
+  retainParticipants: (ids) => {
+    const present = new Set(ids);
+    const state = get();
+    const pins = state.pinnedParticipantIds.filter((id) => present.has(id));
+    if (pins.length === state.pinnedParticipantIds.length) return;
+    set({ pinnedParticipantIds: pins, pinnedParticipantId: pins[pins.length - 1] ?? null });
+    get().evaluateArbitration(ids.length);
+  },
 
   setSpotlight: (id) =>
     set((state) => {

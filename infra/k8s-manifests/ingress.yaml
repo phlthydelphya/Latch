@@ -1,123 +1,28 @@
-# ingress.yaml — Ingress-Nginx + cert-manager (K8s placeholder/scaffold)
-#
-# ⚠️  METADATA-ONLY PLACEHOLDER — EMPTY-RELEASE ONLY (NO WORKLOADS)  ⚠️
-#   This manifest references Kubernetes Services (`meet-signal`, `livekit`,
-#   `turn-auth`) that DO NOT EXIST. The Helm chart
-#   `infra/helm/meet-secure-core` is metadata-only (Chart.yaml only — no
-#   `templates/`, no `values.yaml`, no Service/Deployment definitions), so
-#   nothing creates these Services. `kubectl apply -f` is accepted by the API,
-#   but controller/runtime routing is unavailable until the Services exist.
-#   This file documents the intended K8s contract only;
-#   do not apply it until (a) the chart ships Service/Deployment templates and
-#   (b) a real FQDN replaces the RFC 2606 placeholder host `meet.example.com`.
-#
-# Intended route -> Service mapping:
-#
-#   Route                       Backend service:port
-#   ------------------------------------------------
-#   /healthz, /signal, /   ->   meet-signal:8080
-#   /sfu, /rtc             ->   livekit:7880
-#   /turn                  ->   turn-auth:8080
-#
-# Listener contract (INTENTIONAL divergence from infra/Caddyfile — not parity):
-#   The Caddyfile splits listeners: `/healthz` and `/rtc` are served on
-#   plain-HTTP :80 only, while `/turn` is on :443 only. This Ingress instead
-#   terminates TLS on a SINGLE host listener for every route — the safer
-#   K8s-native contract (no plaintext `/rtc` or `/healthz` listener). It is
-#   deliberately NOT a listener-for-listener copy of the Caddyfile; only the
-#   route -> Service mapping above is preserved.
-#
-# NOT routed through this Ingress (by design):
-#   * WebRTC media (UDP/TCP 7881) — requires Service type LoadBalancer/NodePort
-#     or hostNetwork DaemonSet; Ingress is HTTP(S) only.
-#   * coturn STUN/TURN (3478/udp+tcp, 5349/tls, 443 tcp) — hostNetwork
-#     DaemonSet, per infra/compose.yaml `network_mode: host` parity.
-#   * meet-sfu-manager:8081, metrics:9091/9600/9090/3000 — internal only.
-#
-# Service names below must match the (not-yet-existing) Helm chart
-# `infra/helm/meet-secure-core` Service definitions when they are written.
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: meet-secure-core
+  name: meet-secure-core-ingress
   namespace: meet-secure
   annotations:
-    # Placeholder host/email -> use the STAGING issuer by default
-    # (infra/k8s-manifests/cert-manager.yaml). Switch to letsencrypt-prod only
-    # after substituting a real FQDN + monitored ops mailbox and passing
-    # staging validation. See cert-manager.yaml "Required substitutions".
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # NOTE: `websocket-services` annotation is DEPRECATED/removed in current
-    # ingress-nginx. Long-lived WSS upgrades for /signal and /rtc are instead
-    # handled by the proxy-read/send timeouts below (and nginx's automatic
-    # Upgrade: websocket support on those paths).
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    kubernetes.io/ingress.class: "nginx"
+    # Link the ingress directly to your self-signed cluster issuer
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-body-size: "2m"
-    # NOTE: the header/hardening annotations below (HSTS, X-Frame-Options,
-    # X-Content-Type-Options, Referrer-Policy) are ingress-nginx-specific and
-    # controller-dependent — their behavior is not guaranteed across controllers
-    # or ingress-nginx versions.
-    # HSTS + frame/type sniffing hardening (CSP set at app layer).
-    # hsts-preload is INTENTIONALLY OMITTED: preload is a permanent,
-    # browser-shipped commitment that must never be requested for a placeholder
-    # host (meet.example.com). Enable it only on the final production FQDN.
-    nginx.ingress.kubernetes.io/hsts: "true"
-    nginx.ingress.kubernetes.io/hsts-max-age: "63072000"
-    nginx.ingress.kubernetes.io/hsts-include-subdomains: "true"
-    nginx.ingress.kubernetes.io/x-frame-options: "DENY"
-    nginx.ingress.kubernetes.io/x-content-type-options: "nosniff"
-    nginx.ingress.kubernetes.io/referrer-policy: "strict-origin-when-cross-origin"
+    nginx.ingress.kubernetes.io/websocket-services: "meet-signal"
 spec:
-  ingressClassName: nginx
   tls:
-    - hosts:
-        - meet.example.com
-      secretName: meet-secure-core-tls
+  - hosts:
+    - meet.securecore.local
+    secretName: meet-secure-core-tls
   rules:
-    - host: meet.example.com
-      http:
-        paths:
-          # Signaling: WSS /signal?v=1&room=&token= (JWT 5m aud=roomId)
-          - path: /signal
-            pathType: Prefix
-            backend:
-              service:
-                name: meet-signal
-                port:
-                  number: 8080
-          # LiveKit SFU: HTTP/WebSocket control + TCP media fallback
-          - path: /rtc
-            pathType: Prefix
-            backend:
-              service:
-                name: livekit
-                port:
-                  number: 7880
-          - path: /sfu
-            pathType: Prefix
-            backend:
-              service:
-                name: livekit
-                port:
-                  number: 7880
-          # TURN credential minting: POST /turn/credentials
-          - path: /turn
-            pathType: Prefix
-            backend:
-              service:
-                name: turn-auth
-                port:
-                  number: 8080
-          # Default: PWA + REST (POST /token, POST /room/*, GET /room/*)
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: meet-signal
-                port:
-                  number: 8080
+  - host: meet.securecore.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: meet-signal
+            port:
+              number: 80

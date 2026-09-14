@@ -1,6 +1,7 @@
 // tests/e2e/webrtc-session.spec.ts
 // E2E test to establish LIVE WebRTC session between 2 browsers with fake media
 import { test, expect } from '@playwright/test';
+import { writeFileSync } from 'node:fs';
 
 test.describe.configure({ retries: 0, timeout: 300000 }); // 5 min timeout for sustained session
 
@@ -308,12 +309,12 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
   console.log('[Page1] Navigated to pre-join page, room:', actualRoomId);
     console.log('[Page1] Preview video element found');
 
-    // Explicitly enable both devices in prejoin so this remains compatible
-    // with C01's opt-in defaults and enters the meeting with publications on.
+    // Enter with devices off. C06 publishes each device from ControlBar only
+    // after Browser 2 is present, so the observer witnesses the full lifecycle.
     const prejoinMic = page1.getByRole('button', { name: /(?:mute|unmute) microphone/i });
     const prejoinCamera = page1.getByRole('button', { name: /turn (?:on|off) camera/i });
-    if ((await prejoinMic.getAttribute('aria-pressed')) !== 'true') await prejoinMic.click();
-    if ((await prejoinCamera.getAttribute('aria-pressed')) !== 'true') await prejoinCamera.click();
+    await expect(prejoinMic).toHaveAttribute('aria-pressed', 'false');
+    await expect(prejoinCamera).toHaveAttribute('aria-pressed', 'false');
     
     // Click Join
     await page1.click('button:has-text("Join Meeting")');
@@ -343,10 +344,10 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
     console.log('[Page2] On pre-join page');
     await page2.fill('#displayName', 'Browser-2');
     
-    // Wait for preview
-    await page2.waitForSelector('video', { timeout: 10000 });
-    console.log('[Page2] Preview video element found');
-    
+    // Camera is opt-in, so a guest who leaves it off has no visible preview
+    // video. The enabled Join control is the stable prejoin readiness cue.
+    await expect(page2.getByRole('button', { name: 'Join Meeting' })).toBeEnabled();
+
     // Click Join
     await page2.click('button:has-text("Join Meeting")');
     console.log('[Page2] Clicked Join Meeting');
@@ -388,15 +389,24 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
 
     const micButton = page1.getByRole('button', { name: /(?:mute|unmute) microphone/i });
     const cameraButton = page1.getByRole('button', { name: /turn (?:on|off) camera/i });
-    // Both publications were explicitly enabled in prejoin and must be visible
-    // to the second client before ControlBar changes either one.
+    // Wait until Browser 2 sees Browser 1. Device state can legitimately start
+    // either enabled or disabled; C06 is about the ControlBar changing the real
+    // publication and then rendering the resulting provider state.
     await page2.waitForFunction((identity) => {
       const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
-      return remote?.isMicrophoneEnabled === true && remote?.isCameraEnabled === true;
+      return Boolean(remote);
     }, publisherIdentity, { timeout: 30000 });
-    await expect(micButton).toHaveAttribute('aria-pressed', 'true');
-    await expect(cameraButton).toHaveAttribute('aria-pressed', 'true');
 
+    // Microphone: prove Browser 1 can publish through ControlBar, Browser 2 sees
+    // it enabled, then prove mute propagates across the same LiveKit/SFU path.
+    if ((await micButton.getAttribute('aria-pressed')) !== 'true') {
+      await micButton.click();
+    }
+    await expect(micButton).toHaveAttribute('aria-pressed', 'true');
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isMicrophoneEnabled === true;
+    }, publisherIdentity, { timeout: 30000 });
     await micButton.click();
     await expect(micButton).toHaveAttribute('aria-pressed', 'false');
     await page2.waitForFunction((identity) => {
@@ -404,6 +414,22 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
       return remote?.isMicrophoneEnabled === false;
     }, publisherIdentity, { timeout: 30000 });
 
+    // Camera: normalize to disabled first, then prove enable and disable both
+    // propagate. This avoids treating prejoin restoration timing as C06 proof.
+    if ((await cameraButton.getAttribute('aria-pressed')) === 'true') {
+      await cameraButton.click();
+    }
+    await expect(cameraButton).toHaveAttribute('aria-pressed', 'false');
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isCameraEnabled === false;
+    }, publisherIdentity, { timeout: 30000 });
+    await cameraButton.click();
+    await expect(cameraButton).toHaveAttribute('aria-pressed', 'true');
+    await page2.waitForFunction((identity) => {
+      const remote = (window as any).__LIVEKIT_ROOM__?.remoteParticipants?.get(identity);
+      return remote?.isCameraEnabled === true;
+    }, publisherIdentity, { timeout: 30000 });
     await cameraButton.click();
     await expect(cameraButton).toHaveAttribute('aria-pressed', 'false');
     await page2.waitForFunction((identity) => {
@@ -597,8 +623,7 @@ test('LIVE WebRTC session: 2 browsers join same room with fake media', async ({ 
     });
     console.log('[Page1] Final stats available:', !!finalStats1);
     
-    const fs = require('fs');
-    fs.writeFileSync('firefox-ice-stats.json', JSON.stringify(finalStats1, null, 2));
+    writeFileSync('firefox-ice-stats.json', JSON.stringify(finalStats1, null, 2));
     console.log('Saved to firefox-ice-stats.json');
 
     const finalStats2 = await page2.evaluate(async () => {

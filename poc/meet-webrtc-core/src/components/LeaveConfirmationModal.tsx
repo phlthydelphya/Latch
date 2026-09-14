@@ -69,6 +69,7 @@ export const LeaveConfirmationModal: React.FC<LeaveConfirmationModalProps> = ({
 
   return (
     <div
+      className="meeting-dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="leave-modal-title"

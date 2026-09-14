@@ -1,7 +1,7 @@
 ---
 description: Frontend Lead - PWA, UI, conferencing UX, accessibility
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: opencode-go/qwen3.8-max
 permission:
   bash: allow
   read: allow

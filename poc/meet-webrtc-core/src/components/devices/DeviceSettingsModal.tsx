@@ -95,6 +95,7 @@ export function DeviceSettingsModal({ onSwitchDevice }: DeviceSettingsModalProps
 
   return (
     <div
+      className="meeting-dialog"
       role="dialog"
       aria-modal="true"
       aria-label="Device & Audio Settings"

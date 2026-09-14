@@ -16,6 +16,7 @@ export interface SpeakerSmoothingConfig {
   qualificationThresholdMs: number; // 600 ms default
   hysteresisHoldMs: number;      // 1500 ms default
   energyThreshold: number;       // 0.15 threshold for audible speech
+  silenceHoldMs?: number;        // 3000 ms default (silence release)
 }
 
 export const DEFAULT_SMOOTHING_CONFIG: SpeakerSmoothingConfig = {
@@ -23,6 +24,7 @@ export const DEFAULT_SMOOTHING_CONFIG: SpeakerSmoothingConfig = {
   qualificationThresholdMs: 600,
   hysteresisHoldMs: 1500,
   energyThreshold: 0.15,
+  silenceHoldMs: 3000,
 };
 
 interface SpeakerEnergySample {
@@ -84,7 +86,8 @@ export class SpeakerSmoothingEngine {
     // Evaluate continuous speech qualification (600 ms)
     const isAudible = state.currentSmoothedEnergy >= this.config.energyThreshold;
     if (isAudible) {
-      if (state.speechStartTime === null) {
+      const silenceGap = state.lastAudibleTime > 0 ? now - state.lastAudibleTime : 0;
+      if (state.speechStartTime === null || silenceGap > this.config.windowMs) {
         state.speechStartTime = now;
       }
       state.lastAudibleTime = now;
@@ -132,12 +135,14 @@ export class SpeakerSmoothingEngine {
       }
     }
 
-    // Find the highest confidence qualified candidate
+    // Find the highest confidence qualified candidate who is currently audible
     let bestCandidate: string | null = null;
     let highestConfidence = 0;
 
     for (const [id, state] of this.speakers.entries()) {
-      if (!state.isQualified) continue;
+      // Must be qualified and actively speaking within the rolling window
+      const isCurrentlyAudible = (now - state.lastAudibleTime) <= this.config.windowMs;
+      if (!state.isQualified || !isCurrentlyAudible) continue;
       const conf = this.getConfidence(id, now);
       if (conf > highestConfidence) {
         highestConfidence = conf;
@@ -152,8 +157,9 @@ export class SpeakerSmoothingEngine {
       this.activeSpeakerLastSpokeAt = now;
     } else if (!bestCandidate && this.activeSpeakerId !== null) {
       const timeSinceLastSpoke = now - this.activeSpeakerLastSpokeAt;
-      // Release stage only after hysteresis hold expires completely
-      if (timeSinceLastSpoke >= this.config.hysteresisHoldMs * 2) {
+      // Release stage only after silence hold expires completely (3000ms default)
+      const silenceLimit = this.config.silenceHoldMs ?? (this.config.hysteresisHoldMs * 2);
+      if (timeSinceLastSpoke >= silenceLimit) {
         this.activeSpeakerId = null;
       }
     }

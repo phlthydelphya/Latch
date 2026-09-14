@@ -36,6 +36,7 @@ describe('M3B: Simulcast & Video Encoding Configuration', () => {
 
   it('enforces simulcast enabled in M3B_PUBLISH_DEFAULTS', () => {
     expect(M3B_PUBLISH_DEFAULTS.simulcast).toBe(true);
+    expect(M3B_PUBLISH_DEFAULTS.videoCodec).toBe('vp9');
     expect(M3B_PUBLISH_DEFAULTS.videoSimulcastLayers).toBeDefined();
     expect(M3B_PUBLISH_DEFAULTS.videoSimulcastLayers?.length).toBe(3);
     expect(M3B_PUBLISH_DEFAULTS.videoEncoding?.maxBitrate).toBe(1_800_000);

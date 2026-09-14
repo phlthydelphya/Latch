@@ -40,6 +40,16 @@ export class SignalingClient extends EventEmitter {
     };
   }
 
+  getConnectionUrl(): string {
+    let cleanUrl = (this.config.url || '').trim();
+    while (cleanUrl.endsWith('?') || cleanUrl.endsWith('&')) {
+      cleanUrl = cleanUrl.slice(0, -1);
+    }
+    const separator = cleanUrl.includes('?') ? '&' : '?';
+    const room = encodeURIComponent((this.config.roomId ?? '').trim());
+    return `${cleanUrl}${separator}v=1&room=${room}`;
+  }
+
   async connect(): Promise<void> {
     if (this.ws?.readyState === WebSocket.OPEN) return;
     if (this.isConnecting) return;
@@ -49,10 +59,10 @@ export class SignalingClient extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       try {
-        const wsUrl = `${this.config.url}?v=1&room=${encodeURIComponent(this.config.roomId)}&token=${encodeURIComponent(this.config.jwt)}`;
-        this.ws = new WebSocket(wsUrl);
+        const wsUrl = this.getConnectionUrl();
+        this.ws = new WebSocket(wsUrl, ['meet-token', this.config.jwt || '']);
 
-        this.ws.onopen = () => {
+                this.ws.onopen = () => {
           console.log('Signaling connected');
           this.isConnecting = false;
           this.reconnectAttempts = 0;
@@ -62,7 +72,7 @@ export class SignalingClient extends EventEmitter {
           resolve();
         };
 
-        this.ws.onmessage = (event) => {
+                this.ws.onmessage = (event) => {
           this.handleMessage(event.data);
         };
 

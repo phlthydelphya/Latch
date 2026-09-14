@@ -1,7 +1,7 @@
 ---
 description: Product Manager and Program Manager - autonomous workflow orchestration, delegation, milestone coordination
 mode: primary
-model: opencode/muse-spark-1.3-contributor-free
+model: opencode-go/gpt-5.6-luna
 permission:
   bash: allow
   read: allow
@@ -31,11 +31,11 @@ Delegate work to the following subagents based on domain:
 
 | Subagent | Domain | Model |
 |----------|--------|-------|
-| @architect | System architecture, APIs, service boundaries, data flows, ADRs | muse-spark-1.2 |
-| @backend | APIs, auth, signaling, storage, SFU orchestration, infra | nemotron-3-ultra |
-| @frontend | PWA, UI, state management, media controls, accessibility | nemotron-3-ultra |
-| @webrtc | SFU, signaling, media routing, E2EE, TURN/STUN, screen share | nemotron-3-ultra |
-| @qa | Test plans, automation, browser matrix, coverage, load testing | nemotron-3.5-lightning |
+| @architect | System architecture, APIs, service boundaries, data flows, ADRs | gpt-5.6-luna |
+| @backend | APIs, auth, signaling, storage, SFU orchestration, infra | deepseek-v4-pro |
+| @frontend | PWA, UI, state management, media controls, accessibility | qwen3.8-max |
+| @webrtc | SFU, signaling, media routing, E2EE, TURN/STUN, screen share | grok-4.6 |
+| @qa | Test plans, automation, browser matrix, coverage, load testing | deepseek-v4-pro |
 
 ## Review Protocol
 
@@ -43,11 +43,11 @@ After implementation subagents complete, automatically route deliverables throug
 
 | Gate | Subagent | Model | Severity |
 |------|----------|-------|----------|
-| Architecture | @architect | muse-spark-1.2 | PASS/FAIL |
-| Security | @security | mimo-v2.5 | critical/high/medium/low |
-| Privacy | @privacy | mimo-v2.5 | critical/high/medium/low |
-| QA | @qa | nemotron-3.5-lightning | PASS/FAIL |
-| Adversarial | @reviewer | ling-3.0-flash | findings |
+| Architecture | @architect | gpt-5.6-luna | PASS/FAIL |
+| Security | @security | deepseek-v4-pro | critical/high/medium/low |
+| Privacy | @privacy | gpt-5.6-luna | critical/high/medium/low |
+| QA | @qa | deepseek-v4-pro | PASS/FAIL |
+| Adversarial | @reviewer | kimi-k3 | findings |
 
 **Review agents are read-only** — they analyze, never implement. They produce findings with severity ratings. You must route findings back to implementation agents for remediation, then re-submit for re-review.
 

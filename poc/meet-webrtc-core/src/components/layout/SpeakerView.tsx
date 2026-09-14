@@ -12,17 +12,38 @@ interface SpeakerViewProps {
 
 export function SpeakerView({ tiles, onPin, onSpotlight }: SpeakerViewProps) {
   const pinnedParticipantId = useLayoutStore((s) => s.pinnedParticipantId);
+  const pinnedParticipantIds = useLayoutStore((s) => s.pinnedParticipantIds);
   const spotlightParticipantId = useLayoutStore((s) => s.spotlightParticipantId);
   const activeSpeakerId = useLayoutStore((s) => s.activeSpeakerId);
   const filmstripPosition = useLayoutStore((s) => s.filmstripPosition);
   const pinParticipant = useLayoutStore((s) => s.pinParticipant);
 
-  // Determine stage participant via deterministic layoutEngine hierarchy (Pin > Spotlight > Speaker)
-  const { stageTile, filmstripTiles } = useMemo(() => {
+  // Determine stage participant(s) via deterministic hierarchy (Multi-Pin > Pin > Spotlight > Speaker)
+  const { stageTiles, filmstripTiles } = useMemo(() => {
     if (tiles.length === 0) {
-      return { stageTile: null, filmstripTiles: [] };
+      return { stageTiles: [], filmstripTiles: [] };
     }
 
+    const tileMap = new Map(tiles.map((t) => [t.id, t]));
+    const pinnedTiles = (pinnedParticipantIds || [])
+      .map((id) => tileMap.get(id))
+      .filter((t): t is LayoutParticipantTile => Boolean(t));
+
+    // Multi-pin stage: when multiple participants are pinned, render them all on stage
+    if (pinnedTiles.length > 1) {
+      const stageSet = new Set(pinnedTiles.map((t) => t.id));
+      const rest = tiles.filter((t) => !stageSet.has(t.id));
+      return { stageTiles: pinnedTiles, filmstripTiles: rest };
+    }
+
+    // Single pinned participant
+    if (pinnedTiles.length === 1) {
+      const stage = pinnedTiles[0];
+      const rest = tiles.filter((t) => t.id !== stage.id);
+      return { stageTiles: [stage], filmstripTiles: rest };
+    }
+
+    // Default: resolve via layoutEngine (Spotlight > Speaker > First Remote)
     const resolved = layoutEngine.resolveStageParticipant({
       hasScreenShare: false,
       screenShareOwnerId: null,
@@ -46,10 +67,10 @@ export function SpeakerView({ tiles, onPin, onSpotlight }: SpeakerViewProps) {
     const stage = tiles.find((t) => t.id === featuredId) || tiles[0];
     const rest = tiles.filter((t) => t.id !== stage.id);
 
-    return { stageTile: stage, filmstripTiles: rest };
-  }, [tiles, spotlightParticipantId, pinnedParticipantId, activeSpeakerId]);
+    return { stageTiles: [stage], filmstripTiles: rest };
+  }, [tiles, spotlightParticipantId, pinnedParticipantId, pinnedParticipantIds, activeSpeakerId]);
 
-  if (!stageTile) {
+  if (stageTiles.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--fg-muted)' }}>
         <span>No participants in meeting</span>
@@ -85,18 +106,60 @@ export function SpeakerView({ tiles, onPin, onSpotlight }: SpeakerViewProps) {
           overflow: 'hidden',
         }}
       >
-        <VideoTile
-          id={stageTile.id}
-          stream={stageTile.stream}
-          name={stageTile.name}
-          isLocal={stageTile.isLocal}
-          isScreen={stageTile.isScreen}
-          videoEnabled={stageTile.videoEnabled}
-          audioEnabled={stageTile.audioEnabled}
-          speaking={stageTile.speaking}
-          onPin={onPin}
-          onSpotlight={onSpotlight}
-        />
+        {stageTiles.length > 1 ? (
+          <div
+            data-testid="multi-pin-stage-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${stageTiles.length === 2 ? 2 : stageTiles.length <= 4 ? 2 : 3}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${Math.ceil(stageTiles.length / (stageTiles.length === 2 ? 2 : stageTiles.length <= 4 ? 2 : 3))}, minmax(0, 1fr))`,
+              gap: '8px',
+              width: '100%',
+              height: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            {stageTiles.map((tile) => (
+              <div
+                key={tile.id}
+                style={{
+                  minHeight: 0,
+                  minWidth: 0,
+                  height: '100%',
+                  position: 'relative',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                }}
+              >
+                <VideoTile
+                  id={tile.id}
+                  stream={tile.stream}
+                  name={tile.name}
+                  isLocal={tile.isLocal}
+                  isScreen={tile.isScreen}
+                  videoEnabled={tile.videoEnabled}
+                  audioEnabled={tile.audioEnabled}
+                  speaking={tile.speaking}
+                  onPin={onPin}
+                  onSpotlight={onSpotlight}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <VideoTile
+            id={stageTiles[0].id}
+            stream={stageTiles[0].stream}
+            name={stageTiles[0].name}
+            isLocal={stageTiles[0].isLocal}
+            isScreen={stageTiles[0].isScreen}
+            videoEnabled={stageTiles[0].videoEnabled}
+            audioEnabled={stageTiles[0].audioEnabled}
+            speaking={stageTiles[0].speaking}
+            onPin={onPin}
+            onSpotlight={onSpotlight}
+          />
+        )}
       </div>
 
       {/* Peer Filmstrip */}

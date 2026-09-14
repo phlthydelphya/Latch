@@ -1,7 +1,7 @@
 ---
 description: Principal System Architect - system architecture, APIs, service boundaries, data flows, ADRs
 mode: subagent
-model: opencode/muse-spark-1.2-contributor-free
+model: opencode-go/gpt-5.6-luna
 permission:
   bash: allow
   read: allow

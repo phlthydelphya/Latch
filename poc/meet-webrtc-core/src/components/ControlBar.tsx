@@ -11,6 +11,7 @@ import { useHostControlStore } from '../host/hostControlStore';
 import { HostControlManager } from '../host/hostControlManager';
 import { LeaveConfirmationModal } from './LeaveConfirmationModal';
 import { InviteModal } from './InviteModal';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface ControlBarProps {
   onToggleAudio?: () => Promise<void> | void;
@@ -47,7 +48,8 @@ export function ControlBar({ onToggleAudio, onToggleVideo, onToggleHand, onToggl
   const publishedLocalParticipant = usePresenceStore((s) =>
     s.localParticipantId ? s.participants.get(s.localParticipantId) : undefined
   );
-  const isLocalHost = hostId !== null && hostId === localParticipantId;
+
+  const { isHost: isLocalHost, isPrivileged, canShareScreen: canUserShareScreen } = usePermissions();
 
   const permissions = useHostControlStore((s) => s.permissions);
   const setHostModalOpen = useHostControlStore((s) => s.setHostModalOpen);
@@ -63,7 +65,7 @@ export function ControlBar({ onToggleAudio, onToggleVideo, onToggleHand, onToggl
   const screenSharing = localParticipant?.screenSharing ?? false;
 
   const isMuteLocked = !audioEnabled && !permissions.canUnmuteSelf && !isLocalHost;
-  const isScreenShareLocked = !permissions.canShareScreen && !isLocalHost;
+  const isScreenShareLocked = !canUserShareScreen;
   const isReactionsLocked = !permissions.canReact && !isLocalHost;
   const isChatLocked = !permissions.canChat && !isLocalHost;
 
@@ -265,7 +267,7 @@ export function ControlBar({ onToggleAudio, onToggleVideo, onToggleHand, onToggl
           Invite
         </button>
 
-        {isLocalHost && (
+        {isPrivileged && (
           <button
             className="btn btn-secondary"
             onClick={() => setHostModalOpen(true)}
@@ -303,6 +305,7 @@ export function ControlBar({ onToggleAudio, onToggleVideo, onToggleHand, onToggl
           </svg>
           Diagnostics
         </button>
+
         <button
           className="btn btn-danger"
           onClick={handleLeaveClick}

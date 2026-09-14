@@ -1,7 +1,7 @@
 ---
 description: Privacy Engineering Reviewer - data minimization, retention, E2EE, compliance
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode-go/gpt-5.6-luna
 permission:
   read: allow
   glob: allow

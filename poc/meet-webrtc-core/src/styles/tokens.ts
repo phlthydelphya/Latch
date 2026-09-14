@@ -1,52 +1,58 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // LATCH DESIGN TOKENS — Single source of truth for all visual design
-// Generated from UX-F1 Design Token Contract (docs/ux/UX-F1-design-token-contract.md)
+// Palette: Latch brand kit v1.3 (ink/lime/signal) — matches src/styles/global.css
+// Contract: docs/ux/UX-F1-design-token-contract.md
 // ──────────────────────────────────────────────────────────────────────────────
 
 export const tokens = {
   // Color
   color: {
     bg: {
-      base: '#0a0a0f',
-      surface: '#11111a',
-      elevated: '#14141e',
+      base: '#070807',
+      surface: '#101210',
+      elevated: '#171a16',
       backdrop: 'rgba(0,0,0,0.75)',
     },
     fg: {
-      primary: '#eaeaea',
-      secondary: '#b8b8cc',
-      muted: '#888899',
-      inverse: '#0a0a0f',
+      primary: '#f4f5ee',
+      secondary: '#d1d5ce',
+      muted: '#a4aa9f',
+      inverse: '#070807',
     },
     accent: {
-      primary: '#00d4aa',
-      primaryHover: '#00e8bb',
-      primaryActive: '#00c09a',
-      weak: 'rgba(0,212,170,0.15)',
-      weakBorder: 'rgba(0,212,170,0.4)',
+      primary: '#b7ff2a',
+      primaryHover: '#d5ff78',
+      primaryActive: '#9fdc22',
+      weak: 'rgba(183,255,42,0.15)',
+      weakBorder: 'rgba(183,255,42,0.4)',
     },
     status: {
-      success: '#16f2b3',
-      info: '#00d4ff',
-      warning: '#ffa502',
-      danger: '#ff4757',
-      dangerWeak: 'rgba(255,71,87,0.15)',
+      success: '#b7ff2a',
+      info: '#a79bff',
+      warning: '#ffb020',
+      danger: '#ff5b45',
+      dangerWeak: 'rgba(255,91,69,0.15)',
     },
     border: {
-      subtle: '#222233',
-      strong: '#28283c',
+      subtle: 'rgba(244,245,238,0.2)',
+      strong: 'rgba(244,245,238,0.42)',
     },
     focus: {
-      ring: '#00d4aa',
-      ringInset: 'rgba(0,212,170,0.4)',
+      ring: '#b7ff2a',
+      ringInset: 'rgba(183,255,42,0.4)',
     },
   },
 
   // Typography
   font: {
-    sans: "'Manrope', 'Inter', system-ui, sans-serif",
-    mono: "'JetBrains Mono', 'Fira Code', monospace",
-    display: "'Manrope', system-ui, sans-serif",
+    sans: "'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
+    mono: "'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, monospace",
+    display: "'Arial Black', 'Helvetica Neue', Arial, sans-serif",
+  },
+  tracking: {
+    tight: '-0.07em',
+    heading: '-0.05em',
+    label: '0.12em',
   },
   text: {
     xs: { size: '0.75rem', lineHeight: '1.4', weight: '500' },
@@ -75,6 +81,8 @@ export const tokens = {
     slide200: '200ms ease-out',
     scale100: '100ms ease-out',
     spring200: '200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+    brandFast: '160ms cubic-bezier(0.22, 1, 0.36, 1)',
+    brandBase: '360ms cubic-bezier(0.22, 1, 0.36, 1)',
   },
 
   // Shadow & Glow
@@ -85,9 +93,9 @@ export const tokens = {
     4: '0 20px 60px rgba(0,0,0,0.6)',
   },
   glow: {
-    primary: '0 0 0 2px var(--accent-primary), 0 0 16px rgba(0,212,170,0.3)',
-    warning: '0 0 0 2px var(--warning), 0 0 12px rgba(255,165,2,0.4)',
-    danger: '0 0 0 2px var(--danger), 0 0 12px rgba(255,71,87,0.4)',
+    primary: '0 0 0 2px var(--accent-primary), 0 0 16px rgba(183,255,42,0.3)',
+    warning: '0 0 0 2px var(--warning), 0 0 12px rgba(255,176,32,0.4)',
+    danger: '0 0 0 2px var(--danger), 0 0 12px rgba(255,91,69,0.4)',
     spotlight: '0 0 0 2px #eab308, 0 0 12px rgba(234,179,8,0.4)',
   },
 
@@ -157,6 +165,7 @@ export function generateCSSVariables(): string {
   lines.push(`  --font-sans: ${tokens.font.sans};`);
   lines.push(`  --font-mono: ${tokens.font.mono};`);
   lines.push(`  --font-display: ${tokens.font.display};`);
+  Object.entries(tokens.tracking).forEach(([k, v]) => lines.push(`  --tracking-${k}: ${v};`));
   Object.entries(tokens.text).forEach(([k, v]) => {
     lines.push(`  --text-${k}-size: ${v.size};`);
     lines.push(`  --text-${k}-line-height: ${v.lineHeight};`);

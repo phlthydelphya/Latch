@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'meet-secure',
         short_name: 'meet',
         description: 'E2EE video conferencing — privacy by design',
-        theme_color: '#0a0a0f',
-        background_color: '#0a0a0f',
+        theme_color: '#070807',
+        background_color: '#070807',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',
@@ -70,6 +70,18 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'maskable any',
           },
+          {
+            src: '/brand/latch-icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable any',
+          },
+          {
+            src: '/brand/latch-icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable any',
+          },
         ],
         categories: ['productivity', 'communication'],
         screenshots: [],
@@ -78,35 +90,17 @@ export default defineConfig({
             name: 'New Meeting',
             short_name: 'New',
             description: 'Start a new secure meeting',
-            url: '/r/new',
+            url: '/new',
             icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
           },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2,wasm}'],
         globIgnores: ['**/sw.js', '**/workbox-*.js'],
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/wasm/'),
             handler: 'CacheFirst',
@@ -120,50 +114,8 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackAllowlist: [/^\/r\//],
       },
-      devOptions: {
-        enabled: false,
-        type: 'module',
-      },
     }),
   ],
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src'),
-    },
-    dedupe: ['react', 'react-dom'],
-  },
-  build: {
-    target: 'es2022',
-    minify: 'esbuild',
-    cssCodeSplit: true,
-    modulePreload: { polyfill: false },
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-dom/client'],
-          'vendor-state': ['zustand'],
-        },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
-          const name = assetInfo.name || 'asset';
-          const ext = name.split('.').pop() || '';
-          if (/\.(png|jpe?g|gif|svg|ico|webp)$/i.test(name)) {
-            return 'assets/img/[name]-[hash].' + ext;
-          }
-          if (/\.(woff2?)$/i.test(name)) {
-            return 'assets/fonts/[name]-[hash].' + ext;
-          }
-          if (/\.(wasm)$/i.test(name)) {
-            return 'wasm/[name]-[hash].' + ext;
-          }
-          return 'assets/[ext]/[name]-[hash].' + ext;
-        },
-      },
-    },
-    reportCompressedSize: true,
-    chunkSizeWarningLimit: 120, // 120kB gz budget for main bundle
-  },
   optimizeDeps: {
     include: [
       'react',

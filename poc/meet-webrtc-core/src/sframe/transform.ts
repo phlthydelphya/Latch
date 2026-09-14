@@ -715,7 +715,7 @@ function recycleFrame(frame) {
 
 export class WASMSFrameWorker {
   private worker: Worker | null = null;
-  private pendingRequests: Map<number, { resolve: Function; reject: Function }> = new Map();
+  private pendingRequests: Map<number, { resolve: (value: any) => void; reject: (reason?: any) => void }> = new Map();
   private requestId = 0;
 
   async initialize(wasmUrl: string): Promise<void> {

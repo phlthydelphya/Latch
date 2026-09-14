@@ -16,6 +16,7 @@ import { WaitingRoomBanner } from '../components/host/WaitingRoomBanner';
 import { RoomLockBadge } from '../components/host/RoomLockBadge';
 import { useHostControlStore } from '../host/hostControlStore';
 import { usePresenceStore } from '../presence/presenceStore';
+import '../styles/meeting-theme.css';
 
 const DeviceSettingsModal = lazy(() => import('../components/devices/DeviceSettingsModal').then(m => ({ default: m.DeviceSettingsModal })));
 const HostControlsModal = lazy(() => import('../components/host/HostControlsModal').then(m => ({ default: m.HostControlsModal })));
@@ -80,7 +81,8 @@ export function MeetingPage() {
 
   if (isKicked) {
     return (
-      <div
+      <main id="main" tabIndex={-1}
+        className="meeting-interstitial"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -93,10 +95,10 @@ export function MeetingPage() {
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🚪</div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+        <div className="meeting-linework" aria-hidden="true" />
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
           Removed from Meeting
-        </h2>
+        </h1>
         <p style={{ color: 'var(--fg-muted, #8b9182)', maxWidth: '400px', marginBottom: '24px' }}>
           You have been removed from this meeting by the host.
         </p>
@@ -110,7 +112,7 @@ export function MeetingPage() {
         >
           Return to Home
         </button>
-      </div>
+      </main>
     );
   }
 
@@ -120,7 +122,8 @@ export function MeetingPage() {
 
   if (isWaitingInLobby && !isLocalHost && !isAdmitted) {
     return (
-      <div
+      <main id="main" tabIndex={-1}
+        className="meeting-interstitial"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -133,10 +136,10 @@ export function MeetingPage() {
           textAlign: 'center',
         }}
       >
-        <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>⏳</div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+        <div className="meeting-linework" aria-hidden="true" />
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
           Waiting for the host to let you in
-        </h2>
+        </h1>
         <p style={{ color: 'var(--fg-muted, #8b9182)', maxWidth: '440px', marginBottom: '24px', lineHeight: 1.5 }}>
           The host has enabled a waiting room for this meeting. You will join the call automatically once admitted.
         </p>
@@ -151,13 +154,14 @@ export function MeetingPage() {
         >
           Leave Meeting
         </button>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', minHeight: 0 }}>
-      <header style={{ 
+    <div className="meeting-shell">
+      <div className="meeting-shell__linework" aria-hidden="true" />
+      <header className="meeting-header" style={{ 
         padding: '0.75rem 1rem', 
         background: 'rgba(10, 10, 15, 0.95)', 
         backdropFilter: 'blur(8px)',
@@ -168,22 +172,23 @@ export function MeetingPage() {
         flexWrap: 'wrap',
         gap: '0.5rem',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5" aria-hidden="true">
+        <div className="meeting-brand">
+          <span className="meeting-brand-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5" aria-hidden="true">
             <path d="M21 12V7H5V12" />
             <path d="M21 17H5" />
             <path d="M12 17V7" />
             <circle cx="12" cy="12" r="3" />
-          </svg>
+          </svg></span>
           <div>
-            <h1 style={{ fontSize: '1.125rem', fontWeight: 600 }}>meet-secure</h1>
-            <p style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', fontFamily: 'var(--font-mono)' }}>
-              {roomId} · E2EE · SFrame
+            <h1 className="meeting-wordmark">Latch<span className="meeting-eyebrow"> / IN SESSION</span></h1>
+            <p className="meeting-room-meta">
+              <span className="meeting-room-meta__label">ROOM</span>
+              {roomId}
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="meeting-header-tools">
           <RoomLockBadge />
           <LayoutControls onClearSpotlight={() => publishSpotlight(null)} />
         </div>
@@ -195,7 +200,7 @@ export function MeetingPage() {
         </div>
       )}
 
-      <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+      <main id="main" tabIndex={-1} className="meeting-stage" aria-label="Meeting video" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <WaitingRoomBanner />
         <VideoGrid
           localStream={localStream}
@@ -209,7 +214,7 @@ export function MeetingPage() {
         />
         
         {!isConnected && (
-          <div style={{
+          <div className="meeting-connecting" role="status" style={{
             position: 'absolute',
             inset: 0,
             display: 'flex',
@@ -254,3 +259,4 @@ export function MeetingPage() {
     </div>
   );
 }
+

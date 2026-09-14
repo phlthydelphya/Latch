@@ -1,7 +1,7 @@
 ---
 description: "[DEPRECATED] Use @webrtc instead - WebRTC and Media Engineer legacy alias"
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: opencode-go/grok-4.6
 hidden: true
 permission:
   bash: allow

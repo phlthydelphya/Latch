@@ -9,6 +9,7 @@
  */
 
 import React, { useEffect } from 'react';
+import '../styles/support-theme.css';
 import { usePresenceStore } from '../presence/presenceStore';
 import { EphemeralToast } from '../presence/types';
 

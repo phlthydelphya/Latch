@@ -7,6 +7,7 @@ import { HostControlManager } from '../host/hostControlManager';
 import { createRoom } from '../auth/token';
 import { parseMeetingInput, formatMeetingUrl, formatMeetingPath, formatInvitationText } from '../utils/roomUrl';
 import { InviteModal } from '../components/InviteModal';
+import '../styles/pages-theme.css';
 
 // ─── Meeting Ready Card ───────────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ function MeetingReadyCard({ roomId, keyParam, hostName, onStart }: MeetingReadyC
             <path d="M20 6L9 17l-5-5" />
           </svg>
         </div>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Meeting ready</h2>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Meeting ready</h1>
         <p style={{ fontSize: '0.875rem', color: 'var(--fg-muted)', marginTop: '0.25rem' }}>
           Share the link with participants before starting.
         </p>
@@ -149,12 +150,16 @@ function MeetingReadyCard({ roomId, keyParam, hostName, onStart }: MeetingReadyC
 
 type Intent = 'choose' | 'create' | 'join';
 
-export function LandingPage() {
+interface LandingPageProps {
+  initialIntent?: Intent;
+}
+
+export function LandingPage({ initialIntent = 'choose' }: LandingPageProps = {}) {
   const navigate = useNavigate();
   const setRoom = useAppStore((s) => s.setRoom);
 
   // Shared state
-  const [intent, setIntent] = useState<Intent>('choose');
+  const [intent, setIntent] = useState<Intent>(initialIntent);
   const [name, setName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -300,7 +305,7 @@ export function LandingPage() {
 
   if (readyRoomId) {
     return (
-      <main className="landing" id="main" role="main">
+      <main className="landing latch-entry" id="main" role="main">
         <MeetingReadyCard
           roomId={readyRoomId}
           keyParam={readyKeyParam}
@@ -315,82 +320,46 @@ export function LandingPage() {
 
   if (intent === 'choose') {
     return (
-      <main className="landing" id="main" role="main">
-        <div className="landing__logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 12V7H5V12" />
-            <path d="M21 17H5" />
-            <path d="M12 17V7" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </div>
-
-        <h1 className="landing__title">meet-secure</h1>
-        <p className="landing__subtitle">
-          End-to-end encrypted video conferencing. No servers can see or hear your meetings.
-        </p>
-
-        <div className="landing__features" role="list" aria-label="Security features">
-          <div className="feature-pill" role="listitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            E2EE by default
-          </div>
-          <div className="feature-pill" role="listitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            SFrame RFC 9605
-          </div>
-          <div className="feature-pill" role="listitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            Key rotation ≤500ms
-          </div>
-          <div className="feature-pill" role="listitem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            Reconnect ≤5s
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', maxWidth: '360px', marginTop: '2rem' }}>
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ width: '100%', fontSize: '1rem', padding: '0.875rem' }}
-            onClick={() => setIntent('create')}
-          >
-            + New Meeting
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ width: '100%', fontSize: '1rem', padding: '0.875rem' }}
-            onClick={() => setIntent('join')}
-          >
-            Join Meeting
-          </button>
-        </div>
-
-        <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: 'var(--fg-muted)', maxWidth: '500px' }}>
-          By joining, you agree to ephemeral in-memory processing only. No recordings, no persistent logs, no telemetry.
-        </p>
-      </main>
+      <div className="latch-home">
+        
+        <header className="latch-home__header">
+          <span className="latch-home__wordmark">LATCH</span>
+          <span className="latch-home__edition">A SPACE TO CONNECT</span>
+          <button className="btn btn-secondary" type="button" onClick={() => setIntent('join')}>Join Meeting ↗</button>
+        </header>
+        <main id="main" className="latch-home__main">
+          <section className="latch-home__hero" aria-labelledby="home-title">
+            <div className="latch-home__copy">
+              <p className="latch-home__eyebrow">Human by nature. Private by design.</p>
+              <h1 id="home-title">Good company.<br /><span>Less noise.</span></h1>
+              <p className="latch-home__lede">A little room for real conversation. Create a meeting, share your invitation, and make yourself at home.</p>
+              <div className="latch-home__actions">
+                <button type="button" className="btn btn-primary" onClick={() => setIntent('create')}>+ New Meeting <span aria-hidden="true">↗</span></button>
+                <button type="button" className="btn btn-secondary" onClick={() => setIntent('join')}>Join Meeting</button>
+              </div>
+              <p className="latch-home__hint">Your camera. Your microphone. Your choice.</p>
+            </div>
+            <div className="latch-home__art" aria-hidden="true">
+              <img src="/brand/linework-flow.png" alt="" />
+              <span className="latch-home__art-label">ROOM FOR<br />CONNECTION.</span>
+              <span className="latch-home__art-index">01 / COME AS YOU ARE</span>
+            </div>
+          </section>
+          <section className="latch-home__principles" aria-label="Meeting experience">
+            <div><span>01 / ON YOUR TERMS</span><h2>Ease into it.</h2><p>Check your camera and sound before you enter. Keep either off whenever you like.</p></div>
+            <div><span>02 / BY INVITATION</span><h2>Bring your people.</h2><p>Share a private invitation. Hosts manage who comes into the room.</p></div>
+            <div><span>03 / IN THE MOMENT</span><h2>Be here, together.</h2><p>Video, voice, and screen sharing, with encryption status visible during your meeting.</p></div>
+          </section>
+        </main>
+        <footer className="latch-home__footer"><span>LATCH / SPACE FOR THE HUMAN SIDE</span><span>Human by nature. Private by design.</span></footer>
+      </div>
     );
   }
-
   // ── Create form ──────────────────────────────────────────────────────────
 
   if (intent === 'create') {
     return (
-      <main className="landing" id="main" role="main">
+      <main className="landing latch-entry" id="main" role="main">
         <button
           type="button"
           className="btn btn-secondary"
@@ -400,7 +369,7 @@ export function LandingPage() {
           ← Back
         </button>
 
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>New meeting</h2>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>New meeting</h1>
         <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           A unique end-to-end encrypted room will be created for you.
         </p>
@@ -446,7 +415,7 @@ export function LandingPage() {
   // ── Join form ────────────────────────────────────────────────────────────
 
   return (
-    <main className="landing" id="main" role="main">
+    <main className="landing latch-entry" id="main" role="main">
       <button
         type="button"
         className="btn btn-secondary"
@@ -456,7 +425,7 @@ export function LandingPage() {
         ← Back
       </button>
 
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>Join meeting</h2>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>Join meeting</h1>
       <p style={{ color: 'var(--fg-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
         Paste a meeting link, or enter the meeting ID.
       </p>

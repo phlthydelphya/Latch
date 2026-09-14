@@ -12,7 +12,7 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
     vi.restoreAllMocks();
   });
 
-  it('BHS-001A: Semantic lifecycle - fails camera, succeeds fallback, maintains error, clears on manual retry', async () => {
+  it('BHS-001A: explicit camera request fails closed and succeeds on manual retry', async () => {
     let testPhase: 'CAMERA_FAILURE' | 'RECOVERY_SUCCESS' = 'CAMERA_FAILURE';
 
     const mockGetUserMedia = vi.fn().mockImplementation((constraints: MediaStreamConstraints) => {
@@ -23,24 +23,13 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
         if (constraints.video) {
           return Promise.reject(new DOMException('Failed to allocate videosource', 'NotReadableError'));
         }
-        // Audio-only fallback must succeed
-        if (constraints.audio && constraints.video === false) {
-          return Promise.resolve({
-            getTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
-            getAudioTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
-            getVideoTracks: () => [],
-          });
-        }
       }
 
       if (testPhase === 'RECOVERY_SUCCESS') {
         return Promise.resolve({
-          getTracks: () => [
-            { kind: 'video', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) },
-            { kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) },
-          ],
-          getAudioTracks: () => [{ kind: 'audio', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'mic-1' }) }],
-          getVideoTracks: () => [{ kind: 'video', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) }],
+          getTracks: () => [{ kind: 'video', readyState: 'live', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) }],
+          getAudioTracks: () => [],
+          getVideoTracks: () => [{ kind: 'video', readyState: 'live', stop: vi.fn(), enabled: true, getSettings: () => ({ deviceId: 'cam-1' }) }],
         });
       }
 
@@ -73,12 +62,17 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
       </MemoryRouter>
     );
 
-    // Wait for the fallback alert to be displayed
+    expect(mockGetUserMedia).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByLabelText('Turn on camera'));
+
+    // Wait for the camera error. The microphone must never be requested.
     await waitFor(() => {
       const alert = screen.getByRole('alert');
       expect(alert).not.toBeNull();
-      expect(alert.textContent).toContain('Camera is in use by another application or unavailable. Joined with microphone.');
+      expect(alert.textContent).toContain('Your camera is unavailable or in use by another app. Close that app and try again.');
     });
+    expect(mockGetUserMedia).toHaveBeenCalledTimes(1);
+    expect(mockGetUserMedia).toHaveBeenCalledWith({ video: true, audio: false });
 
     // Verify Retry Camera button is present
     const retryBtn = screen.getByRole('button', { name: /retry camera/i });
@@ -97,7 +91,7 @@ describe('M2 Phase D: PreJoinPage Hardware Busy & Retry Affordance', () => {
     // After retry succeeds, alert and retry button should be cleared
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /retry camera/i })).toBeNull();
-      expect(screen.queryByText(/Camera is in use by another application/i)).toBeNull();
+      expect(screen.queryByText(/in use by another app/i)).toBeNull();
     });
 
     // Verify unmount behavior
