@@ -650,6 +650,7 @@ func TestWebSocketSignalConnectionWithLiveKitAndLegacyTokens(t *testing.T) {
 	}
 
 	// 5. Test room mismatch returns 403 Forbidden
+	hdrMismatch := http.Header{"Sec-WebSocket-Protocol": {"meet-token, " + respLK.Token}}
 	wsURLMismatch := "ws" + strings.TrimPrefix(server.URL, "http") + "/signal?v=1&room=wrong-room&token=" + url.QueryEscape(respLK.Token)
 	_, respMismatch, err := websocket.DefaultDialer.Dial(wsURLMismatch, hdrMismatch)
 	if err == nil {
@@ -660,6 +661,7 @@ func TestWebSocketSignalConnectionWithLiveKitAndLegacyTokens(t *testing.T) {
 	}
 
 	// 6. Test missing/invalid token returns 401 Unauthorized
+	hdrNoToken := http.Header{}
 	wsURLNoToken := "ws" + strings.TrimPrefix(server.URL, "http") + "/signal?v=1&room=" + roomID
 	_, respNoToken, err := websocket.DefaultDialer.Dial(wsURLNoToken, hdrNoToken)
 	if err == nil {
@@ -727,6 +729,7 @@ func TestWebSocketSignalAuthorizationEdgeCases(t *testing.T) {
 	connLower.Close()
 
 	// 3. Mixed case room in query parameter connects successfully
+	hdrMixed := http.Header{"Sec-WebSocket-Protocol": {"meet-token, " + respLK.Token}}
 	wsURLMixed := "ws" + strings.TrimPrefix(server.URL, "http") + "/signal?v=1&room=SIGNAL-EDGE-ROOM&token=" + url.QueryEscape(respLK.Token)
 	connMixed, _, err := websocket.DefaultDialer.Dial(wsURLMixed, hdrMixed)
 	if err != nil {
@@ -769,6 +772,7 @@ func TestWebSocketSignalAuthorizationEdgeCases(t *testing.T) {
 	}
 	tokConflict := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsConflict)
 	signedConflict, _ := tokConflict.SignedString(jwtSecret)
+	hdrConflict := http.Header{"Sec-WebSocket-Protocol": {"meet-token, " + signedConflict}}
 	wsURLConflict := "ws" + strings.TrimPrefix(server.URL, "http") + "/signal?v=1&room=room-alpha&token=" + url.QueryEscape(signedConflict)
 	_, respConflict, err := websocket.DefaultDialer.Dial(wsURLConflict, hdrConflict)
 	if err == nil {
@@ -1357,6 +1361,7 @@ func TestM4BWebSocketDirectiveInterception(t *testing.T) {
 	signedTarget, _ := tokTarget.SignedString(jwtSecret)
 
 	// Connect Target client so we can test whether unauthorized frames reach peers
+	hdrTarget := http.Header{"Sec-WebSocket-Protocol": {"meet-token, " + signedTarget}}
 	wsURLTarget := "ws" + strings.TrimPrefix(server.URL, "http") + "/?token=" + url.QueryEscape(signedTarget)
 	connTarget, _, err := websocket.DefaultDialer.Dial(wsURLTarget, hdrTarget)
 	if err != nil {
@@ -1365,6 +1370,7 @@ func TestM4BWebSocketDirectiveInterception(t *testing.T) {
 	defer connTarget.Close()
 
 	// Connect Guest client
+	hdrGuest := http.Header{"Sec-WebSocket-Protocol": {"meet-token, " + signedGuest}}
 	wsURLGuest := "ws" + strings.TrimPrefix(server.URL, "http") + "/?token=" + url.QueryEscape(signedGuest)
 	connGuest, _, err := websocket.DefaultDialer.Dial(wsURLGuest, hdrGuest)
 	if err != nil {
